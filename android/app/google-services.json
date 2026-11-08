@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "74289919477",
+    "project_id": "dilse-cd48e",
+    "storage_bucket": "dilse-cd48e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74289919477:android:fdfb20f39a88dddb89dcbc",
+        "android_client_info": {
+          "package_name": "com.charant.dilse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDloF6_vKMd5djk3n6EldwgzeU23jawCX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
