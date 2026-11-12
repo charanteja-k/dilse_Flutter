@@ -255,3 +255,4 @@ lib/
 │       ├── swipeable_queue_tile.dart   (Swipe-to-queue / swipe-to-remove gestures)
 │       └── sleep_timer_dial.dart       (Tactile radial dial with gradual fadeout)
 ```
+

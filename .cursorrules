@@ -81,3 +81,4 @@ Before claiming any task or feature is complete:
 2. `flutter analyze lib/` (must yield 0 errors, 0 warnings, 0 infos)
 3. `flutter test` (all unit and widget tests must pass 100%)
 4. Clean transient platform files: `git checkout -- linux/ macos/ windows/`
+
