@@ -10,7 +10,7 @@ class ApiEndpoints {
   /// Default public GitHub repository hosting DilSe release APKs.
   /// Can be overridden at runtime in-app to point to any temporary test repo.
   static const String defaultUpdateRepoOwner = 'charanteja-k';
-  static const String defaultUpdateRepoName = 'dilse-releases';
+  static const String defaultUpdateRepoName = 'dilse_Flutter';
 
   /// Primary JioSaavn catalog search via Cloudflare Edge Worker (instant, zero cold start).
   static Uri jioSearchUri({
