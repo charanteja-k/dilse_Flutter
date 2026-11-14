@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/widgets/dilse_notification.dart';
 import '../../../data/models/song_model.dart';
 import '../viewmodels/audio_player_viewmodel.dart';
 import 'album_color_deriver.dart';
@@ -670,6 +671,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               context.read<AudioPlayerViewModel>().toggleLike(shownSong);
+                              DilSeNotification.heart(
+                                context,
+                                isLiked ? 'Removed from Liked Songs' : 'Added to Liked Songs',
+                                subtitle: shownSong.title,
+                              );
                             },
                           ),
                         ],

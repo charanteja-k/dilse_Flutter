@@ -1,9 +1,11 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
+import 'data/datasources/local/audio_handler.dart';
 import 'data/datasources/local/audio_stream_buffer_manager.dart';
 import 'data/datasources/local/queue_manager.dart';
 import 'data/datasources/local/soloud_audio_driver.dart';
@@ -27,16 +29,40 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const DilseApp());
+  // Initialize AudioService for lockscreen media controls and background notification
+  DilSeAudioHandler? audioHandler;
+  try {
+    audioHandler = await AudioService.init(
+      builder: () => DilSeAudioHandler(),
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'com.charant.dilse.playback',
+        androidNotificationChannelName: 'DilSe Playback',
+        androidNotificationOngoing: false,
+        androidStopForegroundOnPause: false,
+        androidShowNotificationBadge: true,
+        androidNotificationIcon: 'drawable/ic_stat_music',
+        notificationColor: Color(0xFFFA2D48),
+      ),
+    );
+  } catch (e) {
+    debugPrint('[AudioService] Init note: $e');
+  }
+
+  runApp(DilseApp(audioHandler: audioHandler));
 }
 
 class DilseApp extends StatelessWidget {
-  const DilseApp({super.key});
+  final DilSeAudioHandler? audioHandler;
+
+  const DilseApp({super.key, this.audioHandler});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        if (audioHandler != null)
+          Provider<DilSeAudioHandler>.value(value: audioHandler!),
+
         // HTTP Client
         Provider<http.Client>(
           create: (_) => http.Client(),
@@ -61,10 +87,10 @@ class DilseApp extends StatelessWidget {
               previous ?? AudioStreamBufferManagerImpl(client: client),
         ),
 
-        // Audio Driver (just_audio powered ExoPlayer driver)
+        // Audio Driver (just_audio powered ExoPlayer driver with AudioService handler)
         ProxyProvider<AudioStreamBufferManager, SoLoudAudioDriver>(
           update: (context, bufferManager, previous) =>
-              previous ?? JustAudioDriverImpl(),
+              previous ?? JustAudioDriverImpl(audioHandler: audioHandler),
           dispose: (context, driver) => driver.dispose(),
         ),
 
@@ -79,6 +105,7 @@ class DilseApp extends StatelessWidget {
             audioDriver: context.read<SoLoudAudioDriver>(),
             queueManager: context.read<QueueManager>(),
             audioRepository: context.read<AudioRepository>(),
+            audioHandler: audioHandler,
           ),
           update: (_, driver, queue, repo, previous) =>
               previous ??
@@ -86,6 +113,7 @@ class DilseApp extends StatelessWidget {
                 audioDriver: driver,
                 queueManager: queue,
                 audioRepository: repo,
+                audioHandler: audioHandler,
               ),
         ),
 

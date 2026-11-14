@@ -13,10 +13,12 @@ abstract class AudioRepository {
     int limit = 50,
   });
 
-  /// Fetches synchronized and plain text lyrics from Cloudflare Edge.
+  /// Fetches synchronized and plain text lyrics across Edge, Backend, JioSaavn, YTM, and LRCLIB tiers.
   Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
     required String title,
     String? artist,
+    Duration? duration,
+    String? videoId,
   });
 }
 

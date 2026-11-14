@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import '../../models/song_model.dart';
+import 'audio_handler.dart';
 
 enum PlaybackState { idle, buffering, playing, paused, completed, error }
 
@@ -32,6 +33,7 @@ abstract class SoLoudAudioDriver {
 /// Natively supports 320kbps AAC MP4 container streams from JioSaavn without decoding stalls.
 class JustAudioDriverImpl implements SoLoudAudioDriver {
   final ja.AudioPlayer _player;
+  final DilSeAudioHandler? _audioHandler;
   late final StreamSubscription _playerStateSub;
   late final StreamSubscription _positionSub;
   late final StreamSubscription _durationSub;
@@ -44,8 +46,9 @@ class JustAudioDriverImpl implements SoLoudAudioDriver {
   Duration _currentPosition = Duration.zero;
   Duration _currentDuration = Duration.zero;
 
-  JustAudioDriverImpl({ja.AudioPlayer? player})
-      : _player = player ?? ja.AudioPlayer() {
+  JustAudioDriverImpl({ja.AudioPlayer? player, DilSeAudioHandler? audioHandler})
+      : _player = player ?? audioHandler?.player ?? ja.AudioPlayer(),
+        _audioHandler = audioHandler {
     _playerStateSub = _player.playerStateStream.listen((state) {
       if (state.processingState == ja.ProcessingState.loading ||
           state.processingState == ja.ProcessingState.buffering) {
@@ -114,6 +117,7 @@ class JustAudioDriverImpl implements SoLoudAudioDriver {
         _durationController.add(_currentDuration);
       }
 
+      _audioHandler?.updateMediaForSong(song);
       await _player.play();
       debugPrint('[AudioDriver] Playback started successfully!');
     } catch (e, stack) {
@@ -146,6 +150,7 @@ class JustAudioDriverImpl implements SoLoudAudioDriver {
     _stateController.close();
     _positionController.close();
     _durationController.close();
+    _audioHandler?.disposeHandler();
     _player.dispose();
   }
 }

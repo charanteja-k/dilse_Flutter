@@ -76,7 +76,14 @@ class AudioRepositoryImpl implements AudioRepository {
   Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
     required String title,
     String? artist,
+    Duration? duration,
+    String? videoId,
   }) {
-    return remoteDatasource.fetchLyrics(title: title, artist: artist);
+    return remoteDatasource.fetchLyrics(
+      title: title,
+      artist: artist,
+      duration: duration,
+      videoId: videoId,
+    );
   }
 }

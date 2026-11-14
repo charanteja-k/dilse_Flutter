@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/widgets/dilse_notification.dart';
 
 /// Apple-Style Glassmorphic Floating Bottom Navigation Dock with Sliding Indicator.
 /// Adheres strictly to AGENTS.md:
@@ -121,13 +122,10 @@ class FloatingNavDock extends StatelessWidget {
                               if (tab.isEnabled) {
                                 onTabSelected(index);
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('${tab.label} is coming soon!'),
-                                    duration: const Duration(seconds: 1),
-                                    backgroundColor: context.colors.cardDarkSurface,
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
+                                DilSeNotification.info(
+                                  context,
+                                  '${tab.label} is coming soon!',
+                                  subtitle: 'We are crafting the ${tab.label.toLowerCase()} experience for you.',
                                 );
                               }
                             },

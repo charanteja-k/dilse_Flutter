@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../data/datasources/local/audio_handler.dart';
 import '../../../data/datasources/local/queue_manager.dart';
 import '../../../data/datasources/local/soloud_audio_driver.dart';
 import '../../../data/models/song_model.dart';
@@ -66,11 +67,16 @@ class AudioPlayerViewModel extends ChangeNotifier {
     required this.audioDriver,
     required this.queueManager,
     required this.audioRepository,
+    DilSeAudioHandler? audioHandler,
   }) {
     _stateSub = audioDriver.stateStream.listen(_onStateChanged);
     _positionSub = audioDriver.positionStream.listen(_onPositionChanged);
     _durationSub = audioDriver.durationStream.listen(_onDurationChanged);
     _loadLikedSongs();
+    if (audioHandler != null) {
+      audioHandler.onSkipToNext = skipNext;
+      audioHandler.onSkipToPrevious = skipPrevious;
+    }
   }
 
   PlaybackState get playbackState => _playbackState;
@@ -252,6 +258,8 @@ class AudioPlayerViewModel extends ChangeNotifier {
       final res = await audioRepository.fetchLyrics(
         title: song.title,
         artist: song.artist,
+        duration: song.duration,
+        videoId: song.id,
       );
       if (_lyricsSongId == song.id) {
         _currentLyricsPlain = res.plainLyrics;

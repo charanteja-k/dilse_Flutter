@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/widgets/dilse_notification.dart';
 import '../../../data/models/song_model.dart';
 import '../../app_update/viewmodels/update_viewmodel.dart';
 import '../../app_update/views/update_top_bar_button.dart';
@@ -474,13 +475,10 @@ class _HomeScreenState extends State<HomeScreen> {
               if (item.songs.isNotEmpty) {
                 context.read<AudioPlayerViewModel>().playFromQueue(item.songs);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${item.title} will sync with your library soon.'),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: context.colors.cardDarkSurface,
-                    behavior: SnackBarBehavior.floating,
-                  ),
+                DilSeNotification.info(
+                  context,
+                  item.title,
+                  subtitle: 'Will sync with your library soon.',
                 );
               }
             },

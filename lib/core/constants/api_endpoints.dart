@@ -92,6 +92,8 @@ class ApiEndpoints {
   static Uri lyricsUri({
     required String title,
     String? artist,
+    String? lang,
+    int? duration,
     String baseUrl = defaultCloudflareWorkerUrl,
   }) {
     final cleanBase = baseUrl.endsWith('/')
@@ -102,6 +104,38 @@ class ApiEndpoints {
     );
     if (artist != null && artist.isNotEmpty) {
       buffer.write('&artist=${Uri.encodeComponent(artist)}');
+    }
+    if (lang != null && lang.isNotEmpty) {
+      buffer.write('&lang=${Uri.encodeComponent(lang)}');
+    }
+    if (duration != null && duration > 0) {
+      buffer.write('&duration=$duration');
+    }
+    return Uri.parse(buffer.toString());
+  }
+
+  /// Render Backend synced LRC / plain text lyrics proxy endpoint.
+  static Uri backendLyricsUri({
+    required String title,
+    String? artist,
+    String? lang,
+    int? duration,
+    String baseUrl = defaultRenderBackendUrl,
+  }) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final buffer = StringBuffer(
+      '$cleanBase/lyrics?title=${Uri.encodeComponent(title)}',
+    );
+    if (artist != null && artist.isNotEmpty) {
+      buffer.write('&artist=${Uri.encodeComponent(artist)}');
+    }
+    if (lang != null && lang.isNotEmpty) {
+      buffer.write('&lang=${Uri.encodeComponent(lang)}');
+    }
+    if (duration != null && duration > 0) {
+      buffer.write('&duration=$duration');
     }
     return Uri.parse(buffer.toString());
   }
