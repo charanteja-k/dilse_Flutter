@@ -22,6 +22,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
   final double quickAccessTileHeight;
   final double badgeDotSize;
   final double progressBarHeight;
+  final double playerHeroPlaySize;
+  final double playerHeroPlayIconSize;
+  final double playerSkipIconSize;
+  final double playerArtworkRadius;
+  final double playerScrubberHeight;
+  final double queueItemHeight;
 
   const AppSizes({
     required this.miniPlayerHeight,
@@ -43,6 +49,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
     required this.quickAccessTileHeight,
     required this.badgeDotSize,
     required this.progressBarHeight,
+    required this.playerHeroPlaySize,
+    required this.playerHeroPlayIconSize,
+    required this.playerSkipIconSize,
+    required this.playerArtworkRadius,
+    required this.playerScrubberHeight,
+    required this.queueItemHeight,
   });
 
   static const standard = AppSizes(
@@ -65,6 +77,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
     quickAccessTileHeight: 56.0,
     badgeDotSize: 10.0,
     progressBarHeight: 6.0,
+    playerHeroPlaySize: 76.0,
+    playerHeroPlayIconSize: 52.0,
+    playerSkipIconSize: 38.0,
+    playerArtworkRadius: 26.0,
+    playerScrubberHeight: 44.0,
+    queueItemHeight: 64.0,
   );
 
   @override
@@ -88,6 +106,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
     double? quickAccessTileHeight,
     double? badgeDotSize,
     double? progressBarHeight,
+    double? playerHeroPlaySize,
+    double? playerHeroPlayIconSize,
+    double? playerSkipIconSize,
+    double? playerArtworkRadius,
+    double? playerScrubberHeight,
+    double? queueItemHeight,
   }) {
     return AppSizes(
       miniPlayerHeight: miniPlayerHeight ?? this.miniPlayerHeight,
@@ -109,6 +133,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
       quickAccessTileHeight: quickAccessTileHeight ?? this.quickAccessTileHeight,
       badgeDotSize: badgeDotSize ?? this.badgeDotSize,
       progressBarHeight: progressBarHeight ?? this.progressBarHeight,
+      playerHeroPlaySize: playerHeroPlaySize ?? this.playerHeroPlaySize,
+      playerHeroPlayIconSize: playerHeroPlayIconSize ?? this.playerHeroPlayIconSize,
+      playerSkipIconSize: playerSkipIconSize ?? this.playerSkipIconSize,
+      playerArtworkRadius: playerArtworkRadius ?? this.playerArtworkRadius,
+      playerScrubberHeight: playerScrubberHeight ?? this.playerScrubberHeight,
+      queueItemHeight: queueItemHeight ?? this.queueItemHeight,
     );
   }
 
@@ -135,6 +165,12 @@ class AppSizes extends ThemeExtension<AppSizes> {
       quickAccessTileHeight: lerpDouble(quickAccessTileHeight, other.quickAccessTileHeight, t)!,
       badgeDotSize: lerpDouble(badgeDotSize, other.badgeDotSize, t)!,
       progressBarHeight: lerpDouble(progressBarHeight, other.progressBarHeight, t)!,
+      playerHeroPlaySize: lerpDouble(playerHeroPlaySize, other.playerHeroPlaySize, t)!,
+      playerHeroPlayIconSize: lerpDouble(playerHeroPlayIconSize, other.playerHeroPlayIconSize, t)!,
+      playerSkipIconSize: lerpDouble(playerSkipIconSize, other.playerSkipIconSize, t)!,
+      playerArtworkRadius: lerpDouble(playerArtworkRadius, other.playerArtworkRadius, t)!,
+      playerScrubberHeight: lerpDouble(playerScrubberHeight, other.playerScrubberHeight, t)!,
+      queueItemHeight: lerpDouble(queueItemHeight, other.queueItemHeight, t)!,
     );
   }
 }

@@ -12,5 +12,11 @@ abstract class AudioRepository {
     required SongModel seedSong,
     int limit = 50,
   });
+
+  /// Fetches synchronized and plain text lyrics from Cloudflare Edge.
+  Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
+    required String title,
+    String? artist,
+  });
 }
 

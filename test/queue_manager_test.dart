@@ -106,6 +106,23 @@ void main() {
       expect(queueManager.currentQueue, equals([songA, songB, songC]));
       expect(queueManager.currentSong, equals(songB));
     });
+
+    test('removeAt removes track and adjusts currentIndex seamlessly', () {
+      queueManager.setQueue([songA, songB, songC], initialIndex: 2); // active is songC (index 2)
+      final removed = queueManager.removeAt(0); // remove songA
+      expect(removed, equals(songA));
+      expect(queueManager.currentQueue, equals([songB, songC]));
+      expect(queueManager.currentIndex, equals(1)); // shifted down
+      expect(queueManager.currentSong, equals(songC));
+    });
+
+    test('reorder rearranges queue items and preserves active track pointer', () {
+      queueManager.setQueue([songA, songB, songC], initialIndex: 0); // active is songA
+      queueManager.reorder(0, 3); // move songA to end
+      expect(queueManager.currentQueue, equals([songB, songC, songA]));
+      expect(queueManager.currentIndex, equals(2));
+      expect(queueManager.currentSong, equals(songA));
+    });
   });
 }
 

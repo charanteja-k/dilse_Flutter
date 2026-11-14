@@ -9,6 +9,10 @@ abstract class CloudflareEdgeDatasource {
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
   Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
   Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50});
+  Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
+    required String title,
+    String? artist,
+  });
 }
 
 /// Concrete implementation communicating with Cloudflare Workers V8 edge compute.
@@ -113,5 +117,28 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       }
     } catch (_) {}
     return [];
+  }
+
+  @override
+  Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
+    required String title,
+    String? artist,
+  }) async {
+    try {
+      final uri = ApiEndpoints.lyricsUri(title: title, artist: artist, baseUrl: baseUrl);
+      final res = await client.get(uri).timeout(const Duration(seconds: 10));
+      if (res.statusCode == 200) {
+        final decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic> && decoded['match'] == true) {
+          final data = decoded['data'];
+          if (data is Map<String, dynamic>) {
+            final plain = data['plainLyrics']?.toString();
+            final synced = data['syncedLyrics']?.toString();
+            return (plainLyrics: plain, syncedLyrics: synced);
+          }
+        }
+      }
+    } catch (_) {}
+    return (plainLyrics: null, syncedLyrics: null);
   }
 }

@@ -10,6 +10,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
   final TextStyle bodyMedium;
   final TextStyle captionMuted;
   final TextStyle eyebrow;
+  final TextStyle playerTitle;
+  final TextStyle playerSubtitle;
 
   const AppTypography({
     required this.displayLarge,
@@ -20,6 +22,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.bodyMedium,
     required this.captionMuted,
     required this.eyebrow,
+    required this.playerTitle,
+    required this.playerSubtitle,
   });
 
   static const standard = AppTypography(
@@ -66,6 +70,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
       letterSpacing: 1.2,
       color: Color(0xFF94A3B8),
     ),
+    playerTitle: TextStyle(
+      fontSize: 22.0,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.5,
+      color: Color(0xFFFFFFFF),
+    ),
+    playerSubtitle: TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.w500,
+      color: Color(0xB3FFFFFF),
+    ),
   );
 
   @override
@@ -78,6 +93,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? bodyMedium,
     TextStyle? captionMuted,
     TextStyle? eyebrow,
+    TextStyle? playerTitle,
+    TextStyle? playerSubtitle,
   }) {
     return AppTypography(
       displayLarge: displayLarge ?? this.displayLarge,
@@ -88,6 +105,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       bodyMedium: bodyMedium ?? this.bodyMedium,
       captionMuted: captionMuted ?? this.captionMuted,
       eyebrow: eyebrow ?? this.eyebrow,
+      playerTitle: playerTitle ?? this.playerTitle,
+      playerSubtitle: playerSubtitle ?? this.playerSubtitle,
     );
   }
 
@@ -103,6 +122,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       bodyMedium: TextStyle.lerp(bodyMedium, other.bodyMedium, t)!,
       captionMuted: TextStyle.lerp(captionMuted, other.captionMuted, t)!,
       eyebrow: TextStyle.lerp(eyebrow, other.eyebrow, t)!,
+      playerTitle: TextStyle.lerp(playerTitle, other.playerTitle, t)!,
+      playerSubtitle: TextStyle.lerp(playerSubtitle, other.playerSubtitle, t)!,
     );
   }
 }

@@ -71,4 +71,12 @@ class AudioRepositoryImpl implements AudioRepository {
 
     return queue;
   }
+
+  @override
+  Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
+    required String title,
+    String? artist,
+  }) {
+    return remoteDatasource.fetchLyrics(title: title, artist: artist);
+  }
 }

@@ -2,12 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../viewmodels/audio_player_viewmodel.dart';
+import 'player_screen.dart';
 
 /// MiniPlayer widget that docks at the bottom of the screen.
 /// Follows AGENTS.md Invariant 2 (Zero magic numbers, context-exposed tokens only)
 /// and Invariant 3 (Strict MVVM, pure presentation).
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({super.key});
+
+  void _openFullPlayer(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const PlayerScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.easeOutCubic;
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(position: animation.drive(tween), child: child);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,52 +68,63 @@ class MiniPlayer extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: context.spacing.sm),
                 child: Row(
                   children: [
-                    // Artwork
-                    ClipRRect(
-                      borderRadius: context.radius.asBorderRadiusSm,
-                      child: Container(
-                        width: context.sizes.avatarMd,
-                        height: context.sizes.avatarMd,
-                        color: context.colors.cardDarkSurface,
-                        child: song.thumbnailUrl.isNotEmpty
-                            ? Image.network(
-                                song.thumbnailUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Icon(
-                                  Icons.music_note,
-                                  color: context.colors.textSecondary,
-                                  size: context.sizes.iconMd,
-                                ),
-                              )
-                            : Icon(
-                                Icons.music_note,
-                                color: context.colors.textSecondary,
-                                size: context.sizes.iconMd,
-                              ),
-                      ),
-                    ),
-                    SizedBox(width: context.spacing.sm),
-
-                    // Song Title & Artist
+                    // Tappable Area: Artwork + Song Title & Artist
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            song.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.typography.titleMedium,
-                          ),
-                          SizedBox(height: context.spacing.xxs),
-                          Text(
-                            song.artist,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.typography.bodyMedium,
-                          ),
-                        ],
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openFullPlayer(context),
+                        child: Row(
+                          children: [
+                            // Artwork
+                            ClipRRect(
+                              borderRadius: context.radius.asBorderRadiusSm,
+                              child: Container(
+                                width: context.sizes.avatarMd,
+                                height: context.sizes.avatarMd,
+                                color: context.colors.cardDarkSurface,
+                                child: song.thumbnailUrl.isNotEmpty
+                                    ? Image.network(
+                                        song.thumbnailUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Icon(
+                                          Icons.music_note,
+                                          color: context.colors.textSecondary,
+                                          size: context.sizes.iconMd,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.music_note,
+                                        color: context.colors.textSecondary,
+                                        size: context.sizes.iconMd,
+                                      ),
+                              ),
+                            ),
+                            SizedBox(width: context.spacing.sm),
+
+                            // Song Title & Artist
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    song.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: context.typography.titleMedium,
+                                  ),
+                                  SizedBox(height: context.spacing.xxs),
+                                  Text(
+                                    song.artist,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: context.typography.bodyMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -127,7 +154,9 @@ class MiniPlayer extends StatelessWidget {
                     else
                       IconButton(
                         icon: Icon(
-                          player.isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_filled_rounded,
+                          player.isPlaying
+                              ? Icons.pause_circle_filled_rounded
+                              : Icons.play_circle_filled_rounded,
                           color: context.colors.brandRuby,
                           size: context.sizes.iconLg,
                         ),

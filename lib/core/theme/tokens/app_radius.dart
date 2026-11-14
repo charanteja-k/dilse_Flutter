@@ -9,6 +9,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
   final double lg;
   final double card;
   final double dock;
+  final double sheet;
+  final double artwork;
   final double full;
 
   const AppRadius({
@@ -18,6 +20,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
     required this.lg,
     required this.card,
     required this.dock,
+    required this.sheet,
+    required this.artwork,
     required this.full,
   });
 
@@ -28,6 +32,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
     lg: 16.0,
     card: 20.0,
     dock: 32.0,
+    sheet: 28.0,
+    artwork: 26.0,
     full: 999.0,
   );
 
@@ -37,6 +43,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
   BorderRadius get asBorderRadiusLg => BorderRadius.circular(lg);
   BorderRadius get asBorderRadiusCard => BorderRadius.circular(card);
   BorderRadius get asBorderRadiusDock => BorderRadius.circular(dock);
+  BorderRadius get asBorderRadiusSheet => BorderRadius.circular(sheet);
+  BorderRadius get asBorderRadiusArtwork => BorderRadius.circular(artwork);
   BorderRadius get asBorderRadiusFull => BorderRadius.circular(full);
 
   @override
@@ -47,6 +55,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
     double? lg,
     double? card,
     double? dock,
+    double? sheet,
+    double? artwork,
     double? full,
   }) {
     return AppRadius(
@@ -56,6 +66,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
       lg: lg ?? this.lg,
       card: card ?? this.card,
       dock: dock ?? this.dock,
+      sheet: sheet ?? this.sheet,
+      artwork: artwork ?? this.artwork,
       full: full ?? this.full,
     );
   }
@@ -70,6 +82,8 @@ class AppRadius extends ThemeExtension<AppRadius> {
       lg: lerpDouble(lg, other.lg, t)!,
       card: lerpDouble(card, other.card, t)!,
       dock: lerpDouble(dock, other.dock, t)!,
+      sheet: lerpDouble(sheet, other.sheet, t)!,
+      artwork: lerpDouble(artwork, other.artwork, t)!,
       full: lerpDouble(full, other.full, t)!,
     );
   }

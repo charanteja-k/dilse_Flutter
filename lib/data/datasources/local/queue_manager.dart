@@ -109,6 +109,40 @@ class QueueManager {
     return null;
   }
 
+  SongModel? removeAt(int index) {
+    if (index < 0 || index >= _currentQueue.length) return null;
+    final removed = _currentQueue.removeAt(index);
+    _originalQueue.remove(removed);
+
+    if (_currentQueue.isEmpty) {
+      _currentIndex = -1;
+    } else if (index < _currentIndex) {
+      _currentIndex--;
+    } else if (index == _currentIndex) {
+      if (_currentIndex >= _currentQueue.length) {
+        _currentIndex = _currentQueue.length - 1;
+      }
+    }
+    return removed;
+  }
+
+  void reorder(int oldIndex, int newIndex) {
+    if (oldIndex < 0 || oldIndex >= _currentQueue.length) return;
+    if (newIndex < 0 || newIndex > _currentQueue.length) return;
+
+    final adjustedNewIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
+    final song = _currentQueue.removeAt(oldIndex);
+    _currentQueue.insert(adjustedNewIndex, song);
+
+    if (_currentIndex == oldIndex) {
+      _currentIndex = adjustedNewIndex;
+    } else if (_currentIndex > oldIndex && _currentIndex <= adjustedNewIndex) {
+      _currentIndex--;
+    } else if (_currentIndex < oldIndex && _currentIndex >= adjustedNewIndex) {
+      _currentIndex++;
+    }
+  }
+
   void toggleShuffle() {
     if (_currentQueue.isEmpty) return;
 
