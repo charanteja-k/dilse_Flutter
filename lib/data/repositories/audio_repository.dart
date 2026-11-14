@@ -5,5 +5,12 @@ abstract class AudioRepository {
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
   Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
+
+  /// Generates a high-fidelity queue powered by Google's recommendation graph
+  /// resolved into 320kbps JioSaavn streams.
+  Future<List<SongModel>> generateAlgorithmicQueue({
+    required SongModel seedSong,
+    int limit = 50,
+  });
 }
 
