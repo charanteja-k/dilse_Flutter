@@ -90,35 +90,150 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     return [];
   }
 
+  static const Map<String, String> _ytmHeaders = {
+    'Content-Type': 'application/json',
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Origin': 'https://music.youtube.com',
+    'Referer': 'https://music.youtube.com/',
+  };
+
+  static const Map<String, dynamic> _ytmContext = {
+    'client': {
+      'clientName': 'WEB_REMIX',
+      'clientVersion': '1.20240101.01.00',
+      'hl': 'en',
+      'gl': 'IN',
+    }
+  };
+
   @override
   Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50}) async {
     try {
-      // 1. Resolve seed query to a YouTube Music videoId
-      final searchUri = ApiEndpoints.ytmSearchUri(query: seedQuery, limit: 3, baseUrl: baseUrl);
-      final searchRes = await client.get(searchUri).timeout(const Duration(seconds: 10));
-
       String? videoId;
-      if (searchRes.statusCode == 200) {
-        final decoded = jsonDecode(searchRes.body);
-        if (decoded is List && decoded.isNotEmpty) {
-          videoId = decoded.first['id']?.toString();
+      final trimmed = seedQuery.trim();
+      final isYtId = RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed);
+
+      if (isYtId) {
+        videoId = trimmed;
+      } else {
+        // 1. Resolve seed query to a YouTube Music videoId via InnerTube search
+        final searchUri = Uri.parse('https://music.youtube.com/youtubei/v1/search');
+        final searchRes = await client.post(
+          searchUri,
+          headers: _ytmHeaders,
+          body: jsonEncode({
+            'context': _ytmContext,
+            'query': trimmed,
+            'params': 'EgWKAQIIAWoKEAkQChADEAQQBQ%3D%3D',
+          }),
+        ).timeout(const Duration(seconds: 8));
+
+        if (searchRes.statusCode == 200) {
+          final searchData = jsonDecode(searchRes.body);
+          final contents = searchData['contents']?['tabbedSearchResultsRenderer']?['tabs']?[0]?['tabRenderer']
+              ?['content']?['sectionListRenderer']?['contents'] as List?;
+          if (contents != null) {
+            for (final section in contents) {
+              final items = (section['musicShelfRenderer']?['contents'] ??
+                  section['itemSectionRenderer']?['contents']) as List?;
+              if (items != null && items.isNotEmpty) {
+                for (final item in items) {
+                  final renderer = item['musicResponsiveListItemRenderer'];
+                  final playNav = renderer?['overlay']?['musicItemThumbnailOverlayRenderer']?['content']
+                      ?['musicPlayButtonRenderer']?['playNavigationEndpoint'];
+                  videoId = playNav?['watchEndpoint']?['videoId'] as String?;
+                  videoId ??= renderer?['playlistItemData']?['videoId'] as String?;
+                  if (videoId != null && videoId.isNotEmpty) break;
+                }
+                if (videoId != null && videoId.isNotEmpty) break;
+              }
+            }
+          }
         }
       }
 
       if (videoId == null || videoId.isEmpty) return [];
 
-      // 2. Fetch Google's radio co-listening automix graph
-      final radioUri = ApiEndpoints.ytmRadioUri(videoId: videoId, limit: limit, baseUrl: baseUrl);
-      final radioRes = await client.get(radioUri).timeout(const Duration(seconds: 10));
+      // 2. Fetch Google's radio co-listening automix graph (RDAMVM$videoId)
+      final List<Map<String, dynamic>> tracks = await _fetchInnerTubeNextTracks(videoId);
 
-      if (radioRes.statusCode == 200) {
-        final decoded = jsonDecode(radioRes.body);
-        if (decoded is List) {
-          return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      // 3. Neural Continuation Chaining:
+      // If primary neural automix returned fewer than 35 tracks, chain using the last track
+      if (tracks.isNotEmpty && tracks.length < 35 && limit > tracks.length) {
+        final nextSeedId = tracks.last['id'] as String?;
+        if (nextSeedId != null && nextSeedId.length == 11) {
+          final chained = await _fetchInnerTubeNextTracks(nextSeedId);
+          for (final t in chained) {
+            if (!tracks.any((e) => e['id'] == t['id'])) {
+              tracks.add(t);
+              if (tracks.length >= limit) break;
+            }
+          }
         }
       }
-    } catch (_) {}
-    return [];
+
+      return tracks.take(limit).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchInnerTubeNextTracks(String videoId) async {
+    try {
+      final nextUri = Uri.parse('https://music.youtube.com/youtubei/v1/next');
+      final nextRes = await client.post(
+        nextUri,
+        headers: _ytmHeaders,
+        body: jsonEncode({
+          'context': _ytmContext,
+          'videoId': videoId,
+          'playlistId': 'RDAMVM$videoId',
+          'enablePersistentPlaylistPanel': true,
+        }),
+      ).timeout(const Duration(seconds: 8));
+
+      if (nextRes.statusCode != 200) return [];
+
+      final nextData = jsonDecode(nextRes.body);
+      final tabs = nextData['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']
+          ?['watchNextTabbedResultsRenderer']?['tabs'] as List?;
+      final upNext = tabs?[0]?['tabRenderer']?['content']?['musicQueueRenderer']?['content']
+          ?['playlistPanelRenderer']?['contents'] as List?;
+
+      if (upNext == null) return [];
+
+      final List<Map<String, dynamic>> tracks = [];
+      for (final item in upNext) {
+        final r = item['playlistPanelVideoRenderer'];
+        if (r == null) continue;
+        final vid = r['videoId'] as String?;
+        if (vid == null || vid.isEmpty) continue;
+        if (vid == videoId && tracks.isNotEmpty) continue;
+
+        final title = r['title']?['runs']?[0]?['text'] as String? ?? 'Unknown Title';
+        final artist = r['longBylineText']?['runs']?[0]?['text'] as String? ?? 'Unknown Artist';
+        final length = r['lengthText']?['runs']?[0]?['text'] as String? ?? '';
+        final thumbnails = r['thumbnail']?['thumbnails'] as List?;
+        final thumbUrl = (thumbnails != null && thumbnails.isNotEmpty)
+            ? thumbnails.last['url'] as String?
+            : 'https://i.ytimg.com/vi/$vid/hqdefault.jpg';
+
+        tracks.add({
+          'id': vid,
+          'title': title,
+          'artist': artist,
+          'author': artist,
+          'thumbnail': thumbUrl ?? 'https://i.ytimg.com/vi/$vid/hqdefault.jpg',
+          'duration': length,
+          'source': 'google_automix',
+        });
+      }
+
+      return tracks;
+    } catch (_) {
+      return [];
+    }
   }
 
   @override

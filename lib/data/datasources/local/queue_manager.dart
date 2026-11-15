@@ -65,6 +65,17 @@ class QueueManager {
     }
   }
 
+  void updateSong(SongModel song) {
+    final curIdx = _currentQueue.indexWhere((s) => s.id == song.id);
+    if (curIdx != -1) {
+      _currentQueue[curIdx] = song;
+    }
+    final origIdx = _originalQueue.indexWhere((s) => s.id == song.id);
+    if (origIdx != -1) {
+      _originalQueue[origIdx] = song;
+    }
+  }
+
   SongModel? skipToNext() {
     if (_currentQueue.isEmpty) return null;
 

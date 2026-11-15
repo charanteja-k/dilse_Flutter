@@ -12,6 +12,7 @@ import '../../models/song_model.dart';
 class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   final ja.AudioPlayer _player;
   StreamSubscription<ja.PlaybackEvent>? _playbackEventSub;
+  StreamSubscription<ja.PlayerState>? _playerStateSub;
   StreamSubscription<Duration?>? _durationSub;
 
   Future<void> Function()? onPlay;
@@ -28,44 +29,77 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
 
   ja.AudioPlayer get player => _player;
 
+  void _broadcastPlaybackState({int? queueIndex}) {
+    final playing = _player.playing;
+    final processingState = _player.processingState;
+
+    final AudioProcessingState audioProcessingState;
+    switch (processingState) {
+      case ja.ProcessingState.idle:
+        audioProcessingState = AudioProcessingState.idle;
+        break;
+      case ja.ProcessingState.loading:
+        audioProcessingState = AudioProcessingState.loading;
+        break;
+      case ja.ProcessingState.buffering:
+        audioProcessingState = AudioProcessingState.buffering;
+        break;
+      case ja.ProcessingState.ready:
+        audioProcessingState = AudioProcessingState.ready;
+        break;
+      case ja.ProcessingState.completed:
+        audioProcessingState = AudioProcessingState.completed;
+        break;
+    }
+
+    playbackState.add(
+      PlaybackState(
+        controls: [
+          MediaControl.skipToPrevious,
+          if (playing) MediaControl.pause else MediaControl.play,
+          MediaControl.stop,
+          MediaControl.skipToNext,
+        ],
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
+          MediaAction.play,
+          MediaAction.pause,
+          MediaAction.playPause,
+          MediaAction.stop,
+          MediaAction.skipToNext,
+          MediaAction.skipToPrevious,
+          MediaAction.fastForward,
+          MediaAction.rewind,
+        },
+        androidCompactActionIndices: const [0, 1, 3],
+        processingState: audioProcessingState,
+        playing: playing,
+        updatePosition: _player.position,
+        bufferedPosition: _player.bufferedPosition,
+        speed: _player.speed,
+        queueIndex: queueIndex ?? playbackState.value.queueIndex,
+      ),
+    );
+  }
+
   void _initStreams() {
     _playbackEventSub = _player.playbackEventStream.listen(
       (ja.PlaybackEvent event) {
-        final playing = _player.playing;
-        playbackState.add(
-          playbackState.value.copyWith(
-            controls: [
-              MediaControl.skipToPrevious,
-              if (playing) MediaControl.pause else MediaControl.play,
-              MediaControl.stop,
-              MediaControl.skipToNext,
-            ],
-            systemActions: const {
-              MediaAction.seek,
-              MediaAction.seekForward,
-              MediaAction.seekBackward,
-            },
-            androidCompactActionIndices: const [0, 1, 3],
-            processingState: const {
-              ja.ProcessingState.idle: AudioProcessingState.idle,
-              ja.ProcessingState.loading: AudioProcessingState.loading,
-              ja.ProcessingState.buffering: AudioProcessingState.buffering,
-              ja.ProcessingState.ready: AudioProcessingState.ready,
-              ja.ProcessingState.completed: AudioProcessingState.completed,
-            }[_player.processingState]!,
-            playing: playing,
-            updatePosition: _player.position,
-            bufferedPosition: _player.bufferedPosition,
-            speed: _player.speed,
-            queueIndex: event.currentIndex,
-          ),
-        );
+        _broadcastPlaybackState(queueIndex: event.currentIndex);
+      },
+    );
+
+    _playerStateSub = _player.playerStateStream.listen(
+      (ja.PlayerState state) {
+        _broadcastPlaybackState();
       },
     );
 
     _durationSub = _player.durationStream.listen(
       (Duration? duration) {
-        if (mediaItem.value != null && duration != null) {
+        if (mediaItem.value != null && duration != null && duration > Duration.zero) {
           mediaItem.add(mediaItem.value!.copyWith(duration: duration));
         }
       },
@@ -76,17 +110,35 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   void notifyLoading({bool isLoading = true}) {
     final playing = _player.playing;
     playbackState.add(
-      playbackState.value.copyWith(
-        processingState: isLoading
-            ? AudioProcessingState.loading
-            : AudioProcessingState.ready,
-        playing: playing || isLoading,
+      PlaybackState(
         controls: [
           MediaControl.skipToPrevious,
           if (playing || isLoading) MediaControl.pause else MediaControl.play,
           MediaControl.stop,
           MediaControl.skipToNext,
         ],
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
+          MediaAction.play,
+          MediaAction.pause,
+          MediaAction.playPause,
+          MediaAction.stop,
+          MediaAction.skipToNext,
+          MediaAction.skipToPrevious,
+          MediaAction.fastForward,
+          MediaAction.rewind,
+        },
+        androidCompactActionIndices: const [0, 1, 3],
+        processingState: isLoading
+            ? AudioProcessingState.loading
+            : AudioProcessingState.ready,
+        playing: playing || isLoading,
+        updatePosition: _player.position,
+        bufferedPosition: _player.bufferedPosition,
+        speed: _player.speed,
+        queueIndex: playbackState.value.queueIndex,
       ),
     );
   }
@@ -99,7 +151,7 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
         album: song.album.isNotEmpty ? song.album : 'DilSe Music',
         title: song.title,
         artist: song.artist,
-        duration: song.duration,
+        duration: song.duration > Duration.zero ? song.duration : null,
         artUri: song.thumbnailUrl.isNotEmpty ? Uri.tryParse(song.thumbnailUrl) : null,
       ),
     );
@@ -112,6 +164,7 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
     } else {
       await _player.play();
     }
+    _broadcastPlaybackState();
   }
 
   @override
@@ -120,6 +173,26 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
       await onPause!();
     } else {
       await _player.pause();
+    }
+    _broadcastPlaybackState();
+  }
+
+  @override
+  Future<void> click([MediaButton button = MediaButton.media]) async {
+    switch (button) {
+      case MediaButton.media:
+        if (_player.playing) {
+          await pause();
+        } else {
+          await play();
+        }
+        break;
+      case MediaButton.next:
+        await skipToNext();
+        break;
+      case MediaButton.previous:
+        await skipToPrevious();
+        break;
     }
   }
 
@@ -191,6 +264,7 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> disposeHandler() async {
     await _playbackEventSub?.cancel();
+    await _playerStateSub?.cancel();
     await _durationSub?.cancel();
   }
 }

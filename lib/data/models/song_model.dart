@@ -26,6 +26,9 @@ class SongModel {
     this.bitrate = '320kbps',
   });
 
+  String get artworkUrl => thumbnailUrl;
+  int get durationMs => duration.inMilliseconds;
+
   factory SongModel.fromJson(Map<String, dynamic> json) {
     Duration parsedDuration = Duration.zero;
     final rawDuration = json['duration'] ?? json['durationSeconds'];
@@ -35,6 +38,18 @@ class SongModel {
       final parsed = int.tryParse(rawDuration);
       if (parsed != null) {
         parsedDuration = Duration(seconds: parsed);
+      } else if (rawDuration.contains(':')) {
+        final parts = rawDuration.trim().split(':');
+        if (parts.length == 2) {
+          final m = int.tryParse(parts[0]) ?? 0;
+          final s = int.tryParse(parts[1]) ?? 0;
+          parsedDuration = Duration(minutes: m, seconds: s);
+        } else if (parts.length == 3) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          final s = int.tryParse(parts[2]) ?? 0;
+          parsedDuration = Duration(hours: h, minutes: m, seconds: s);
+        }
       }
     }
 

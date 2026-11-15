@@ -29,44 +29,81 @@ class AudioRepositoryImpl implements AudioRepository {
     required SongModel seedSong,
     int limit = 50,
   }) async {
-    // 1. Query Google's recommendation graph
-    final seedQuery = '${seedSong.title} ${seedSong.artist}'.trim();
+    // 1. Query Google's collaborative filtering recommendation graph
+    final seedQuery = seedSong.id.length == 11 && !seedSong.id.contains(' ')
+        ? seedSong.id
+        : '${seedSong.title} ${seedSong.artist}'.trim();
     final ytmTracks = await remoteDatasource.fetchYtmRadioTracks(seedQuery, limit: limit);
 
     final List<SongModel> queue = [seedSong];
     if (ytmTracks.isEmpty) return queue;
 
-    // 2. Resolve Google-recommended tracks into JioSaavn 320k streams in concurrent batches
-    const batchSize = 5;
-    for (int i = 0; i < ytmTracks.length; i += batchSize) {
-      final batch = ytmTracks.sublist(i, (i + batchSize).clamp(0, ytmTracks.length));
-      final futures = batch.map((track) async {
-        final title = (track['title'] ?? '').toString();
-        final artist = (track['author'] ?? track['artist'] ?? '').toString();
-        if (title.isEmpty) return null;
+    final seenTitles = <String>{seedSong.title.toLowerCase().trim()};
 
-        // Try single track resolver
-        final resolved = await remoteDatasource.resolveSingleTrack(title, artist: artist);
-        if (resolved != null && resolved.streamUrl.isNotEmpty) {
-          return resolved;
-        }
+    // 2. Populate 50-song progressive queue immediately with Google ML tracks
+    for (final track in ytmTracks) {
+      final id = (track['id'] ?? '').toString();
+      final title = (track['title'] ?? '').toString().trim();
+      final artist = (track['author'] ?? track['artist'] ?? '').toString().trim();
+      final thumbnail = (track['thumbnail'] ?? track['thumbnailUrl'] ?? '').toString();
+      final rawDuration = track['duration'];
 
-        // Fallback to top studio search match
-        final searchResults = await remoteDatasource.searchSongs('$title $artist', limit: 1);
-        if (searchResults.isNotEmpty && searchResults.first.streamUrl.isNotEmpty) {
-          return searchResults.first;
-        }
-        return null;
-      });
+      if (id.isEmpty || title.isEmpty) continue;
+      final cleanTitleKey = title.toLowerCase().trim();
+      if (seenTitles.contains(cleanTitleKey)) continue;
+      seenTitles.add(cleanTitleKey);
 
-      final results = await Future.wait(futures);
-      for (final song in results) {
-        if (song != null && !queue.any((s) => s.id == song.id || s.title.toLowerCase() == song.title.toLowerCase())) {
-          queue.add(song);
+      Duration parsedDur = Duration.zero;
+      if (rawDuration is Duration) {
+        parsedDur = rawDuration;
+      } else if (rawDuration is num) {
+        parsedDur = Duration(seconds: rawDuration.toInt());
+      } else if (rawDuration is String) {
+        final parsed = int.tryParse(rawDuration);
+        if (parsed != null) {
+          parsedDur = Duration(seconds: parsed);
+        } else if (rawDuration.contains(':')) {
+          final parts = rawDuration.trim().split(':');
+          if (parts.length == 2) {
+            parsedDur = Duration(minutes: int.tryParse(parts[0]) ?? 0, seconds: int.tryParse(parts[1]) ?? 0);
+          } else if (parts.length == 3) {
+            parsedDur = Duration(hours: int.tryParse(parts[0]) ?? 0, minutes: int.tryParse(parts[1]) ?? 0, seconds: int.tryParse(parts[2]) ?? 0);
+          }
         }
       }
 
+      queue.add(SongModel(
+        id: id,
+        title: title,
+        artist: artist,
+        album: 'DilSe Radio',
+        thumbnailUrl: thumbnail.isNotEmpty ? thumbnail : 'https://i.ytimg.com/vi/$id/hqdefault.jpg',
+        streamUrl: '',
+        duration: parsedDur,
+        source: 'google_automix',
+        bitrate: '320kbps',
+      ));
+
       if (queue.length >= limit) break;
+    }
+
+    // 3. Proactively pre-resolve the immediate upcoming track for zero-latency handoff
+    if (queue.length > 1) {
+      final nextTrack = queue[1];
+      try {
+        final resolved = await remoteDatasource.resolveSingleTrack(
+          nextTrack.title,
+          artist: nextTrack.artist,
+        );
+        if (resolved != null && resolved.streamUrl.isNotEmpty) {
+          queue[1] = nextTrack.copyWith(
+            streamUrl: resolved.streamUrl,
+            album: resolved.album.isNotEmpty ? resolved.album : nextTrack.album,
+            thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : nextTrack.thumbnailUrl,
+            duration: resolved.duration > Duration.zero ? resolved.duration : nextTrack.duration,
+          );
+        }
+      } catch (_) {}
     }
 
     return queue;

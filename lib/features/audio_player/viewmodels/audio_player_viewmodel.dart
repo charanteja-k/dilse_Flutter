@@ -79,8 +79,12 @@ class AudioPlayerViewModel extends ChangeNotifier {
       audioHandler.onPlay = () async {
         if (_playbackState == PlaybackState.paused) {
           await audioDriver.resume();
+        } else if (_playbackState == PlaybackState.playing) {
+          // Already playing
         } else if (currentSong != null) {
           await _startPlayback(currentSong!);
+        } else {
+          await audioDriver.resume();
         }
       };
       audioHandler.onPause = () async {
@@ -151,13 +155,71 @@ class AudioPlayerViewModel extends ChangeNotifier {
   }
 
   Future<void> _startPlayback(SongModel song) async {
-    await audioDriver.playSong(song);
+    SongModel playableSong = song;
+    if (playableSong.streamUrl.isEmpty) {
+      final resolved = await audioRepository.resolveSingleTrack(
+        playableSong.title,
+        artist: playableSong.artist,
+      );
+      if (resolved != null && resolved.streamUrl.isNotEmpty) {
+        playableSong = playableSong.copyWith(
+          streamUrl: resolved.streamUrl,
+          album: resolved.album.isNotEmpty ? resolved.album : playableSong.album,
+          thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : playableSong.thumbnailUrl,
+          duration: resolved.duration > Duration.zero ? resolved.duration : playableSong.duration,
+        );
+        queueManager.updateSong(playableSong);
+      } else {
+        // Fallback to top studio search match
+        final searchResults = await audioRepository.searchSongs(
+          '${playableSong.title} ${playableSong.artist}'.trim(),
+          limit: 1,
+        );
+        if (searchResults.isNotEmpty && searchResults.first.streamUrl.isNotEmpty) {
+          final topMatch = searchResults.first;
+          playableSong = playableSong.copyWith(
+            streamUrl: topMatch.streamUrl,
+            album: topMatch.album.isNotEmpty ? topMatch.album : playableSong.album,
+            thumbnailUrl: topMatch.thumbnailUrl.isNotEmpty ? topMatch.thumbnailUrl : playableSong.thumbnailUrl,
+            duration: topMatch.duration > Duration.zero ? topMatch.duration : playableSong.duration,
+          );
+          queueManager.updateSong(playableSong);
+        }
+      }
+    }
+
+    await audioDriver.playSong(playableSong);
     notifyListeners();
     fetchLyricsForCurrentSong();
+
+    _prewarmNextTrack();
+  }
+
+  void _prewarmNextTrack() {
+    final nextIdx = queueManager.currentIndex + 1;
+    if (nextIdx < queueManager.currentQueue.length) {
+      final nextSong = queueManager.currentQueue[nextIdx];
+      if (nextSong.streamUrl.isEmpty) {
+        audioRepository.resolveSingleTrack(
+          nextSong.title,
+          artist: nextSong.artist,
+        ).then((resolved) {
+          if (resolved != null && resolved.streamUrl.isNotEmpty) {
+            final updated = nextSong.copyWith(
+              streamUrl: resolved.streamUrl,
+              album: resolved.album.isNotEmpty ? resolved.album : nextSong.album,
+              thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : nextSong.thumbnailUrl,
+              duration: resolved.duration > Duration.zero ? resolved.duration : nextSong.duration,
+            );
+            queueManager.updateSong(updated);
+          }
+        }).catchError((_) {});
+      }
+    }
   }
 
   Future<void> togglePlayPause() async {
-    if (isPlaying) {
+    if (isPlaying || _playbackState == PlaybackState.buffering) {
       await audioDriver.pause();
     } else if (_playbackState == PlaybackState.paused) {
       await audioDriver.resume();
@@ -312,7 +374,7 @@ class AudioPlayerViewModel extends ChangeNotifier {
     try {
       final radioTracks = await audioRepository.generateAlgorithmicQueue(
         seedSong: seedSong,
-        limit: 15,
+        limit: 50,
       );
       if (radioTracks.length > 1) {
         final upcoming = radioTracks.sublist(1);
@@ -324,8 +386,18 @@ class AudioPlayerViewModel extends ChangeNotifier {
     }
   }
 
+  bool _isDisposed = false;
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
+    _isDisposed = true;
     _stateSub.cancel();
     _positionSub.cancel();
     _durationSub.cancel();
