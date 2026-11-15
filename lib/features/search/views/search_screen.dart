@@ -8,7 +8,7 @@ import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
 import '../../audio_player/views/song_options_bottom_sheet.dart';
 import '../viewmodels/search_viewmodel.dart';
 
-/// Pure View for song search and Google ML queue initiation.
+/// Pure OLED-black song search view with borderless list items and Google ML queue initiation.
 /// Strictly adheres to AGENTS.md:
 /// - Invariant 1: Provider & Streams only (strictly zero static singletons).
 /// - Invariant 2: Context-Exposed Design Tokens (strictly zero magic numbers/raw colors).
@@ -84,30 +84,33 @@ class _SearchScreenState extends State<SearchScreen> {
           widget.onBackToHome!();
         }
       },
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Search Input Header
-            _buildSearchHeader(context, searchVm),
+      child: Container(
+        color: context.colors.oledBackground,
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // Search Input Header
+              _buildSearchHeader(context, searchVm),
 
-            // Content Area
-            Expanded(
-              child: searchVm.isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: context.colors.brandRuby,
-                      ),
-                    )
-                  : searchVm.errorMessage != null
-                      ? _buildErrorView(context, searchVm)
-                      : searchVm.query.isEmpty
-                          ? _buildTrendingSection(context, searchVm)
-                          : !searchVm.hasResults
-                              ? _buildEmptyResultsView(context, searchVm)
-                              : _buildSearchResultsList(context, searchVm),
-            ),
-          ],
+              // Content Area on Absolute OLED Black
+              Expanded(
+                child: searchVm.isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: context.colors.brandRuby,
+                        ),
+                      )
+                    : searchVm.errorMessage != null
+                        ? _buildErrorView(context, searchVm)
+                        : searchVm.query.isEmpty
+                            ? _buildTrendingSection(context, searchVm)
+                            : !searchVm.hasResults
+                                ? _buildEmptyResultsView(context, searchVm)
+                                : _buildSearchResultsList(context, searchVm),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -119,87 +122,66 @@ class _SearchScreenState extends State<SearchScreen> {
         horizontal: context.spacing.md,
         vertical: context.spacing.xs,
       ),
-      child: Row(
-        children: [
-          if (widget.onBackToHome != null) ...[
-            IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: context.colors.textPrimary,
-                size: context.sizes.iconSm,
-              ),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                _focusNode.unfocus();
-                widget.onBackToHome!();
-              },
+      child: Container(
+        height: context.sizes.quickAccessTileHeight,
+        padding: EdgeInsets.symmetric(horizontal: context.spacing.sm),
+        decoration: BoxDecoration(
+          color: context.colors.cardDarkSurface,
+          borderRadius: context.radius.asBorderRadiusFull,
+          border: Border.all(
+            color: context.colors.solidMatteBorder,
+            width: context.sizes.borderThin,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.search_rounded,
+              color: context.colors.textSecondary,
+              size: context.sizes.iconSm,
             ),
-            SizedBox(width: context.spacing.xxs),
-          ],
-          Expanded(
-            child: Container(
-              height: context.sizes.quickAccessTileHeight,
-              padding: EdgeInsets.symmetric(horizontal: context.spacing.sm),
-              decoration: BoxDecoration(
-                color: context.colors.cardDarkSurface,
-                borderRadius: context.radius.asBorderRadiusFull,
-                border: Border.all(
-                  color: context.colors.solidMatteBorder,
-                  width: context.sizes.borderThin,
+            SizedBox(width: context.spacing.xs),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                style: context.typography.titleMedium,
+                cursorColor: context.colors.brandRuby,
+                textInputAction: TextInputAction.search,
+                onChanged: (text) => searchVm.onQueryChanged(text),
+                onSubmitted: (text) {
+                  _focusNode.unfocus();
+                  searchVm.search(text);
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search songs, artists, albums...',
+                  hintStyle: context.typography.titleMedium.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search_rounded,
+            ),
+            if (_controller.text.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _controller.clear();
+                  searchVm.clearSearch();
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(context.spacing.xxs),
+                  child: Icon(
+                    Icons.close_rounded,
                     color: context.colors.textSecondary,
                     size: context.sizes.iconSm,
                   ),
-                  SizedBox(width: context.spacing.xs),
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      style: context.typography.titleMedium,
-                      cursorColor: context.colors.brandRuby,
-                      textInputAction: TextInputAction.search,
-                      onChanged: (text) => searchVm.onQueryChanged(text),
-                      onSubmitted: (text) {
-                        _focusNode.unfocus();
-                        searchVm.search(text);
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search songs, artists, albums...',
-                        hintStyle: context.typography.titleMedium.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ),
-                  if (_controller.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        _controller.clear();
-                        searchVm.clearSearch();
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(context.spacing.xxs),
-                        child: Icon(
-                          Icons.close_rounded,
-                          color: context.colors.textSecondary,
-                          size: context.sizes.iconSm,
-                        ),
-                      ),
-                    ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -280,10 +262,14 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// Seamless, boxless song list rendering directly on pure OLED black.
   Widget _buildSearchResultsList(BuildContext context, SearchViewModel searchVm) {
     final results = searchVm.searchResults;
+    final currentSong = context.select<AudioPlayerViewModel, SongModel?>(
+      (vm) => vm.currentSong,
+    );
 
-    return ListView.separated(
+    return ListView.builder(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.only(
         left: context.spacing.md,
@@ -294,81 +280,102 @@ class _SearchScreenState extends State<SearchScreen> {
             context.spacing.xl,
       ),
       itemCount: results.length,
-      separatorBuilder: (context, index) => SizedBox(height: context.spacing.xs),
       itemBuilder: (context, index) {
         final song = results[index];
+        final isPlayingThis = currentSong?.id == song.id;
         final durationStr = _formatDuration(song.duration);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: context.colors.cardDarkSurface,
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: context.radius.asBorderRadiusMd,
-            border: Border.all(
-              color: context.colors.solidMatteBorder,
-              width: context.sizes.borderThin,
-            ),
-          ),
-          child: ListTile(
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: context.spacing.sm,
-              vertical: context.spacing.xxs,
-            ),
-            leading: ClipRRect(
-              borderRadius: context.radius.asBorderRadiusSm,
-              child: Container(
-                width: context.sizes.thumbnailMd,
-                height: context.sizes.thumbnailMd,
-                color: context.colors.oledBackground,
-                child: song.thumbnailUrl.isNotEmpty
-                    ? Image.network(
-                        song.thumbnailUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Icon(
-                          Icons.music_note_rounded,
-                          color: context.colors.textSecondary,
+            onTap: () => _onSongSelected(context, song),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: context.spacing.xs,
+              ),
+              child: Row(
+                children: [
+                  // Artwork Thumbnail
+                  ClipRRect(
+                    borderRadius: context.radius.asBorderRadiusSm,
+                    child: Container(
+                      width: context.sizes.thumbnailMd,
+                      height: context.sizes.thumbnailMd,
+                      color: context.colors.cardDarkSurface,
+                      child: song.thumbnailUrl.isNotEmpty
+                          ? Image.network(
+                              song.thumbnailUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.music_note_rounded,
+                                color: context.colors.textSecondary,
+                                size: context.sizes.iconMd,
+                              ),
+                            )
+                          : Icon(
+                              Icons.music_note_rounded,
+                              color: context.colors.textSecondary,
+                              size: context.sizes.iconMd,
+                            ),
+                    ),
+                  ),
+                  SizedBox(width: context.spacing.sm),
+
+                  // Song Title & Artist
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          song.title,
+                          style: context.typography.titleMedium.copyWith(
+                            color: isPlayingThis
+                                ? context.colors.brandRuby
+                                : context.colors.textPrimary,
+                            fontWeight: isPlayingThis
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      )
-                    : Icon(
-                        Icons.music_note_rounded,
-                        color: context.colors.textSecondary,
-                      ),
+                        SizedBox(height: context.spacing.xxs),
+                        Text(
+                          song.artist.isNotEmpty ? song.artist : 'DilSe Track',
+                          style: context.typography.bodyMedium.copyWith(
+                            color: context.colors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Duration text
+                  if (durationStr.isNotEmpty) ...[
+                    Text(
+                      durationStr,
+                      style: context.typography.captionMuted,
+                    ),
+                    SizedBox(width: context.spacing.xs),
+                  ],
+
+                  // More Options icon button
+                  IconButton(
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                      color: context.colors.textSecondary,
+                      size: context.sizes.iconSm,
+                    ),
+                    onPressed: () {
+                      SongOptionsBottomSheet.show(context, song);
+                    },
+                  ),
+                ],
               ),
             ),
-            title: Text(
-              song.title,
-              style: context.typography.titleMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              song.artist.isNotEmpty ? song.artist : 'DilSe Track',
-              style: context.typography.captionMuted,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (durationStr.isNotEmpty) ...[
-                  Text(
-                    durationStr,
-                    style: context.typography.captionMuted,
-                  ),
-                  SizedBox(width: context.spacing.xxs),
-                ],
-                IconButton(
-                  icon: Icon(
-                    Icons.more_vert_rounded,
-                    color: context.colors.textSecondary,
-                    size: context.sizes.iconSm,
-                  ),
-                  onPressed: () {
-                    SongOptionsBottomSheet.show(context, song);
-                  },
-                ),
-              ],
-            ),
-            onTap: () => _onSongSelected(context, song),
           ),
         );
       },
@@ -448,4 +455,3 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
-

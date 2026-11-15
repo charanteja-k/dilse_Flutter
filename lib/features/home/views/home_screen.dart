@@ -9,6 +9,8 @@ import '../../app_update/viewmodels/update_viewmodel.dart';
 import '../../app_update/views/update_top_bar_button.dart';
 import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
 import '../../audio_player/views/mini_player.dart';
+import '../../downloads/views/downloads_screen.dart';
+import '../../library/views/library_screen.dart';
 import '../../search/views/search_screen.dart';
 import '../viewmodels/home_viewmodel.dart';
 import 'floating_nav_dock.dart';
@@ -94,11 +96,15 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: context.colors.oledBackground,
       body: Stack(
         children: [
-          // Main Body: Home Feed (index 0) or Search Screen (index 1)
+          // Main Body: Home Feed (0), Search (1), Library (2), Downloads (3)
           if (_selectedNavIndex == 1)
             SearchScreen(
               onBackToHome: () => setState(() => _selectedNavIndex = 0),
             )
+          else if (_selectedNavIndex == 2)
+            const LibraryScreen()
+          else if (_selectedNavIndex == 3)
+            const DownloadsScreen()
           else
             SafeArea(
               bottom: false,
@@ -260,23 +266,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Top Bar Actions: Search, Language Selector, Update & Avatar
+          // Language Selector Pill, Update & Avatar
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.search_rounded,
-                  color: context.colors.textPrimary,
-                  size: context.sizes.iconMd,
-                ),
-                tooltip: 'Search Songs',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  setState(() => _selectedNavIndex = 1);
-                },
-              ),
-              SizedBox(width: context.spacing.xxs),
               PopupMenuButton<String>(
                 color: context.colors.cardDarkSurface,
                 shape: RoundedRectangleBorder(

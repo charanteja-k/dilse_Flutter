@@ -15,10 +15,13 @@ import 'data/repositories/audio_repository.dart';
 import 'data/repositories/audio_repository_impl.dart';
 import 'data/repositories/update_repository.dart';
 import 'data/repositories/update_repository_impl.dart';
+import 'data/datasources/local/storage_datasource.dart';
 import 'features/app_update/viewmodels/update_viewmodel.dart';
 import 'features/audio_player/viewmodels/audio_player_viewmodel.dart';
+import 'features/downloads/viewmodels/downloads_viewmodel.dart';
 import 'features/home/viewmodels/home_viewmodel.dart';
 import 'features/home/views/home_screen.dart';
+import 'features/library/viewmodels/library_viewmodel.dart';
 import 'features/search/viewmodels/search_viewmodel.dart';
 import 'firebase_options.dart';
 
@@ -134,6 +137,28 @@ class DilseApp extends StatelessWidget {
               previous ?? SearchViewModel(audioRepository: repo),
         ),
 
+        // Storage Datasource (Library & Downloads)
+        Provider<StorageDatasource>(
+          create: (_) => StorageDatasourceImpl(),
+        ),
+
+        // Library & Downloads ViewModels
+        ChangeNotifierProxyProvider<StorageDatasource, LibraryViewModel>(
+          create: (context) => LibraryViewModel(
+            storageDatasource: context.read<StorageDatasource>(),
+          ),
+          update: (_, storage, previous) =>
+              previous ?? LibraryViewModel(storageDatasource: storage),
+        ),
+
+        ChangeNotifierProxyProvider<StorageDatasource, DownloadsViewModel>(
+          create: (context) => DownloadsViewModel(
+            storageDatasource: context.read<StorageDatasource>(),
+          ),
+          update: (_, storage, previous) =>
+              previous ?? DownloadsViewModel(storageDatasource: storage),
+        ),
+
         // GitHub App Updates Layer
         ProxyProvider<http.Client, GithubUpdateDatasource>(
           update: (context, client, previous) =>
@@ -156,7 +181,9 @@ class DilseApp extends StatelessWidget {
       child: MaterialApp(
         title: 'DilSe',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.dark,
         home: const HomeScreen(),
       ),
     );

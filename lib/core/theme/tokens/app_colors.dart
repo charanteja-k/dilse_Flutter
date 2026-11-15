@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+/// Pure Monochrome Theme Tokens adhering strictly to AGENTS.md Invariant 4:
+/// - Absolute Black & White Palette (Dark & Light Mode Support)
+/// - Zero Gradients & Zero Neons across surfaces, buttons, indicators, and docks
+/// - High-contrast matte monochrome finishes
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   final Color oledBackground;
@@ -7,7 +11,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color surfaceContainer;
   final Color floatingDockSurface;
   final Color solidMatteBorder;
-  final Color brandRuby;
+  final Color brandRuby; // In pure monochrome, maps to primary accent (White in dark, Black in light)
   final Color successEmerald;
   final Color warningAmber;
   final Color errorCrimson;
@@ -40,24 +44,48 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.mixCrimson,
   });
 
+  /// Dark Mode: Pure OLED Black with matte grey surfaces and pure white highlights
   static const dark = AppColors(
     oledBackground: Color(0xFF000000),
-    cardDarkSurface: Color(0xFF18181B),
-    surfaceContainer: Color(0xFF181818),
-    floatingDockSurface: Color(0xFF161618),
-    solidMatteBorder: Color(0xFF2E2E32),
-    brandRuby: Color(0xFFFA2D48),
-    successEmerald: Color(0xFF1DB954),
-    warningAmber: Color(0xFFF59E0B),
-    errorCrimson: Color(0xFFEF4444),
+    cardDarkSurface: Color(0xFF121214),
+    surfaceContainer: Color(0xFF161618),
+    floatingDockSurface: Color(0xFF141416),
+    solidMatteBorder: Color(0xFF242428),
+    brandRuby: Color(0xFFFFFFFF), // Pure white primary accent
+    successEmerald: Color(0xFFE5E5EA),
+    warningAmber: Color(0xFFD1D1D6),
+    errorCrimson: Color(0xFFFF453A),
     textPrimary: Color(0xFFFFFFFF),
-    textSecondary: Color(0xFF94A3B8),
-    mixBlue: Color(0xFF2E3856),
-    mixPurple: Color(0xFF5038A0),
-    mixTeal: Color(0xFF223544),
-    mixAmber: Color(0xFF5A381E),
-    mixGreen: Color(0xFF1E382A),
-    mixCrimson: Color(0xFF38222A),
+    textSecondary: Color(0xFF8E8E93),
+    // Monochromatic solid matte tiles for quick access & chips
+    mixBlue: Color(0xFF18181B),
+    mixPurple: Color(0xFF18181B),
+    mixTeal: Color(0xFF18181B),
+    mixAmber: Color(0xFF18181B),
+    mixGreen: Color(0xFF18181B),
+    mixCrimson: Color(0xFF18181B),
+  );
+
+  /// Light Mode: Clean White with subtle light matte surfaces and pure black text/highlights
+  static const light = AppColors(
+    oledBackground: Color(0xFFFFFFFF),
+    cardDarkSurface: Color(0xFFF5F5F7),
+    surfaceContainer: Color(0xFFEFEFF4),
+    floatingDockSurface: Color(0xFFFFFFFF),
+    solidMatteBorder: Color(0xFFE5E5EA),
+    brandRuby: Color(0xFF000000), // Pure black primary accent
+    successEmerald: Color(0xFF2C2C2E),
+    warningAmber: Color(0xFF3A3A3C),
+    errorCrimson: Color(0xFFFF3B30),
+    textPrimary: Color(0xFF000000),
+    textSecondary: Color(0xFF6E6E73),
+    // Monochromatic light matte tiles for quick access & chips
+    mixBlue: Color(0xFFF5F5F7),
+    mixPurple: Color(0xFFF5F5F7),
+    mixTeal: Color(0xFFF5F5F7),
+    mixAmber: Color(0xFFF5F5F7),
+    mixGreen: Color(0xFFF5F5F7),
+    mixCrimson: Color(0xFFF5F5F7),
   );
 
   @override
@@ -102,7 +130,7 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 
   @override
-  AppColors lerp(ThemeExtension<AppColors>? other, double t) {
+  ThemeExtension<AppColors> lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
     return AppColors(
       oledBackground: Color.lerp(oledBackground, other.oledBackground, t)!,
@@ -125,4 +153,3 @@ class AppColors extends ThemeExtension<AppColors> {
     );
   }
 }
-

@@ -26,7 +26,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.playerSubtitle,
   });
 
-  static const standard = AppTypography(
+  static const dark = AppTypography(
     displayLarge: TextStyle(
       fontSize: 28.0,
       fontWeight: FontWeight.w700,
@@ -52,36 +52,95 @@ class AppTypography extends ThemeExtension<AppTypography> {
     bodyLarge: TextStyle(
       fontSize: 14.0,
       fontWeight: FontWeight.w400,
-      color: Color(0xFF94A3B8),
+      color: Color(0xFF8E8E93),
     ),
     bodyMedium: TextStyle(
       fontSize: 12.0,
       fontWeight: FontWeight.w400,
-      color: Color(0xFF94A3B8),
+      color: Color(0xFF8E8E93),
     ),
     captionMuted: TextStyle(
       fontSize: 11.0,
-      fontWeight: FontWeight.w400,
-      color: Color(0xFF64748B),
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF8E8E93),
     ),
     eyebrow: TextStyle(
       fontSize: 11.0,
       fontWeight: FontWeight.w700,
       letterSpacing: 1.2,
-      color: Color(0xFF94A3B8),
+      color: Color(0xFF8E8E93),
     ),
     playerTitle: TextStyle(
       fontSize: 22.0,
       fontWeight: FontWeight.w700,
-      letterSpacing: -0.5,
+      letterSpacing: -0.4,
       color: Color(0xFFFFFFFF),
     ),
     playerSubtitle: TextStyle(
-      fontSize: 16.0,
+      fontSize: 15.0,
       fontWeight: FontWeight.w500,
-      color: Color(0xB3FFFFFF),
+      color: Color(0xFF8E8E93),
     ),
   );
+
+  static const light = AppTypography(
+    displayLarge: TextStyle(
+      fontSize: 28.0,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.5,
+      color: Color(0xFF000000),
+    ),
+    headlineMedium: TextStyle(
+      fontSize: 20.0,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.3,
+      color: Color(0xFF000000),
+    ),
+    titleLarge: TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF000000),
+    ),
+    titleMedium: TextStyle(
+      fontSize: 14.0,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF000000),
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 14.0,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF6E6E73),
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 12.0,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF6E6E73),
+    ),
+    captionMuted: TextStyle(
+      fontSize: 11.0,
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF6E6E73),
+    ),
+    eyebrow: TextStyle(
+      fontSize: 11.0,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 1.2,
+      color: Color(0xFF6E6E73),
+    ),
+    playerTitle: TextStyle(
+      fontSize: 22.0,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.4,
+      color: Color(0xFF000000),
+    ),
+    playerSubtitle: TextStyle(
+      fontSize: 15.0,
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF6E6E73),
+    ),
+  );
+
+  static const standard = dark;
 
   @override
   AppTypography copyWith({
@@ -111,7 +170,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   }
 
   @override
-  AppTypography lerp(ThemeExtension<AppTypography>? other, double t) {
+  ThemeExtension<AppTypography> lerp(ThemeExtension<AppTypography>? other, double t) {
     if (other is! AppTypography) return this;
     return AppTypography(
       displayLarge: TextStyle.lerp(displayLarge, other.displayLarge, t)!,
@@ -127,4 +186,3 @@ class AppTypography extends ThemeExtension<AppTypography> {
     );
   }
 }
-
