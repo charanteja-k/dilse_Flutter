@@ -446,16 +446,9 @@ class _SearchScreenState extends State<SearchScreen> {
         // Top Result Spotlight Hero Card
         if (topSong != null) ...[
           Padding(
-            padding: EdgeInsets.only(
-              top: context.spacing.xs,
-              bottom: context.spacing.xs,
-            ),
-            child: Text(
-              'TOP RESULT',
-              style: context.typography.eyebrow,
-            ),
+            padding: EdgeInsets.only(top: context.spacing.xs),
+            child: _buildSpotlightCard(context, topSong, currentSong, isPlaying),
           ),
-          _buildSpotlightCard(context, topSong, currentSong, isPlaying),
           SizedBox(height: context.spacing.md),
         ],
 
@@ -471,9 +464,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ...List.generate(songs.length, (index) {
             final song = songs[index];
             final isPlayingThis = currentSong?.id == song.id;
-            return _buildRankedSongRow(
+            return _buildSongRow(
               context,
-              index: index + 2,
               song: song,
               isPlayingThis: isPlayingThis,
               isAudioPlaying: isPlaying,
@@ -491,6 +483,7 @@ class _SearchScreenState extends State<SearchScreen> {
     bool isAudioPlaying,
   ) {
     final isThisPlaying = currentSong?.id == song.id;
+    final cardArtworkSize = context.sizes.avatarLg + context.spacing.xs;
 
     return Container(
       padding: EdgeInsets.all(context.spacing.sm),
@@ -508,8 +501,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ClipRRect(
             borderRadius: context.radius.asBorderRadiusMd,
             child: Container(
-              width: context.sizes.avatarLg,
-              height: context.sizes.avatarLg,
+              width: cardArtworkSize,
+              height: cardArtworkSize,
               color: context.colors.oledBackground,
               child: song.thumbnailUrl.isNotEmpty
                   ? Image.network(
@@ -534,6 +527,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(
@@ -545,25 +539,27 @@ class _SearchScreenState extends State<SearchScreen> {
                     borderRadius: context.radius.asBorderRadiusFull,
                   ),
                   child: Text(
-                    'SONG • SPOTLIGHT',
+                    'TOP RESULT',
                     style: context.typography.eyebrow.copyWith(
                       color: context.colors.textPrimary,
                     ),
                   ),
                 ),
-                SizedBox(height: context.spacing.xxs),
+                SizedBox(height: context.spacing.xs),
                 Text(
                   song.title,
-                  style: context.typography.titleMedium.copyWith(
+                  style: context.typography.titleLarge.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: context.spacing.xxs),
                 Text(
                   song.artist.isNotEmpty ? song.artist : 'DilSe Artist',
-                  style: context.typography.bodyMedium,
+                  style: context.typography.bodyMedium.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -598,9 +594,8 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildRankedSongRow(
+  Widget _buildSongRow(
     BuildContext context, {
-    required int index,
     required SongModel song,
     required bool isPlayingThis,
     required bool isAudioPlaying,
@@ -616,22 +611,6 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: EdgeInsets.symmetric(vertical: context.spacing.xs),
           child: Row(
             children: [
-              // Rank Index
-              SizedBox(
-                width: context.spacing.lg,
-                child: Text(
-                  '$index',
-                  style: context.typography.captionMuted.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isPlayingThis
-                        ? context.colors.brandRuby
-                        : context.colors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              SizedBox(width: context.spacing.xs),
-
               // Artwork Thumbnail
               ClipRRect(
                 borderRadius: context.radius.asBorderRadiusSm,

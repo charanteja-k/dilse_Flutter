@@ -28,6 +28,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
   final double playerArtworkRadius;
   final double playerScrubberHeight;
   final double queueItemHeight;
+  final double floatingCdSize;
 
   const AppSizes({
     required this.miniPlayerHeight,
@@ -55,6 +56,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
     required this.playerArtworkRadius,
     required this.playerScrubberHeight,
     required this.queueItemHeight,
+    required this.floatingCdSize,
   });
 
   static const standard = AppSizes(
@@ -83,6 +85,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
     playerArtworkRadius: 26.0,
     playerScrubberHeight: 44.0,
     queueItemHeight: 64.0,
+    floatingCdSize: 56.0,
   );
 
   @override
@@ -112,6 +115,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
     double? playerArtworkRadius,
     double? playerScrubberHeight,
     double? queueItemHeight,
+    double? floatingCdSize,
   }) {
     return AppSizes(
       miniPlayerHeight: miniPlayerHeight ?? this.miniPlayerHeight,
@@ -139,6 +143,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
       playerArtworkRadius: playerArtworkRadius ?? this.playerArtworkRadius,
       playerScrubberHeight: playerScrubberHeight ?? this.playerScrubberHeight,
       queueItemHeight: queueItemHeight ?? this.queueItemHeight,
+      floatingCdSize: floatingCdSize ?? this.floatingCdSize,
     );
   }
 
@@ -171,6 +176,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
       playerArtworkRadius: lerpDouble(playerArtworkRadius, other.playerArtworkRadius, t)!,
       playerScrubberHeight: lerpDouble(playerScrubberHeight, other.playerScrubberHeight, t)!,
       queueItemHeight: lerpDouble(queueItemHeight, other.queueItemHeight, t)!,
+      floatingCdSize: lerpDouble(floatingCdSize, other.floatingCdSize, t)!,
     );
   }
 }

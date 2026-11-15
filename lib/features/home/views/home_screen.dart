@@ -9,6 +9,7 @@ import '../../../data/models/song_model.dart';
 import '../../app_update/viewmodels/update_viewmodel.dart';
 import '../../app_update/views/update_top_bar_button.dart';
 import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
+import '../../audio_player/views/floating_vinyl_disc.dart';
 import '../../audio_player/views/mini_player.dart';
 import '../../downloads/views/downloads_screen.dart';
 import '../../library/views/library_screen.dart';
@@ -90,9 +91,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final homeVm = context.watch<HomeViewModel>();
-    final hasActivePlayback = context.select<AudioPlayerViewModel, bool>(
-      (vm) => vm.currentSong != null,
-    );
+    final audioPlayerVm = context.watch<AudioPlayerViewModel>();
+    final currentSong = audioPlayerVm.currentSong;
+    final isPlaying = audioPlayerVm.isPlaying;
+    final hasActivePlayback = currentSong != null;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 50;
     final isDockVisible = _isNavVisible && !isKeyboardOpen;
 
@@ -252,22 +254,20 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const MiniPlayer(),
-                AnimatedAlign(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOutCubic,
-                  alignment: Alignment.topCenter,
-                  heightFactor: isDockVisible ? 1.0 : 0.0,
-                  child: AnimatedSlide(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOutCubic,
-                    offset: isDockVisible ? Offset.zero : const Offset(0, 1.4),
-                    child: IgnorePointer(
-                      ignoring: !isDockVisible,
-                      child: FloatingNavDock(
+            child: AnimatedSlide(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeInOutCubic,
+              offset: isDockVisible ? Offset.zero : const Offset(0, 1.4),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isDockVisible ? 1.0 : 0.0,
+                child: IgnorePointer(
+                  ignoring: !isDockVisible,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const MiniPlayer(),
+                      FloatingNavDock(
                         selectedIndex: _selectedNavIndex,
                         onTabSelected: (index) {
                           setState(() {
@@ -276,12 +276,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           });
                         },
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
+
+          // Floating Spinning Vinyl CD Player (Appears when scrolled down and playback is active, draggable between left & right)
+          if (hasActivePlayback)
+            FloatingVinylDisc(
+              isVisible: !isDockVisible,
+              song: currentSong,
+              isPlaying: isPlaying,
+            ),
         ],
       ),
     ),
