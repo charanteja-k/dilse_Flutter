@@ -19,6 +19,7 @@ import 'features/app_update/viewmodels/update_viewmodel.dart';
 import 'features/audio_player/viewmodels/audio_player_viewmodel.dart';
 import 'features/home/viewmodels/home_viewmodel.dart';
 import 'features/home/views/home_screen.dart';
+import 'features/search/viewmodels/search_viewmodel.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -123,6 +124,14 @@ class DilseApp extends StatelessWidget {
           ),
           update: (_, repo, previous) =>
               previous ?? HomeViewModel(audioRepository: repo),
+        ),
+
+        ChangeNotifierProxyProvider<AudioRepository, SearchViewModel>(
+          create: (context) => SearchViewModel(
+            audioRepository: context.read<AudioRepository>(),
+          ),
+          update: (_, repo, previous) =>
+              previous ?? SearchViewModel(audioRepository: repo),
         ),
 
         // GitHub App Updates Layer

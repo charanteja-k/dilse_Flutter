@@ -9,6 +9,7 @@ import '../../app_update/viewmodels/update_viewmodel.dart';
 import '../../app_update/views/update_top_bar_button.dart';
 import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
 import '../../audio_player/views/mini_player.dart';
+import '../../search/views/search_screen.dart';
 import '../viewmodels/home_viewmodel.dart';
 import 'floating_nav_dock.dart';
 
@@ -93,11 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: context.colors.oledBackground,
       body: Stack(
         children: [
-          // Main Scrollable Home Feed
-          SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
+          // Main Body: Home Feed (index 0) or Search Screen (index 1)
+          if (_selectedNavIndex == 1)
+            SearchScreen(
+              onBackToHome: () => setState(() => _selectedNavIndex = 0),
+            )
+          else
+            SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
                 _buildTopBar(context, homeVm),
                 Expanded(
                   child: homeVm.isLoading
@@ -254,10 +260,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Language Selector Pill & Avatar
+          // Top Bar Actions: Search, Language Selector, Update & Avatar
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: Icon(
+                  Icons.search_rounded,
+                  color: context.colors.textPrimary,
+                  size: context.sizes.iconMd,
+                ),
+                tooltip: 'Search Songs',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _selectedNavIndex = 1);
+                },
+              ),
+              SizedBox(width: context.spacing.xxs),
               PopupMenuButton<String>(
                 color: context.colors.cardDarkSurface,
                 shape: RoundedRectangleBorder(

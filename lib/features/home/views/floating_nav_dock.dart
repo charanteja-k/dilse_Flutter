@@ -31,7 +31,7 @@ class FloatingNavDock extends StatelessWidget {
         icon: Icons.search_rounded,
         activeIcon: Icons.saved_search_rounded,
         label: 'Search',
-        isEnabled: false,
+        isEnabled: true,
       ),
       _NavTabItem(
         icon: Icons.library_music_outlined,
