@@ -59,7 +59,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
 
   static const standard = AppSizes(
     miniPlayerHeight: 64.0,
-    navDockHeight: 64.0,
+    navDockHeight: 56.0,
     navDockElevation: 8.0,
     iconSm: 18.0,
     iconMd: 24.0,

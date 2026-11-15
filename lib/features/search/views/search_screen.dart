@@ -20,7 +20,7 @@ class SearchScreen extends StatefulWidget {
   const SearchScreen({
     super.key,
     this.onBackToHome,
-    this.autoFocus = true,
+    this.autoFocus = false,
   });
 
   @override
