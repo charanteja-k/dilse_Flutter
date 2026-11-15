@@ -388,7 +388,11 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
             Icon(
               icon,
               size: context.sizes.iconSm * 0.85,
-              color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+              color: isSelected
+                  ? (widget.vibrantColor.computeLuminance() > 0.5
+                      ? context.colors.oledBackground
+                      : context.colors.textPrimary)
+                  : context.colors.textSecondary,
             ),
             SizedBox(width: context.spacing.xs),
             Text(
@@ -396,7 +400,11 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
               style: context.typography.eyebrow.copyWith(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+                color: isSelected
+                    ? (widget.vibrantColor.computeLuminance() > 0.5
+                        ? context.colors.oledBackground
+                        : context.colors.textPrimary)
+                    : context.colors.textSecondary,
               ),
             ),
           ],

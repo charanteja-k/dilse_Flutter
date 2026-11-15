@@ -148,7 +148,7 @@ class EqualizerBottomSheet extends StatelessWidget {
                           preset,
                           style: context.typography.bodyMedium.copyWith(
                             color: isSelected
-                                ? context.colors.textPrimary
+                                ? context.colors.oledBackground
                                 : context.colors.textSecondary,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                           ),

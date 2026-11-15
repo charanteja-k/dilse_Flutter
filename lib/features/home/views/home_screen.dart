@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
@@ -29,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedNavIndex = 0;
+  bool _isNavVisible = true;
 
   @override
   void initState() {
@@ -94,19 +96,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: context.colors.oledBackground,
-      body: Stack(
-        children: [
-          // Main Body: Home Feed (0), Search (1), Library (2), Downloads (3)
-          if (_selectedNavIndex == 1)
-            SearchScreen(
-              onBackToHome: () => setState(() => _selectedNavIndex = 0),
-            )
-          else if (_selectedNavIndex == 2)
-            const LibraryScreen()
-          else if (_selectedNavIndex == 3)
-            const DownloadsScreen()
-          else
-            SafeArea(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.axis == Axis.vertical) {
+            if (notification is UserScrollNotification) {
+              if (notification.direction == ScrollDirection.reverse) {
+                // User scrolls down the content -> slide down and hide nav bar
+                if (_isNavVisible) {
+                  setState(() => _isNavVisible = false);
+                }
+              } else if (notification.direction == ScrollDirection.forward) {
+                // User swipes up / scrolls back up -> slide up and reveal nav bar
+                if (!_isNavVisible) {
+                  setState(() => _isNavVisible = true);
+                }
+              }
+            }
+
+            // Always reveal nav bar if at the very top or bottom edge of any list
+            if ((notification.metrics.pixels <= 20 ||
+                    (notification.metrics.maxScrollExtent > 100 &&
+                        notification.metrics.pixels >=
+                            notification.metrics.maxScrollExtent - 20)) &&
+                !_isNavVisible) {
+              setState(() => _isNavVisible = true);
+            }
+          }
+          return false;
+        },
+        child: Stack(
+          children: [
+            // Main Body: Home Feed (0), Search (1), Library (2), Downloads (3)
+            if (_selectedNavIndex == 1)
+              SearchScreen(
+                onBackToHome: () => setState(() {
+                  _selectedNavIndex = 0;
+                  _isNavVisible = true;
+                }),
+              )
+            else if (_selectedNavIndex == 2)
+              const LibraryScreen()
+            else if (_selectedNavIndex == 3)
+              const DownloadsScreen()
+            else
+              SafeArea(
               bottom: false,
               child: Column(
                 children: [
@@ -221,18 +254,36 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const MiniPlayer(),
-                FloatingNavDock(
-                  selectedIndex: _selectedNavIndex,
-                  onTabSelected: (index) {
-                    setState(() => _selectedNavIndex = index);
-                  },
+                AnimatedAlign(
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeInOutCubic,
+                  alignment: Alignment.topCenter,
+                  heightFactor: _isNavVisible ? 1.0 : 0.0,
+                  child: AnimatedSlide(
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeInOutCubic,
+                    offset: _isNavVisible ? Offset.zero : const Offset(0, 1.4),
+                    child: IgnorePointer(
+                      ignoring: !_isNavVisible,
+                      child: FloatingNavDock(
+                        selectedIndex: _selectedNavIndex,
+                        onTabSelected: (index) {
+                          setState(() {
+                            _selectedNavIndex = index;
+                            _isNavVisible = true;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildTopBar(BuildContext context, HomeViewModel homeVm) {
@@ -288,8 +339,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           lang,
                           style: context.typography.titleMedium.copyWith(
                             color: lang == homeVm.selectedLanguage
-                                ? context.colors.brandRuby
-                                : context.colors.textPrimary,
+                                ? context.colors.textPrimary
+                                : context.colors.textSecondary,
+                            fontWeight: lang == homeVm.selectedLanguage
+                                ? FontWeight.w700
+                                : FontWeight.w400,
                           ),
                         ),
                       ),
@@ -614,7 +668,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   mood,
                   style: context.typography.titleMedium.copyWith(
-                    color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+                    color: isSelected ? context.colors.oledBackground : context.colors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ),
@@ -663,7 +718,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         'VIBE RADIO',
                         style: context.typography.eyebrow.copyWith(
-                          color: context.colors.textPrimary,
+                          color: context.colors.oledBackground,
                         ),
                       ),
                     ),
@@ -1004,6 +1059,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colors.brandRuby,
+                foregroundColor: context.colors.oledBackground,
                 shape: RoundedRectangleBorder(
                   borderRadius: context.radius.asBorderRadiusCard,
                 ),
@@ -1012,7 +1068,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'Retry',
                 style: context.typography.titleMedium.copyWith(
-                  color: context.colors.textPrimary,
+                  color: context.colors.oledBackground,
                 ),
               ),
             ),

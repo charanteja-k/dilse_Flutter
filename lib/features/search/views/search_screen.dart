@@ -441,13 +441,18 @@ class _SearchScreenState extends State<SearchScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colors.brandRuby,
-                foregroundColor: context.colors.textPrimary,
+                foregroundColor: context.colors.oledBackground,
                 shape: RoundedRectangleBorder(
                   borderRadius: context.radius.asBorderRadiusFull,
                 ),
               ),
               onPressed: () => searchVm.search(searchVm.query),
-              child: const Text('Retry Search'),
+              child: Text(
+                'Retry Search',
+                style: context.typography.titleMedium.copyWith(
+                  color: context.colors.oledBackground,
+                ),
+              ),
             ),
           ],
         ),

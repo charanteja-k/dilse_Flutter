@@ -329,12 +329,17 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                     onPressed: () => _saveRepoTarget(vm),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.brandRuby,
-                      foregroundColor: context.colors.textPrimary,
+                      foregroundColor: context.colors.oledBackground,
                       shape: RoundedRectangleBorder(
                         borderRadius: context.radius.asBorderRadiusSm,
                       ),
                     ),
-                    child: const Text('Save & Check Releases'),
+                    child: Text(
+                      'Save & Check Releases',
+                      style: context.typography.titleMedium.copyWith(
+                        color: context.colors.oledBackground,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -570,7 +575,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                 child: Text(
                   hasUpdate ? 'NEW RELEASE' : 'UP TO DATE',
                   style: context.typography.eyebrow.copyWith(
-                    color: context.colors.textPrimary,
+                    color: context.colors.oledBackground,
                   ),
                 ),
               ),
@@ -623,11 +628,13 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                             ? 'Download & Install Update'
                             : 'Reinstall Latest APK')
                         : 'Open Release on GitHub',
-                    style: context.typography.titleMedium,
+                    style: context.typography.titleMedium.copyWith(
+                      color: context.colors.oledBackground,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.colors.brandRuby,
-                    foregroundColor: context.colors.textPrimary,
+                    foregroundColor: context.colors.oledBackground,
                     padding: EdgeInsets.symmetric(vertical: context.spacing.sm),
                     shape: RoundedRectangleBorder(
                       borderRadius: context.radius.asBorderRadiusMd,
@@ -700,15 +707,19 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
 
     String statusLabel = 'ROLLBACK';
     Color badgeColor = context.colors.solidMatteBorder;
+    Color badgeTextColor = context.colors.textPrimary;
     if (isInstalled) {
       statusLabel = 'INSTALLED';
       badgeColor = context.colors.successEmerald;
+      badgeTextColor = context.colors.oledBackground;
     } else if (isNewer) {
       statusLabel = isFirst ? 'LATEST' : 'NEWER';
       badgeColor = context.colors.brandRuby;
+      badgeTextColor = context.colors.oledBackground;
     } else if (release.isPrerelease) {
       statusLabel = 'PRE-RELEASE';
       badgeColor = context.colors.warningAmber;
+      badgeTextColor = context.colors.oledBackground;
     }
 
     return Container(
@@ -746,7 +757,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                           child: Text(
                             statusLabel,
                             style: context.typography.eyebrow.copyWith(
-                              color: context.colors.textPrimary,
+                              color: badgeTextColor,
                             ),
                           ),
                         ),

@@ -118,12 +118,17 @@ class NotificationPermissionService {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.colors.brandRuby,
-              foregroundColor: Colors.white,
+              foregroundColor: context.colors.oledBackground,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(context.radius.sm),
+                borderRadius: context.radius.asBorderRadiusSm,
               ),
             ),
-            child: const Text('Open Settings'),
+            child: Text(
+              'Open Settings',
+              style: context.typography.titleMedium.copyWith(
+                color: context.colors.oledBackground,
+              ),
+            ),
           ),
         ],
       ),
