@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/services/notification_permission_service.dart';
 import '../../../core/widgets/dilse_notification.dart';
 import '../../../data/models/song_model.dart';
 import '../../app_update/viewmodels/update_viewmodel.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeViewModel>().loadHomeFeed();
       context.read<UpdateViewModel>().initialize();
+      NotificationPermissionService.promptIfNeeded(context);
     });
   }
 

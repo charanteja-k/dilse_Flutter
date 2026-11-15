@@ -111,14 +111,19 @@ class JustAudioDriverImpl implements SoLoudAudioDriver {
       debugPrint('[AudioDriver] Playing song: ${song.title} - ${song.artist}');
       debugPrint('[AudioDriver] Stream URL: ${song.streamUrl}');
 
+      // Immediately set the media item and notify loading
+      // so Android foreground service displays notification with track title and artwork
+      _audioHandler?.updateMediaForSong(song);
+      _audioHandler?.notifyLoading(isLoading: true);
+
       await _player.setUrl(song.streamUrl);
       _currentDuration = _player.duration ?? song.duration;
       if (!_durationController.isClosed) {
         _durationController.add(_currentDuration);
       }
 
-      _audioHandler?.updateMediaForSong(song);
       await _player.play();
+      _audioHandler?.notifyLoading(isLoading: false);
       debugPrint('[AudioDriver] Playback started successfully!');
     } catch (e, stack) {
       debugPrint('[AudioDriver] Error playing song: $e\n$stack');

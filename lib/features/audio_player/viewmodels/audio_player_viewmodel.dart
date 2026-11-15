@@ -76,6 +76,18 @@ class AudioPlayerViewModel extends ChangeNotifier {
     if (audioHandler != null) {
       audioHandler.onSkipToNext = skipNext;
       audioHandler.onSkipToPrevious = skipPrevious;
+      audioHandler.onPlay = () async {
+        if (_playbackState == PlaybackState.paused) {
+          await audioDriver.resume();
+        } else if (currentSong != null) {
+          await _startPlayback(currentSong!);
+        }
+      };
+      audioHandler.onPause = () async {
+        await audioDriver.pause();
+      };
+      audioHandler.onTogglePlayPause = togglePlayPause;
+      audioHandler.onSeek = seek;
     }
   }
 

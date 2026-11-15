@@ -14,6 +14,10 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   StreamSubscription<ja.PlaybackEvent>? _playbackEventSub;
   StreamSubscription<Duration?>? _durationSub;
 
+  Future<void> Function()? onPlay;
+  Future<void> Function()? onPause;
+  Future<void> Function()? onTogglePlayPause;
+  Future<void> Function(Duration position)? onSeek;
   Future<void> Function()? onSkipToNext;
   Future<void> Function()? onSkipToPrevious;
 
@@ -68,6 +72,25 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
     );
   }
 
+  /// Proactively keeps Android Foreground Service alive during screen-off song transitions.
+  void notifyLoading({bool isLoading = true}) {
+    final playing = _player.playing;
+    playbackState.add(
+      playbackState.value.copyWith(
+        processingState: isLoading
+            ? AudioProcessingState.loading
+            : AudioProcessingState.ready,
+        playing: playing || isLoading,
+        controls: [
+          MediaControl.skipToPrevious,
+          if (playing || isLoading) MediaControl.pause else MediaControl.play,
+          MediaControl.stop,
+          MediaControl.skipToNext,
+        ],
+      ),
+    );
+  }
+
   /// Updates current media item for lockscreen artwork, metadata, and duration.
   void updateMediaForSong(SongModel song) {
     mediaItem.add(
@@ -84,17 +107,29 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> play() async {
-    await _player.play();
+    if (onPlay != null) {
+      await onPlay!();
+    } else {
+      await _player.play();
+    }
   }
 
   @override
   Future<void> pause() async {
-    await _player.pause();
+    if (onPause != null) {
+      await onPause!();
+    } else {
+      await _player.pause();
+    }
   }
 
   @override
   Future<void> seek(Duration position) async {
-    await _player.seek(position);
+    if (onSeek != null) {
+      await onSeek!(position);
+    } else {
+      await _player.seek(position);
+    }
   }
 
   @override
@@ -107,6 +142,15 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
     );
     await _player.stop();
     await super.stop();
+  }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    // Dismiss ghost notification when swiped from recents if not playing
+    if (!_player.playing) {
+      await stop();
+    }
+    await super.onTaskRemoved();
   }
 
   @override
@@ -143,14 +187,6 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> seekBackward(bool begin) async {
     if (begin) await rewind();
-  }
-
-  @override
-  Future<void> onTaskRemoved() async {
-    if (!_player.playing) {
-      await stop();
-    }
-    await super.onTaskRemoved();
   }
 
   Future<void> disposeHandler() async {
