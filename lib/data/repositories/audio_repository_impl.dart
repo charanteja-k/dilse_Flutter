@@ -29,16 +29,46 @@ class AudioRepositoryImpl implements AudioRepository {
     required SongModel seedSong,
     int limit = 50,
   }) async {
+    final isYtId = RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(seedSong.id);
+    final primaryArtist = seedSong.artist.isNotEmpty
+        ? seedSong.artist.split(RegExp(r'[,/|&]')).first.trim()
+        : '';
+
     // 1. Query Google's collaborative filtering recommendation graph
-    final seedQuery = seedSong.id.length == 11 && !seedSong.id.contains(' ')
+    final seedQuery = isYtId
         ? seedSong.id
-        : '${seedSong.title} ${seedSong.artist}'.trim();
-    final ytmTracks = await remoteDatasource.fetchYtmRadioTracks(seedQuery, limit: limit);
+        : '${seedSong.title} $primaryArtist'.trim();
+    List<Map<String, dynamic>> ytmTracks = await remoteDatasource.fetchYtmRadioTracks(seedQuery, limit: limit);
+
+    // Fallback Tier 1: If over-specified title query returned empty, try clean title alone
+    if (ytmTracks.isEmpty && !isYtId && seedSong.title.isNotEmpty) {
+      final cleanT = _cleanSeedTitle(seedSong.title);
+      if (cleanT.isNotEmpty && cleanT != seedQuery) {
+        final retryQuery = primaryArtist.isNotEmpty ? '$cleanT $primaryArtist' : cleanT;
+        ytmTracks = await remoteDatasource.fetchYtmRadioTracks(retryQuery, limit: limit);
+      }
+    }
 
     final List<SongModel> queue = [seedSong];
-    if (ytmTracks.isEmpty) return queue;
-
     final seenTitles = <String>{seedSong.title.toLowerCase().trim()};
+
+    // Fallback Tier 2: If YouTube Music radio graph still returned empty,
+    // populate queue using JioSaavn search on primary artist or title keywords
+    if (ytmTracks.isEmpty) {
+      final fallbackTerm = primaryArtist.isNotEmpty ? primaryArtist : seedSong.title;
+      try {
+        final fallbackSongs = await searchSongs(fallbackTerm, limit: limit);
+        for (final song in fallbackSongs) {
+          final cleanKey = song.title.toLowerCase().trim();
+          if (song.id != seedSong.id && !seenTitles.contains(cleanKey)) {
+            seenTitles.add(cleanKey);
+            queue.add(song);
+            if (queue.length >= limit) break;
+          }
+        }
+      } catch (_) {}
+      return queue;
+    }
 
     // 2. Populate 50-song progressive queue immediately with Google ML tracks
     for (final track in ytmTracks) {
@@ -122,5 +152,29 @@ class AudioRepositoryImpl implements AudioRepository {
       duration: duration,
       videoId: videoId,
     );
+  }
+
+  static String _cleanSeedTitle(String raw) {
+    var s = raw
+        .replaceAll('“', '"')
+        .replaceAll('”', '"')
+        .replaceAll('‘', "'")
+        .replaceAll('’', "'");
+    s = s.replaceAll(RegExp(r'\b(?:feat\.?|ft\.?)\s+[^(\]]+', caseSensitive: false), ' ');
+    s = s.replaceAll(RegExp(r'\[.*?\]|\(.*?\)', caseSensitive: false), ' ');
+    s = s.replaceAll(
+      RegExp(
+        r'\b(official\s+video|official\s+music\s+video|official\s+lyric\s+video|lyric\s+video|'
+        r'full\s+video\s+song|video\s+song|full\s+song|full\s+audio|audio\s+song|lyrics|'
+        r'4k|hdr|remix|hd|promo|teaser|trailer|song)\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+    final parts = s.split(RegExp(r'\s*[|:/]\s*|\s+-\s+'));
+    if (parts.isNotEmpty) {
+      s = parts.first;
+    }
+    return s.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 }

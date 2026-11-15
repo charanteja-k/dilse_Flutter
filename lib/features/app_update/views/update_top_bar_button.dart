@@ -42,15 +42,6 @@ class UpdateTopBarButton extends StatelessWidget {
                       : context.colors.solidMatteBorder,
                   width: context.sizes.borderThin,
                 ),
-                boxShadow: hasUpdate
-                    ? [
-                        BoxShadow(
-                          color: context.colors.brandRuby.withAlpha(90),
-                          blurRadius: context.spacing.sm,
-                          spreadRadius: context.spacing.xxs,
-                        ),
-                      ]
-                    : null,
               ),
               child: Center(
                 child: vm.isChecking
@@ -81,7 +72,7 @@ class UpdateTopBarButton extends StatelessWidget {
                   width: context.sizes.badgeDotSize,
                   height: context.sizes.badgeDotSize,
                   decoration: BoxDecoration(
-                    color: context.colors.successEmerald,
+                    color: context.colors.brandRuby,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: context.colors.oledBackground,

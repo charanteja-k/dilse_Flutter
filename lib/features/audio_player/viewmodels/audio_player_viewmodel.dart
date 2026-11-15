@@ -27,6 +27,7 @@ class AudioPlayerViewModel extends ChangeNotifier {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   bool _isAutoQueueLoading = false;
+  bool get isAutoQueueLoading => _isAutoQueueLoading;
 
   ArtworkStyle _artworkStyle = ArtworkStyle.card;
   final Set<String> _likedSongIds = {};
@@ -138,12 +139,16 @@ class AudioPlayerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> playSong(SongModel song) async {
-    queueManager.setQueue([song], initialIndex: 0);
-    await _startPlayback(song);
+  int _autoQueueRequestId = 0;
 
-    // Concurrently trigger Google InnerTube radio queue generation
-    _triggerBackgroundRadio(song);
+  Future<void> playSong(SongModel song) async {
+    final requestId = ++_autoQueueRequestId;
+    queueManager.setQueue([song], initialIndex: 0);
+
+    // Concurrently trigger Google InnerTube radio queue generation immediately
+    _triggerBackgroundRadio(song, requestId);
+
+    await _startPlayback(song);
   }
 
   Future<void> playFromQueue(List<SongModel> songs, {int initialIndex = 0}) async {
@@ -368,21 +373,38 @@ class AudioPlayerViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _triggerBackgroundRadio(SongModel seedSong) async {
-    if (_isAutoQueueLoading) return;
+  Future<void> _triggerBackgroundRadio(SongModel seedSong, int requestId) async {
     _isAutoQueueLoading = true;
+    notifyListeners();
+
     try {
       final radioTracks = await audioRepository.generateAlgorithmicQueue(
         seedSong: seedSong,
         limit: 50,
       );
+
+      // Verify that this request is still the active one (user hasn't selected another song)
+      if (requestId != _autoQueueRequestId || _isDisposed) {
+        return;
+      }
+
+      // Verify that the currently active song in the player still matches this seed
+      final activeSong = queueManager.currentSong;
+      if (activeSong == null ||
+          (activeSong.id != seedSong.id && activeSong.title != seedSong.title)) {
+        return;
+      }
+
       if (radioTracks.length > 1) {
         final upcoming = radioTracks.sublist(1);
         queueManager.addTracks(upcoming);
         notifyListeners();
       }
     } catch (_) {} finally {
-      _isAutoQueueLoading = false;
+      if (requestId == _autoQueueRequestId) {
+        _isAutoQueueLoading = false;
+        notifyListeners();
+      }
     }
   }
 

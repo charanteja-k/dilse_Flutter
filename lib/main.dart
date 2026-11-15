@@ -28,6 +28,9 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Cap image memory cache to avoid OOM crashes on budget devices (AGENTS.md §3.4)
+  PaintingBinding.instance.imageCache.maximumSize = 100;
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -45,7 +48,7 @@ void main() async {
         androidStopForegroundOnPause: false,
         androidShowNotificationBadge: true,
         androidNotificationIcon: 'drawable/ic_stat_music',
-        notificationColor: Color(0xFFFA2D48),
+        notificationColor: Color(0xFF121214),
       ),
     );
   } catch (e) {

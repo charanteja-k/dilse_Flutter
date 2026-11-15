@@ -131,25 +131,25 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
         if (searchRes.statusCode == 200) {
           final searchData = jsonDecode(searchRes.body);
-          final contents = searchData['contents']?['tabbedSearchResultsRenderer']?['tabs']?[0]?['tabRenderer']
-              ?['content']?['sectionListRenderer']?['contents'] as List?;
-          if (contents != null) {
-            for (final section in contents) {
-              final items = (section['musicShelfRenderer']?['contents'] ??
-                  section['itemSectionRenderer']?['contents']) as List?;
-              if (items != null && items.isNotEmpty) {
-                for (final item in items) {
-                  final renderer = item['musicResponsiveListItemRenderer'];
-                  final playNav = renderer?['overlay']?['musicItemThumbnailOverlayRenderer']?['content']
-                      ?['musicPlayButtonRenderer']?['playNavigationEndpoint'];
-                  videoId = playNav?['watchEndpoint']?['videoId'] as String?;
-                  videoId ??= renderer?['playlistItemData']?['videoId'] as String?;
-                  if (videoId != null && videoId.isNotEmpty) break;
-                }
-                if (videoId != null && videoId.isNotEmpty) break;
-              }
+          videoId = _extractVideoIdFromYtmSearch(searchData);
+        }
+
+        // Secondary fallback search without strict protobuf filter for regional/complex queries
+        if (videoId == null || videoId.isEmpty) {
+          try {
+            final fbRes = await client.post(
+              searchUri,
+              headers: _ytmHeaders,
+              body: jsonEncode({
+                'context': _ytmContext,
+                'query': trimmed,
+              }),
+            ).timeout(const Duration(seconds: 6));
+            if (fbRes.statusCode == 200) {
+              final fbData = jsonDecode(fbRes.body);
+              videoId = _extractVideoIdFromYtmSearch(fbData);
             }
-          }
+          } catch (_) {}
         }
       }
 
@@ -234,6 +234,29 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     } catch (_) {
       return [];
     }
+  }
+
+  static String? _extractVideoIdFromYtmSearch(dynamic searchData) {
+    if (searchData is! Map) return null;
+    final contents = searchData['contents']?['tabbedSearchResultsRenderer']?['tabs']?[0]?['tabRenderer']
+        ?['content']?['sectionListRenderer']?['contents'] as List?;
+    if (contents != null) {
+      for (final section in contents) {
+        final items = (section['musicShelfRenderer']?['contents'] ??
+            section['itemSectionRenderer']?['contents']) as List?;
+        if (items != null && items.isNotEmpty) {
+          for (final item in items) {
+            final renderer = item['musicResponsiveListItemRenderer'];
+            final playNav = renderer?['overlay']?['musicItemThumbnailOverlayRenderer']?['content']
+                ?['musicPlayButtonRenderer']?['playNavigationEndpoint'];
+            final vid = playNav?['watchEndpoint']?['videoId'] as String? ??
+                renderer?['playlistItemData']?['videoId'] as String?;
+            if (vid != null && vid.isNotEmpty) return vid;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   @override

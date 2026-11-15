@@ -24,9 +24,9 @@ class AlbumColorDeriver {
   static AlbumPalette getPalette(SongModel? song) {
     if (song == null) {
       return const AlbumPalette(
-        dominant: Color(0xFF1E1E2C),
-        vibrant: Color(0xFFFA2D48),
-        darkVibrant: Color(0xFF12121A),
+        dominant: Color(0xFF141416),
+        vibrant: Color(0xFFFFFFFF),
+        darkVibrant: Color(0xFF101012),
       );
     }
 

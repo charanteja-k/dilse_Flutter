@@ -621,6 +621,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                         ? Icons.download_rounded
                         : Icons.open_in_new_rounded,
                     size: context.sizes.iconSm,
+                    color: context.colors.oledBackground,
                   ),
                   label: Text(
                     vm.canRunInlineOta && info.hasApk
@@ -825,6 +826,9 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                             : (isInstalled
                                 ? 'Reinstall'
                                 : (isNewer ? 'Install' : 'Rollback')),
+                        style: context.typography.titleMedium.copyWith(
+                          color: context.colors.textPrimary,
+                        ),
                       ),
               ),
             ],

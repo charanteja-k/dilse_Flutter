@@ -93,6 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final hasActivePlayback = context.select<AudioPlayerViewModel, bool>(
       (vm) => vm.currentSong != null,
     );
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 50;
+    final isDockVisible = _isNavVisible && !isKeyboardOpen;
 
     return Scaffold(
       backgroundColor: context.colors.oledBackground,
@@ -255,16 +257,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const MiniPlayer(),
                 AnimatedAlign(
-                  duration: const Duration(milliseconds: 280),
+                  duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOutCubic,
                   alignment: Alignment.topCenter,
-                  heightFactor: _isNavVisible ? 1.0 : 0.0,
+                  heightFactor: isDockVisible ? 1.0 : 0.0,
                   child: AnimatedSlide(
-                    duration: const Duration(milliseconds: 280),
+                    duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOutCubic,
-                    offset: _isNavVisible ? Offset.zero : const Offset(0, 1.4),
+                    offset: isDockVisible ? Offset.zero : const Offset(0, 1.4),
                     child: IgnorePointer(
-                      ignoring: !_isNavVisible,
+                      ignoring: !isDockVisible,
                       child: FloatingNavDock(
                         selectedIndex: _selectedNavIndex,
                         onTabSelected: (index) {
@@ -747,6 +749,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icon(
                           Icons.play_arrow_rounded,
                           size: context.sizes.iconMd,
+                          color: context.colors.oledBackground,
                         ),
                         label: Text(
                           'Play Vibe Radio',

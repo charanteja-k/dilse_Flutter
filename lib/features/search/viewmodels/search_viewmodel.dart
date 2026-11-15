@@ -3,6 +3,35 @@ import 'package:flutter/foundation.dart';
 import '../../../data/models/song_model.dart';
 import '../../../data/repositories/audio_repository.dart';
 
+/// Available sub-category filters for active search query results.
+enum SearchFilter {
+  all('All Results'),
+  tracks('Tracks'),
+  artists('Artists'),
+  albums('Albums');
+
+  final String label;
+  const SearchFilter(this.label);
+}
+
+/// Curated browse genre / mood category for the empty/explore state.
+@immutable
+class SearchCategory {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String query;
+  final String glyph;
+
+  const SearchCategory({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.query,
+    required this.glyph,
+  });
+}
+
 /// Pure business ViewModel managing song search, debounce orchestration, and search history.
 /// Strictly adheres to AGENTS.md:
 /// - Invariant 1: Injected via Provider/MultiProvider (strictly zero static singletons).
@@ -17,6 +46,7 @@ class SearchViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   Timer? _debounceTimer;
+  SearchFilter _selectedFilter = SearchFilter.all;
 
   final List<String> _recentSearches = [
     'Samajavaragamana',
@@ -29,12 +59,106 @@ class SearchViewModel extends ChangeNotifier {
     'Shape of You',
   ];
 
+  static const List<SearchCategory> _categories = [
+    SearchCategory(
+      id: 'telugu',
+      title: 'Telugu Hits',
+      subtitle: 'Tollywood Chartbusters ⚡',
+      query: 'Telugu Top Hits',
+      glyph: '⚡',
+    ),
+    SearchCategory(
+      id: 'hindi',
+      title: 'Hindi Melodies',
+      subtitle: 'Romantic & Soulful 🌙',
+      query: 'Hindi Romantic Hits',
+      glyph: '🌙',
+    ),
+    SearchCategory(
+      id: 'tamil',
+      title: 'Tamil Local',
+      subtitle: 'High-BPM Anthems 🔥',
+      query: 'Tamil Mass Hits',
+      glyph: '🔥',
+    ),
+    SearchCategory(
+      id: 'lofi',
+      title: 'Lo-Fi State',
+      subtitle: 'Chill Coding Beats 🎧',
+      query: 'Lofi Instrumental Chill Beats',
+      glyph: '🎧',
+    ),
+    SearchCategory(
+      id: 'acoustic',
+      title: 'Acoustic Café',
+      subtitle: 'Unplugged & Raw ☕',
+      query: 'Acoustic Unplugged Melodies',
+      glyph: '☕',
+    ),
+    SearchCategory(
+      id: 'workout',
+      title: 'Gym Workout',
+      subtitle: 'Adrenaline Pump 💥',
+      query: 'Workout Motivation Hits',
+      glyph: '💥',
+    ),
+    SearchCategory(
+      id: 'devotional',
+      title: 'Devotional',
+      subtitle: 'Spiritual Peace 🪔',
+      query: 'Devotional Spiritual Songs',
+      glyph: '🪔',
+    ),
+    SearchCategory(
+      id: 'global',
+      title: 'Global Top 50',
+      subtitle: 'Trending Worldwide 🌍',
+      query: 'Global Viral Top Hits',
+      glyph: '🌍',
+    ),
+  ];
+
   String get query => _query;
   List<SongModel> get searchResults => List.unmodifiable(_searchResults);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<String> get recentSearches => List.unmodifiable(_recentSearches);
+  List<SearchCategory> get categories => _categories;
+  SearchFilter get selectedFilter => _selectedFilter;
   bool get hasResults => _searchResults.isNotEmpty;
+
+  /// Returns results filtered according to the active [SearchFilter].
+  List<SongModel> get filteredResults {
+    switch (_selectedFilter) {
+      case SearchFilter.all:
+      case SearchFilter.tracks:
+        return _searchResults;
+      case SearchFilter.artists:
+        final q = _query.toLowerCase();
+        final matches = _searchResults.where((s) => s.artist.toLowerCase().contains(q)).toList();
+        return matches.isNotEmpty ? matches : _searchResults;
+      case SearchFilter.albums:
+        final q = _query.toLowerCase();
+        final matches = _searchResults.where((s) => s.album.toLowerCase().contains(q)).toList();
+        return matches.isNotEmpty ? matches : _searchResults;
+    }
+  }
+
+  /// Top #1 matching track for the dedicated Spotlight card.
+  SongModel? get topResult => filteredResults.isNotEmpty ? filteredResults.first : null;
+
+  /// Remaining track list excluding the top spotlight track.
+  List<SongModel> get remainingResults {
+    final list = filteredResults;
+    if (list.length <= 1) return const [];
+    return list.sublist(1);
+  }
+
+  void setFilter(SearchFilter filter) {
+    if (_selectedFilter == filter) return;
+    _selectedFilter = filter;
+    notifyListeners();
+  }
 
   void onQueryChanged(String newQuery) {
     _query = newQuery;
@@ -44,6 +168,7 @@ class SearchViewModel extends ChangeNotifier {
       _searchResults = [];
       _isLoading = false;
       _errorMessage = null;
+      _selectedFilter = SearchFilter.all;
       notifyListeners();
       return;
     }
@@ -87,11 +212,17 @@ class SearchViewModel extends ChangeNotifier {
     _searchResults = [];
     _isLoading = false;
     _errorMessage = null;
+    _selectedFilter = SearchFilter.all;
     notifyListeners();
   }
 
   void removeRecentSearch(String item) {
     _recentSearches.remove(item);
+    notifyListeners();
+  }
+
+  void clearAllRecentSearches() {
+    _recentSearches.clear();
     notifyListeners();
   }
 

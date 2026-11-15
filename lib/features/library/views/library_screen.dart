@@ -643,7 +643,12 @@ class LibraryScreen extends StatelessWidget {
                 );
               }
             },
-            child: const Text('Create'),
+            child: Text(
+              'Create',
+              style: context.typography.titleMedium.copyWith(
+                color: context.colors.oledBackground,
+              ),
+            ),
           ),
         ],
       ),
