@@ -140,6 +140,24 @@ class ApiEndpoints {
     return Uri.parse(buffer.toString());
   }
 
+  /// JioSaavn Album details endpoint: returns full metadata and tracklist.
+  static Uri jioAlbumDetailsUri({required String albumId}) {
+    return Uri.parse(
+      'https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&_marker=0&api_version=4&ctx=web6dot0&albumid=$albumId',
+    );
+  }
+
+  /// JioSaavn Artist page details endpoint: returns bio, followers, top songs, and discography albums.
+  static Uri jioArtistDetailsUri({
+    required String artistId,
+    int songCount = 30,
+    int albumCount = 20,
+  }) {
+    return Uri.parse(
+      'https://www.jiosaavn.com/api.php?__call=artist.getArtistPageDetails&_format=json&_marker=0&api_version=4&ctx=web6dot0&artistId=$artistId&n_song=$songCount&n_album=$albumCount',
+    );
+  }
+
   /// GitHub REST API endpoint for the latest published release.
   static Uri githubLatestReleaseUri({
     required String owner,

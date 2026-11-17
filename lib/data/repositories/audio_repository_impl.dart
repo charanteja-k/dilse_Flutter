@@ -62,6 +62,16 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   @override
+  Future<List<SongModel>> getAlbumDetails(String albumId) {
+    return remoteDatasource.getAlbumDetails(albumId);
+  }
+
+  @override
+  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId) {
+    return remoteDatasource.getArtistDetails(artistId);
+  }
+
+  @override
   Future<SongModel?> resolveSingleTrack(String title, {String? artist}) {
     return remoteDatasource.resolveSingleTrack(title, artist: artist);
   }

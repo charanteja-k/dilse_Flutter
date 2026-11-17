@@ -9,6 +9,8 @@ import '../../../data/models/song_model.dart';
 import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
 import '../../audio_player/views/song_options_bottom_sheet.dart';
 import '../viewmodels/search_viewmodel.dart';
+import 'album_detail_screen.dart';
+import 'artist_detail_screen.dart';
 
 /// Editorial Spotlight Search tab for DilSe.
 /// Features a dedicated Top Result Spotlight hero card, sub-category filter rail,
@@ -864,26 +866,20 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onAlbumTapped(BuildContext context, AlbumModel album) {
     HapticFeedback.lightImpact();
-    // Search the album title to list and play its tracks directly
-    _controller.text = album.title;
-    _controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: album.title.length),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AlbumDetailScreen(album: album),
+      ),
     );
-    final searchVm = context.read<SearchViewModel>();
-    searchVm.setFilter(SearchFilter.tracks);
-    searchVm.search(album.title);
   }
 
   void _onArtistTapped(BuildContext context, ArtistModel artist) {
     HapticFeedback.lightImpact();
-    // Search the artist name to list and play their top hits directly
-    _controller.text = artist.name;
-    _controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: artist.name.length),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ArtistDetailScreen(artist: artist),
+      ),
     );
-    final searchVm = context.read<SearchViewModel>();
-    searchVm.setFilter(SearchFilter.tracks);
-    searchVm.search(artist.name);
   }
 
   Widget _buildSpotlightCard(

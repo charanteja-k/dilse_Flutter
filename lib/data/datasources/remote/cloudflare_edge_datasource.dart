@@ -10,6 +10,8 @@ abstract class CloudflareEdgeDatasource {
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
   Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1});
   Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1});
+  Future<List<SongModel>> getAlbumDetails(String albumId);
+  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId);
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
   Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
   Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50});
@@ -92,6 +94,164 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       }
     } catch (_) {}
     return [];
+  }
+
+  @override
+  Future<List<SongModel>> getAlbumDetails(String albumId) async {
+    final uri = ApiEndpoints.jioAlbumDetailsUri(albumId: albumId);
+    try {
+      final response = await client.get(
+        uri,
+        headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map && decoded['list'] is List) {
+          final albumTitle = _unescapeHtml((decoded['title'] ?? '').toString());
+          String albumArt = (decoded['image'] ?? '').toString();
+          if (albumArt.contains('150x150')) {
+            albumArt = albumArt.replaceAll('150x150', '500x500');
+          } else if (albumArt.contains('50x50')) {
+            albumArt = albumArt.replaceAll('50x50', '500x500');
+          }
+
+          final songList = <SongModel>[];
+          for (final raw in (decoded['list'] as List)) {
+            if (raw is! Map) continue;
+            final map = Map<String, dynamic>.from(raw);
+            final title = _unescapeHtml((map['title'] ?? 'Unknown Track').toString());
+
+            final moreInfo = map['more_info'] is Map ? map['more_info'] as Map : {};
+            final artistMap = moreInfo['artistMap'] is Map ? moreInfo['artistMap'] as Map : {};
+            final primaryArtistsList = artistMap['primary_artists'] is List ? artistMap['primary_artists'] as List : [];
+            final primaryNames = primaryArtistsList
+                .whereType<Map>()
+                .map((a) => _unescapeHtml((a['name'] ?? '').toString()))
+                .where((n) => n.isNotEmpty)
+                .toList();
+
+            final artist = primaryNames.isNotEmpty
+                ? primaryNames.join(', ')
+                : _unescapeHtml((map['subtitle'] ?? 'Unknown Artist').toString());
+
+            final rawDuration = moreInfo['duration'] ?? map['duration'] ?? '0';
+            final durSec = int.tryParse(rawDuration.toString()) ?? 0;
+
+            String songThumb = (map['image'] ?? albumArt).toString();
+            if (songThumb.contains('150x150')) {
+              songThumb = songThumb.replaceAll('150x150', '500x500');
+            } else if (songThumb.contains('50x50')) {
+              songThumb = songThumb.replaceAll('50x50', '500x500');
+            }
+
+            songList.add(SongModel(
+              id: (map['id'] ?? '').toString(),
+              title: title,
+              artist: artist,
+              album: albumTitle.isNotEmpty ? albumTitle : 'DilSe',
+              thumbnailUrl: songThumb.isNotEmpty ? songThumb : albumArt,
+              streamUrl: '', // Resolved on-demand or pre-warmed
+              duration: Duration(seconds: durSec),
+              source: 'jiosaavn',
+              bitrate: '320kbps',
+            ));
+          }
+          return songList;
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  @override
+  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId) async {
+    final uri = ApiEndpoints.jioArtistDetailsUri(artistId: artistId, songCount: 30, albumCount: 20);
+    try {
+      final response = await client.get(
+        uri,
+        headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map) {
+          final rawFollowers = decoded['follower_count'] ?? decoded['fan_count'] ?? '0';
+          final followerCount = int.tryParse(rawFollowers.toString()) ?? 0;
+
+          // Parse top songs
+          final topSongs = <SongModel>[];
+          if (decoded['topSongs'] is List) {
+            for (final raw in (decoded['topSongs'] as List)) {
+              if (raw is! Map) continue;
+              final map = Map<String, dynamic>.from(raw);
+              final title = _unescapeHtml((map['title'] ?? 'Unknown Track').toString());
+
+              final moreInfo = map['more_info'] is Map ? map['more_info'] as Map : {};
+              final artistMap = moreInfo['artistMap'] is Map ? moreInfo['artistMap'] as Map : {};
+              final primaryList = artistMap['primary_artists'] is List ? artistMap['primary_artists'] as List : [];
+              final primaryNames = primaryList
+                  .whereType<Map>()
+                  .map((a) => _unescapeHtml((a['name'] ?? '').toString()))
+                  .where((n) => n.isNotEmpty)
+                  .toList();
+
+              final artist = primaryNames.isNotEmpty
+                  ? primaryNames.join(', ')
+                  : _unescapeHtml((map['subtitle'] ?? 'Unknown Artist').toString());
+
+              final album = _unescapeHtml((moreInfo['album'] ?? map['album'] ?? 'DilSe').toString());
+              final rawDuration = moreInfo['duration'] ?? map['duration'] ?? '0';
+              final durSec = int.tryParse(rawDuration.toString()) ?? 0;
+
+              String songThumb = (map['image'] ?? '').toString();
+              if (songThumb.contains('150x150')) {
+                songThumb = songThumb.replaceAll('150x150', '500x500');
+              } else if (songThumb.contains('50x50')) {
+                songThumb = songThumb.replaceAll('50x50', '500x500');
+              }
+
+              topSongs.add(SongModel(
+                id: (map['id'] ?? '').toString(),
+                title: title,
+                artist: artist,
+                album: album,
+                thumbnailUrl: songThumb,
+                streamUrl: '',
+                duration: Duration(seconds: durSec),
+                source: 'jiosaavn',
+                bitrate: '320kbps',
+              ));
+            }
+          }
+
+          // Parse top albums
+          final topAlbums = <AlbumModel>[];
+          if (decoded['topAlbums'] is List) {
+            for (final raw in (decoded['topAlbums'] as List)) {
+              if (raw is! Map) continue;
+              topAlbums.add(AlbumModel.fromJson(Map<String, dynamic>.from(raw)));
+            }
+          }
+
+          return (
+            topSongs: topSongs,
+            topAlbums: topAlbums,
+            followerCount: followerCount,
+          );
+        }
+      }
+    } catch (_) {}
+    return (topSongs: <SongModel>[], topAlbums: <AlbumModel>[], followerCount: 0);
+  }
+
+  static String _unescapeHtml(String text) {
+    return text
+        .replaceAll('&quot;', '"')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&#039;', "'")
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>');
   }
 
   @override

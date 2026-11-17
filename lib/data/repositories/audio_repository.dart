@@ -7,6 +7,8 @@ abstract class AudioRepository {
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
   Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1});
   Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1});
+  Future<List<SongModel>> getAlbumDetails(String albumId);
+  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId);
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
   Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
 
