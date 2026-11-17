@@ -1,4 +1,6 @@
 import 'package:dilse/data/datasources/remote/cloudflare_edge_datasource.dart';
+import 'package:dilse/data/models/album_model.dart';
+import 'package:dilse/data/models/artist_model.dart';
 import 'package:dilse/data/models/song_model.dart';
 import 'package:dilse/data/repositories/audio_repository.dart';
 
@@ -8,6 +10,16 @@ class AudioRepositoryImpl implements AudioRepository {
   final CloudflareEdgeDatasource remoteDatasource;
 
   AudioRepositoryImpl({required this.remoteDatasource});
+
+  @override
+  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) {
+    return remoteDatasource.searchAlbums(query, limit: limit, page: page);
+  }
+
+  @override
+  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) {
+    return remoteDatasource.searchArtists(query, limit: limit, page: page);
+  }
 
   @override
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {

@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dilse/data/models/album_model.dart';
+import 'package:dilse/data/models/artist_model.dart';
 import 'package:dilse/data/models/song_model.dart';
 import 'package:dilse/data/repositories/audio_repository.dart';
 import 'package:dilse/features/search/viewmodels/search_viewmodel.dart';
@@ -9,6 +11,16 @@ class MockAudioRepository implements AudioRepository {
   @override
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
     return mockResults;
+  }
+
+  @override
+  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) async {
+    return [];
+  }
+
+  @override
+  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) async {
+    return [];
   }
 
   @override

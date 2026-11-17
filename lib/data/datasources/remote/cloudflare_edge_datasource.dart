@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:dilse/core/constants/api_endpoints.dart';
+import 'package:dilse/data/models/album_model.dart';
+import 'package:dilse/data/models/artist_model.dart';
 import 'package:dilse/data/models/song_model.dart';
 
-/// Contract for fetching songs from remote edge services.
+/// Contract for fetching songs, albums, and artists from remote edge services.
 abstract class CloudflareEdgeDatasource {
   Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
+  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1});
+  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1});
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
   Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
   Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50});
@@ -47,6 +51,46 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
             .toList();
       }
     }
+    return [];
+  }
+
+  @override
+  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) async {
+    final uri = Uri.parse(
+      'https://www.jiosaavn.com/api.php?__call=search.getAlbumResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=$limit&p=$page&q=${Uri.encodeComponent(query)}',
+    );
+
+    try {
+      final response = await client.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map && decoded['results'] is List) {
+          return (decoded['results'] as List)
+              .map((item) => AlbumModel.fromJson(Map<String, dynamic>.from(item as Map)))
+              .toList();
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  @override
+  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) async {
+    final uri = Uri.parse(
+      'https://www.jiosaavn.com/api.php?__call=search.getArtistResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=$limit&p=$page&q=${Uri.encodeComponent(query)}',
+    );
+
+    try {
+      final response = await client.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map && decoded['results'] is List) {
+          return (decoded['results'] as List)
+              .map((item) => ArtistModel.fromJson(Map<String, dynamic>.from(item as Map)))
+              .toList();
+        }
+      }
+    } catch (_) {}
     return [];
   }
 

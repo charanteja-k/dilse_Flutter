@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../../../data/models/album_model.dart';
+import '../../../data/models/artist_model.dart';
 import '../../../data/models/song_model.dart';
 import '../../../data/repositories/audio_repository.dart';
 
@@ -32,7 +34,7 @@ class SearchCategory {
   });
 }
 
-/// Pure business ViewModel managing song search, debounce orchestration, and search history.
+/// Pure business ViewModel managing song, album, and artist search, debounce orchestration, and history.
 /// Strictly adheres to AGENTS.md:
 /// - Invariant 1: Injected via Provider/MultiProvider (strictly zero static singletons).
 /// - Invariant 3: Strict MVVM (Zero BuildContext references, zero Flutter UI dependencies).
@@ -43,6 +45,8 @@ class SearchViewModel extends ChangeNotifier {
 
   String _query = '';
   List<SongModel> _searchResults = [];
+  List<AlbumModel> _albumResults = [];
+  List<ArtistModel> _artistResults = [];
   bool _isLoading = false;
   String? _errorMessage;
   Timer? _debounceTimer;
@@ -120,12 +124,14 @@ class SearchViewModel extends ChangeNotifier {
 
   String get query => _query;
   List<SongModel> get searchResults => List.unmodifiable(_searchResults);
+  List<AlbumModel> get albumResults => List.unmodifiable(_albumResults);
+  List<ArtistModel> get artistResults => List.unmodifiable(_artistResults);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<String> get recentSearches => List.unmodifiable(_recentSearches);
   List<SearchCategory> get categories => _categories;
   SearchFilter get selectedFilter => _selectedFilter;
-  bool get hasResults => _searchResults.isNotEmpty;
+  bool get hasResults => _searchResults.isNotEmpty || _albumResults.isNotEmpty || _artistResults.isNotEmpty;
 
   /// Returns results filtered according to the active [SearchFilter].
   List<SongModel> get filteredResults {
@@ -166,6 +172,8 @@ class SearchViewModel extends ChangeNotifier {
 
     if (newQuery.trim().isEmpty) {
       _searchResults = [];
+      _albumResults = [];
+      _artistResults = [];
       _isLoading = false;
       _errorMessage = null;
       _selectedFilter = SearchFilter.all;
@@ -188,8 +196,19 @@ class SearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final results = await audioRepository.searchSongs(cleanQuery, limit: 35);
-      _searchResults = results;
+      final songFuture = audioRepository.searchSongs(cleanQuery, limit: 35);
+      final albumFuture = audioRepository.searchAlbums(cleanQuery, limit: 15);
+      final artistFuture = audioRepository.searchArtists(cleanQuery, limit: 15);
+
+      final results = await Future.wait([
+        songFuture,
+        albumFuture,
+        artistFuture,
+      ]);
+
+      _searchResults = results[0] as List<SongModel>;
+      _albumResults = results[1] as List<AlbumModel>;
+      _artistResults = results[2] as List<ArtistModel>;
 
       if (!_recentSearches.contains(cleanQuery)) {
         _recentSearches.insert(0, cleanQuery);
@@ -200,6 +219,8 @@ class SearchViewModel extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Search error: $e';
       _searchResults = [];
+      _albumResults = [];
+      _artistResults = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -210,6 +231,8 @@ class SearchViewModel extends ChangeNotifier {
     _debounceTimer?.cancel();
     _query = '';
     _searchResults = [];
+    _albumResults = [];
+    _artistResults = [];
     _isLoading = false;
     _errorMessage = null;
     _selectedFilter = SearchFilter.all;

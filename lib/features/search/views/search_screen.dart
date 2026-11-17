@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/widgets/dilse_notification.dart';
+import '../../../data/models/album_model.dart';
+import '../../../data/models/artist_model.dart';
 import '../../../data/models/song_model.dart';
 import '../../audio_player/viewmodels/audio_player_viewmodel.dart';
 import '../../audio_player/views/song_options_bottom_sheet.dart';
@@ -423,8 +425,17 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchResultsList(BuildContext context, SearchViewModel searchVm) {
+    if (searchVm.selectedFilter == SearchFilter.albums) {
+      return _buildAlbumsView(context, searchVm);
+    }
+    if (searchVm.selectedFilter == SearchFilter.artists) {
+      return _buildArtistsView(context, searchVm);
+    }
+
     final topSong = searchVm.topResult;
     final songs = searchVm.remainingResults;
+    final albums = searchVm.albumResults;
+    final artists = searchVm.artistResults;
     final currentSong = context.select<AudioPlayerViewModel, SongModel?>(
       (vm) => vm.currentSong,
     );
@@ -452,6 +463,32 @@ class _SearchScreenState extends State<SearchScreen> {
           SizedBox(height: context.spacing.md),
         ],
 
+        // On "All Results", show matching Albums shelf if present
+        if (searchVm.selectedFilter == SearchFilter.all && albums.isNotEmpty) ...[
+          _buildSectionHeaderWithAction(
+            context,
+            'ALBUMS',
+            'View All',
+            () => searchVm.setFilter(SearchFilter.albums),
+          ),
+          SizedBox(height: context.spacing.xs),
+          _buildHorizontalAlbumShelf(context, albums.take(6).toList()),
+          SizedBox(height: context.spacing.lg),
+        ],
+
+        // On "All Results", show matching Artists shelf if present
+        if (searchVm.selectedFilter == SearchFilter.all && artists.isNotEmpty) ...[
+          _buildSectionHeaderWithAction(
+            context,
+            'ARTISTS',
+            'View All',
+            () => searchVm.setFilter(SearchFilter.artists),
+          ),
+          SizedBox(height: context.spacing.xs),
+          _buildHorizontalArtistShelf(context, artists.take(6).toList()),
+          SizedBox(height: context.spacing.lg),
+        ],
+
         // Tracks Section Header
         if (songs.isNotEmpty) ...[
           Padding(
@@ -474,6 +511,379 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
       ],
     );
+  }
+
+  Widget _buildSectionHeaderWithAction(
+    BuildContext context,
+    String title,
+    String actionLabel,
+    VoidCallback onAction,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: context.typography.eyebrow,
+        ),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onAction();
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: context.spacing.xxs),
+            child: Text(
+              actionLabel,
+              style: context.typography.captionMuted.copyWith(
+                color: context.colors.brandRuby,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalAlbumShelf(BuildContext context, List<AlbumModel> albums) {
+    return SizedBox(
+      height: 148,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: albums.length,
+        separatorBuilder: (context, index) => SizedBox(width: context.spacing.sm),
+        itemBuilder: (context, index) {
+          final album = albums[index];
+          return GestureDetector(
+            onTap: () => _onAlbumTapped(context, album),
+            child: SizedBox(
+              width: 104,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: context.radius.asBorderRadiusMd,
+                    child: Container(
+                      width: 104,
+                      height: 104,
+                      color: context.colors.cardDarkSurface,
+                      child: album.thumbnailUrl.isNotEmpty
+                          ? Image.network(
+                              album.thumbnailUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.album_rounded,
+                                color: context.colors.textSecondary,
+                                size: context.sizes.iconLg,
+                              ),
+                            )
+                          : Icon(
+                              Icons.album_rounded,
+                              color: context.colors.textSecondary,
+                              size: context.sizes.iconLg,
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: context.spacing.xxs),
+                  Text(
+                    album.title,
+                    style: context.typography.captionMuted.copyWith(
+                      color: context.colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    album.artist.isNotEmpty ? album.artist : album.year,
+                    style: context.typography.captionMuted,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHorizontalArtistShelf(BuildContext context, List<ArtistModel> artists) {
+    return SizedBox(
+      height: 130,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: artists.length,
+        separatorBuilder: (context, index) => SizedBox(width: context.spacing.md),
+        itemBuilder: (context, index) {
+          final artist = artists[index];
+          return GestureDetector(
+            onTap: () => _onArtistTapped(context, artist),
+            child: SizedBox(
+              width: 84,
+              child: Column(
+                children: [
+                  ClipOval(
+                    child: Container(
+                      width: 76,
+                      height: 76,
+                      color: context.colors.cardDarkSurface,
+                      child: artist.thumbnailUrl.isNotEmpty
+                          ? Image.network(
+                              artist.thumbnailUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.person_rounded,
+                                color: context.colors.textSecondary,
+                                size: context.sizes.iconLg,
+                              ),
+                            )
+                          : Icon(
+                              Icons.person_rounded,
+                              color: context.colors.textSecondary,
+                              size: context.sizes.iconLg,
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: context.spacing.xs),
+                  Text(
+                    artist.name,
+                    style: context.typography.captionMuted.copyWith(
+                      color: context.colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    artist.role,
+                    style: context.typography.captionMuted,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAlbumsView(BuildContext context, SearchViewModel searchVm) {
+    final albums = searchVm.albumResults;
+
+    if (albums.isEmpty) {
+      return Center(
+        child: Text(
+          'No albums found for "${searchVm.query}"',
+          style: context.typography.titleMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(
+        left: context.spacing.md,
+        right: context.spacing.md,
+        top: context.spacing.sm,
+        bottom: context.sizes.miniPlayerHeight +
+            context.sizes.navDockHeight +
+            context.spacing.xl,
+      ),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: context.spacing.md,
+        mainAxisSpacing: context.spacing.md,
+        childAspectRatio: 0.76,
+      ),
+      itemCount: albums.length,
+      itemBuilder: (context, index) {
+        final album = albums[index];
+        return GestureDetector(
+          onTap: () => _onAlbumTapped(context, album),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: context.radius.asBorderRadiusMd,
+                  child: Container(
+                    width: double.infinity,
+                    color: context.colors.cardDarkSurface,
+                    child: album.thumbnailUrl.isNotEmpty
+                        ? Image.network(
+                            album.thumbnailUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.album_rounded,
+                              color: context.colors.textSecondary,
+                              size: context.sizes.iconLg,
+                            ),
+                          )
+                        : Icon(
+                            Icons.album_rounded,
+                            color: context.colors.textSecondary,
+                            size: context.sizes.iconLg,
+                          ),
+                  ),
+                ),
+              ),
+              SizedBox(height: context.spacing.xs),
+              Text(
+                album.title,
+                style: context.typography.titleMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                album.artist.isNotEmpty
+                    ? '${album.artist} • ${album.year}'
+                    : (album.language.isNotEmpty ? '${album.language} • ${album.year}' : album.year),
+                style: context.typography.captionMuted,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildArtistsView(BuildContext context, SearchViewModel searchVm) {
+    final artists = searchVm.artistResults;
+
+    if (artists.isEmpty) {
+      return Center(
+        child: Text(
+          'No artists found for "${searchVm.query}"',
+          style: context.typography.titleMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(
+        left: context.spacing.md,
+        right: context.spacing.md,
+        top: context.spacing.sm,
+        bottom: context.sizes.miniPlayerHeight +
+            context.sizes.navDockHeight +
+            context.spacing.xl,
+      ),
+      itemCount: artists.length,
+      separatorBuilder: (context, index) => SizedBox(height: context.spacing.sm),
+      itemBuilder: (context, index) {
+        final artist = artists[index];
+        return GestureDetector(
+          onTap: () => _onArtistTapped(context, artist),
+          child: Container(
+            padding: EdgeInsets.all(context.spacing.sm),
+            decoration: BoxDecoration(
+              color: context.colors.cardDarkSurface,
+              borderRadius: context.radius.asBorderRadiusMd,
+              border: Border.all(
+                color: context.colors.solidMatteBorder,
+                width: context.sizes.borderThin,
+              ),
+            ),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    color: context.colors.oledBackground,
+                    child: artist.thumbnailUrl.isNotEmpty
+                        ? Image.network(
+                            artist.thumbnailUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.person_rounded,
+                              color: context.colors.textSecondary,
+                              size: context.sizes.iconMd,
+                            ),
+                          )
+                        : Icon(
+                            Icons.person_rounded,
+                            color: context.colors.textSecondary,
+                            size: context.sizes.iconMd,
+                          ),
+                  ),
+                ),
+                SizedBox(width: context.spacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artist.name,
+                        style: context.typography.titleMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: context.spacing.xxs),
+                      Text(
+                        artist.role,
+                        style: context.typography.captionMuted,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.colors.textSecondary,
+                  size: context.sizes.iconMd,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _onAlbumTapped(BuildContext context, AlbumModel album) {
+    HapticFeedback.lightImpact();
+    // Search the album title to list and play its tracks directly
+    _controller.text = album.title;
+    _controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: album.title.length),
+    );
+    final searchVm = context.read<SearchViewModel>();
+    searchVm.setFilter(SearchFilter.tracks);
+    searchVm.search(album.title);
+  }
+
+  void _onArtistTapped(BuildContext context, ArtistModel artist) {
+    HapticFeedback.lightImpact();
+    // Search the artist name to list and play their top hits directly
+    _controller.text = artist.name;
+    _controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: artist.name.length),
+    );
+    final searchVm = context.read<SearchViewModel>();
+    searchVm.setFilter(SearchFilter.tracks);
+    searchVm.search(artist.name);
   }
 
   Widget _buildSpotlightCard(
