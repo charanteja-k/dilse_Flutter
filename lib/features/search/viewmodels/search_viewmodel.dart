@@ -188,7 +188,7 @@ class SearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final results = await audioRepository.searchSongs(cleanQuery, limit: 30);
+      final results = await audioRepository.searchSongs(cleanQuery, limit: 35);
       _searchResults = results;
 
       if (!_recentSearches.contains(cleanQuery)) {

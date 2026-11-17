@@ -10,8 +10,43 @@ class AudioRepositoryImpl implements AudioRepository {
   AudioRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) {
-    return remoteDatasource.searchSongs(query, limit: limit, page: page);
+  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
+    // 1. Fetch search results with requested limit
+    final rawResults = await remoteDatasource.searchSongs(query, limit: limit, page: page);
+
+    // 2. Client-side fast deduplication: suppress identical title + artist playlist clones
+    final seenKeys = <String>{};
+    final List<SongModel> distinctSongs = [];
+
+    for (final song in rawResults) {
+      final key = '${song.title.trim()}:::${song.artist.trim()}';
+      if (!seenKeys.contains(key)) {
+        seenKeys.add(key);
+        distinctSongs.add(song);
+      }
+    }
+
+    // 3. Smart enrichment: if duplicate clones were removed, pull top artist tracks
+    // to fill the list up to the requested limit so the user has full variety.
+    if (distinctSongs.isNotEmpty && distinctSongs.length < limit) {
+      final primaryArtist = distinctSongs.first.artist.split(RegExp(r'[,/|&]')).first.trim();
+      if (primaryArtist.isNotEmpty && !primaryArtist.toLowerCase().contains('unknown')) {
+        try {
+          final neededCount = limit - distinctSongs.length;
+          final artistResults = await remoteDatasource.searchSongs(primaryArtist, limit: neededCount + 5, page: 1);
+          for (final song in artistResults) {
+            final key = '${song.title.trim()}:::${song.artist.trim()}';
+            if (!seenKeys.contains(key)) {
+              seenKeys.add(key);
+              distinctSongs.add(song);
+              if (distinctSongs.length >= limit) break;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    return distinctSongs;
   }
 
   @override
