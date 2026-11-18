@@ -26,12 +26,16 @@ class QueueManager {
   }
 
   bool get hasNext {
-    if (_repeatMode == RepeatMode.one || _repeatMode == RepeatMode.all) return true;
+    if (_repeatMode == RepeatMode.one || _repeatMode == RepeatMode.all) {
+      return true;
+    }
     return _currentIndex + 1 < _currentQueue.length;
   }
 
   bool get hasPrevious {
-    if (_repeatMode == RepeatMode.one || _repeatMode == RepeatMode.all) return true;
+    if (_repeatMode == RepeatMode.one || _repeatMode == RepeatMode.all) {
+      return true;
+    }
     return _currentIndex - 1 >= 0;
   }
 

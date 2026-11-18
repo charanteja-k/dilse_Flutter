@@ -40,10 +40,7 @@ void main() {
   group('FloatingVinylDisc Widget Tests', () {
     testWidgets('Renders when isVisible is true', (tester) async {
       await tester.pumpWidget(
-        createTestWidget(
-          isVisible: true,
-          isPlaying: true,
-        ),
+        createTestWidget(isVisible: true, isPlaying: true),
       );
       await tester.pump(const Duration(milliseconds: 350));
 
@@ -77,12 +74,11 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('Dragging leftwards past midpoint snaps to left dock', (tester) async {
+    testWidgets('Dragging leftwards past midpoint snaps to left dock', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        createTestWidget(
-          isVisible: true,
-          isPlaying: true,
-        ),
+        createTestWidget(isVisible: true, isPlaying: true),
       );
       await tester.pump(const Duration(milliseconds: 350));
 

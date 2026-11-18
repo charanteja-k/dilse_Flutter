@@ -253,10 +253,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
             ],
           ),
           if (!_isEditingRepo)
-            Text(
-              vm.repoSlug,
-              style: context.typography.titleMedium,
-            )
+            Text(vm.repoSlug, style: context.typography.titleMedium)
           else ...[
             SizedBox(height: context.spacing.xs),
             TextField(
@@ -352,7 +349,8 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
 
   Widget _buildDownloadProgressCard(BuildContext context, UpdateViewModel vm) {
     final dl = vm.downloadState;
-    final isError = dl.phase == OtaDownloadPhase.error ||
+    final isError =
+        dl.phase == OtaDownloadPhase.error ||
         dl.phase == OtaDownloadPhase.permissionDenied;
 
     return Container(
@@ -377,8 +375,8 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                 isError
                     ? Icons.error_outline_rounded
                     : (dl.phase == OtaDownloadPhase.installing
-                        ? Icons.android_rounded
-                        : Icons.downloading_rounded),
+                          ? Icons.android_rounded
+                          : Icons.downloading_rounded),
                 color: isError
                     ? context.colors.errorCrimson
                     : context.colors.brandRuby,
@@ -409,7 +407,9 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
             ClipRRect(
               borderRadius: context.radius.asBorderRadiusFull,
               child: LinearProgressIndicator(
-                value: dl.progressPercent > 0 ? dl.progressPercent / 100.0 : null,
+                value: dl.progressPercent > 0
+                    ? dl.progressPercent / 100.0
+                    : null,
                 minHeight: context.sizes.progressBarHeight,
                 backgroundColor: context.colors.oledBackground,
                 valueColor: AlwaysStoppedAnimation<Color>(
@@ -502,10 +502,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
               ],
             ),
             SizedBox(height: context.spacing.xs),
-            Text(
-              vm.errorMessage!,
-              style: context.typography.bodyMedium,
-            ),
+            Text(vm.errorMessage!, style: context.typography.bodyMedium),
           ],
         ),
       );
@@ -580,10 +577,7 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                 ),
               ),
               const Spacer(),
-              Text(
-                info.formattedSize,
-                style: context.typography.bodyMedium,
-              ),
+              Text(info.formattedSize, style: context.typography.bodyMedium),
             ],
           ),
           SizedBox(height: context.spacing.sm),
@@ -626,8 +620,8 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                   label: Text(
                     vm.canRunInlineOta && info.hasApk
                         ? (hasUpdate
-                            ? 'Download & Install Update'
-                            : 'Reinstall Latest APK')
+                              ? 'Download & Install Update'
+                              : 'Reinstall Latest APK')
                         : 'Open Release on GitHub',
                     style: context.typography.titleMedium.copyWith(
                       color: context.colors.oledBackground,
@@ -654,25 +648,17 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'ALL RELEASES',
-          style: context.typography.eyebrow,
-        ),
+        Text('ALL RELEASES', style: context.typography.eyebrow),
         SizedBox(height: context.spacing.xs),
         if (vm.isLoadingReleases)
           Padding(
             padding: EdgeInsets.all(context.spacing.lg),
             child: Center(
-              child: CircularProgressIndicator(
-                color: context.colors.brandRuby,
-              ),
+              child: CircularProgressIndicator(color: context.colors.brandRuby),
             ),
           )
         else if (vm.releasesErrorMessage != null)
-          Text(
-            vm.releasesErrorMessage!,
-            style: context.typography.bodyMedium,
-          )
+          Text(vm.releasesErrorMessage!, style: context.typography.bodyMedium)
         else if (vm.releases.isEmpty)
           Text(
             'No releases returned for ${vm.repoSlug}.',
@@ -687,7 +673,12 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                 SizedBox(height: context.spacing.sm),
             itemBuilder: (context, index) {
               final release = vm.releases[index];
-              return _buildReleaseRow(context, vm, release, isFirst: index == 0);
+              return _buildReleaseRow(
+                context,
+                vm,
+                release,
+                isFirst: index == 0,
+              );
             },
           ),
       ],
@@ -824,8 +815,8 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                         !release.hasApk
                             ? 'Open'
                             : (isInstalled
-                                ? 'Reinstall'
-                                : (isNewer ? 'Install' : 'Rollback')),
+                                  ? 'Reinstall'
+                                  : (isNewer ? 'Install' : 'Rollback')),
                         style: context.typography.titleMedium.copyWith(
                           color: context.colors.textPrimary,
                         ),
@@ -851,8 +842,9 @@ class _UpdateHubSheetState extends State<UpdateHubSheet> {
                     : '${release.changelog.split('\n').first} (tap for notes)',
                 style: context.typography.bodyMedium,
                 maxLines: isExpanded ? null : 1,
-                overflow:
-                    isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                overflow: isExpanded
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
               ),
             ),
           ],

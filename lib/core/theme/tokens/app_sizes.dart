@@ -134,11 +134,13 @@ class AppSizes extends ThemeExtension<AppSizes> {
       chipHeight: chipHeight ?? this.chipHeight,
       trackShelfHeight: trackShelfHeight ?? this.trackShelfHeight,
       thumbnailMd: thumbnailMd ?? this.thumbnailMd,
-      quickAccessTileHeight: quickAccessTileHeight ?? this.quickAccessTileHeight,
+      quickAccessTileHeight:
+          quickAccessTileHeight ?? this.quickAccessTileHeight,
       badgeDotSize: badgeDotSize ?? this.badgeDotSize,
       progressBarHeight: progressBarHeight ?? this.progressBarHeight,
       playerHeroPlaySize: playerHeroPlaySize ?? this.playerHeroPlaySize,
-      playerHeroPlayIconSize: playerHeroPlayIconSize ?? this.playerHeroPlayIconSize,
+      playerHeroPlayIconSize:
+          playerHeroPlayIconSize ?? this.playerHeroPlayIconSize,
       playerSkipIconSize: playerSkipIconSize ?? this.playerSkipIconSize,
       playerArtworkRadius: playerArtworkRadius ?? this.playerArtworkRadius,
       playerScrubberHeight: playerScrubberHeight ?? this.playerScrubberHeight,
@@ -151,9 +153,17 @@ class AppSizes extends ThemeExtension<AppSizes> {
   AppSizes lerp(ThemeExtension<AppSizes>? other, double t) {
     if (other is! AppSizes) return this;
     return AppSizes(
-      miniPlayerHeight: lerpDouble(miniPlayerHeight, other.miniPlayerHeight, t)!,
+      miniPlayerHeight: lerpDouble(
+        miniPlayerHeight,
+        other.miniPlayerHeight,
+        t,
+      )!,
       navDockHeight: lerpDouble(navDockHeight, other.navDockHeight, t)!,
-      navDockElevation: lerpDouble(navDockElevation, other.navDockElevation, t)!,
+      navDockElevation: lerpDouble(
+        navDockElevation,
+        other.navDockElevation,
+        t,
+      )!,
       iconSm: lerpDouble(iconSm, other.iconSm, t)!,
       iconMd: lerpDouble(iconMd, other.iconMd, t)!,
       iconLg: lerpDouble(iconLg, other.iconLg, t)!,
@@ -165,19 +175,50 @@ class AppSizes extends ThemeExtension<AppSizes> {
       songCardSize: lerpDouble(songCardSize, other.songCardSize, t)!,
       borderThin: lerpDouble(borderThin, other.borderThin, t)!,
       chipHeight: lerpDouble(chipHeight, other.chipHeight, t)!,
-      trackShelfHeight: lerpDouble(trackShelfHeight, other.trackShelfHeight, t)!,
+      trackShelfHeight: lerpDouble(
+        trackShelfHeight,
+        other.trackShelfHeight,
+        t,
+      )!,
       thumbnailMd: lerpDouble(thumbnailMd, other.thumbnailMd, t)!,
-      quickAccessTileHeight: lerpDouble(quickAccessTileHeight, other.quickAccessTileHeight, t)!,
+      quickAccessTileHeight: lerpDouble(
+        quickAccessTileHeight,
+        other.quickAccessTileHeight,
+        t,
+      )!,
       badgeDotSize: lerpDouble(badgeDotSize, other.badgeDotSize, t)!,
-      progressBarHeight: lerpDouble(progressBarHeight, other.progressBarHeight, t)!,
-      playerHeroPlaySize: lerpDouble(playerHeroPlaySize, other.playerHeroPlaySize, t)!,
-      playerHeroPlayIconSize: lerpDouble(playerHeroPlayIconSize, other.playerHeroPlayIconSize, t)!,
-      playerSkipIconSize: lerpDouble(playerSkipIconSize, other.playerSkipIconSize, t)!,
-      playerArtworkRadius: lerpDouble(playerArtworkRadius, other.playerArtworkRadius, t)!,
-      playerScrubberHeight: lerpDouble(playerScrubberHeight, other.playerScrubberHeight, t)!,
+      progressBarHeight: lerpDouble(
+        progressBarHeight,
+        other.progressBarHeight,
+        t,
+      )!,
+      playerHeroPlaySize: lerpDouble(
+        playerHeroPlaySize,
+        other.playerHeroPlaySize,
+        t,
+      )!,
+      playerHeroPlayIconSize: lerpDouble(
+        playerHeroPlayIconSize,
+        other.playerHeroPlayIconSize,
+        t,
+      )!,
+      playerSkipIconSize: lerpDouble(
+        playerSkipIconSize,
+        other.playerSkipIconSize,
+        t,
+      )!,
+      playerArtworkRadius: lerpDouble(
+        playerArtworkRadius,
+        other.playerArtworkRadius,
+        t,
+      )!,
+      playerScrubberHeight: lerpDouble(
+        playerScrubberHeight,
+        other.playerScrubberHeight,
+        t,
+      )!,
       queueItemHeight: lerpDouble(queueItemHeight, other.queueItemHeight, t)!,
       floatingCdSize: lerpDouble(floatingCdSize, other.floatingCdSize, t)!,
     );
   }
 }
-

@@ -7,14 +7,35 @@ import 'package:dilse/data/models/song_model.dart';
 
 /// Contract for fetching songs, albums, and artists from remote edge services.
 abstract class CloudflareEdgeDatasource {
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1});
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1});
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  });
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  });
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  });
   Future<List<SongModel>> getAlbumDetails(String albumId);
-  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId);
+  Future<
+    ({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})
+  >
+  getArtistDetails(String artistId);
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
-  Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
-  Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50});
+  Future<List<SongModel>> getRecommendations({
+    String query = 'telugu',
+    int limit = 15,
+  });
+  Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(
+    String seedQuery, {
+    int limit = 50,
+  });
   Future<({String? plainLyrics, String? syncedLyrics})> fetchLyrics({
     required String title,
     String? artist,
@@ -35,7 +56,11 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
   });
 
   @override
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  }) async {
     final uri = ApiEndpoints.jioSearchUri(
       query: query,
       limit: limit,
@@ -49,7 +74,10 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       final decoded = jsonDecode(response.body);
       if (decoded is List) {
         return decoded
-            .map((item) => SongModel.fromJson(Map<String, dynamic>.from(item as Map)))
+            .map(
+              (item) =>
+                  SongModel.fromJson(Map<String, dynamic>.from(item as Map)),
+            )
             .toList();
       }
     }
@@ -57,18 +85,27 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
   }
 
   @override
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) async {
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     final uri = Uri.parse(
       'https://www.jiosaavn.com/api.php?__call=search.getAlbumResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=$limit&p=$page&q=${Uri.encodeComponent(query)}',
     );
 
     try {
-      final response = await client.get(uri).timeout(const Duration(seconds: 10));
+      final response = await client
+          .get(uri)
+          .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is Map && decoded['results'] is List) {
           return (decoded['results'] as List)
-              .map((item) => AlbumModel.fromJson(Map<String, dynamic>.from(item as Map)))
+              .map(
+                (item) =>
+                    AlbumModel.fromJson(Map<String, dynamic>.from(item as Map)),
+              )
               .toList();
         }
       }
@@ -77,18 +114,28 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
   }
 
   @override
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) async {
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     final uri = Uri.parse(
       'https://www.jiosaavn.com/api.php?__call=search.getArtistResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=$limit&p=$page&q=${Uri.encodeComponent(query)}',
     );
 
     try {
-      final response = await client.get(uri).timeout(const Duration(seconds: 10));
+      final response = await client
+          .get(uri)
+          .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is Map && decoded['results'] is List) {
           return (decoded['results'] as List)
-              .map((item) => ArtistModel.fromJson(Map<String, dynamic>.from(item as Map)))
+              .map(
+                (item) => ArtistModel.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
               .toList();
         }
       }
@@ -100,10 +147,14 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
   Future<List<SongModel>> getAlbumDetails(String albumId) async {
     final uri = ApiEndpoints.jioAlbumDetailsUri(albumId: albumId);
     try {
-      final response = await client.get(
-        uri,
-        headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await client
+          .get(
+            uri,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -120,11 +171,19 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
           for (final raw in (decoded['list'] as List)) {
             if (raw is! Map) continue;
             final map = Map<String, dynamic>.from(raw);
-            final title = _unescapeHtml((map['title'] ?? 'Unknown Track').toString());
+            final title = _unescapeHtml(
+              (map['title'] ?? 'Unknown Track').toString(),
+            );
 
-            final moreInfo = map['more_info'] is Map ? map['more_info'] as Map : {};
-            final artistMap = moreInfo['artistMap'] is Map ? moreInfo['artistMap'] as Map : {};
-            final primaryArtistsList = artistMap['primary_artists'] is List ? artistMap['primary_artists'] as List : [];
+            final moreInfo = map['more_info'] is Map
+                ? map['more_info'] as Map
+                : {};
+            final artistMap = moreInfo['artistMap'] is Map
+                ? moreInfo['artistMap'] as Map
+                : {};
+            final primaryArtistsList = artistMap['primary_artists'] is List
+                ? artistMap['primary_artists'] as List
+                : [];
             final primaryNames = primaryArtistsList
                 .whereType<Map>()
                 .map((a) => _unescapeHtml((a['name'] ?? '').toString()))
@@ -133,7 +192,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
             final artist = primaryNames.isNotEmpty
                 ? primaryNames.join(', ')
-                : _unescapeHtml((map['subtitle'] ?? 'Unknown Artist').toString());
+                : _unescapeHtml(
+                    (map['subtitle'] ?? 'Unknown Artist').toString(),
+                  );
 
             final rawDuration = moreInfo['duration'] ?? map['duration'] ?? '0';
             final durSec = int.tryParse(rawDuration.toString()) ?? 0;
@@ -145,17 +206,19 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
               songThumb = songThumb.replaceAll('50x50', '500x500');
             }
 
-            songList.add(SongModel(
-              id: (map['id'] ?? '').toString(),
-              title: title,
-              artist: artist,
-              album: albumTitle.isNotEmpty ? albumTitle : 'DilSe',
-              thumbnailUrl: songThumb.isNotEmpty ? songThumb : albumArt,
-              streamUrl: '', // Resolved on-demand or pre-warmed
-              duration: Duration(seconds: durSec),
-              source: 'jiosaavn',
-              bitrate: '320kbps',
-            ));
+            songList.add(
+              SongModel(
+                id: (map['id'] ?? '').toString(),
+                title: title,
+                artist: artist,
+                album: albumTitle.isNotEmpty ? albumTitle : 'DilSe',
+                thumbnailUrl: songThumb.isNotEmpty ? songThumb : albumArt,
+                streamUrl: '', // Resolved on-demand or pre-warmed
+                duration: Duration(seconds: durSec),
+                source: 'jiosaavn',
+                bitrate: '320kbps',
+              ),
+            );
           }
           return songList;
         }
@@ -165,18 +228,30 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
   }
 
   @override
-  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId) async {
-    final uri = ApiEndpoints.jioArtistDetailsUri(artistId: artistId, songCount: 30, albumCount: 20);
+  Future<
+    ({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})
+  >
+  getArtistDetails(String artistId) async {
+    final uri = ApiEndpoints.jioArtistDetailsUri(
+      artistId: artistId,
+      songCount: 30,
+      albumCount: 20,
+    );
     try {
-      final response = await client.get(
-        uri,
-        headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await client
+          .get(
+            uri,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is Map) {
-          final rawFollowers = decoded['follower_count'] ?? decoded['fan_count'] ?? '0';
+          final rawFollowers =
+              decoded['follower_count'] ?? decoded['fan_count'] ?? '0';
           final followerCount = int.tryParse(rawFollowers.toString()) ?? 0;
 
           // Parse top songs
@@ -185,11 +260,19 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
             for (final raw in (decoded['topSongs'] as List)) {
               if (raw is! Map) continue;
               final map = Map<String, dynamic>.from(raw);
-              final title = _unescapeHtml((map['title'] ?? 'Unknown Track').toString());
+              final title = _unescapeHtml(
+                (map['title'] ?? 'Unknown Track').toString(),
+              );
 
-              final moreInfo = map['more_info'] is Map ? map['more_info'] as Map : {};
-              final artistMap = moreInfo['artistMap'] is Map ? moreInfo['artistMap'] as Map : {};
-              final primaryList = artistMap['primary_artists'] is List ? artistMap['primary_artists'] as List : [];
+              final moreInfo = map['more_info'] is Map
+                  ? map['more_info'] as Map
+                  : {};
+              final artistMap = moreInfo['artistMap'] is Map
+                  ? moreInfo['artistMap'] as Map
+                  : {};
+              final primaryList = artistMap['primary_artists'] is List
+                  ? artistMap['primary_artists'] as List
+                  : [];
               final primaryNames = primaryList
                   .whereType<Map>()
                   .map((a) => _unescapeHtml((a['name'] ?? '').toString()))
@@ -198,10 +281,15 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
               final artist = primaryNames.isNotEmpty
                   ? primaryNames.join(', ')
-                  : _unescapeHtml((map['subtitle'] ?? 'Unknown Artist').toString());
+                  : _unescapeHtml(
+                      (map['subtitle'] ?? 'Unknown Artist').toString(),
+                    );
 
-              final album = _unescapeHtml((moreInfo['album'] ?? map['album'] ?? 'DilSe').toString());
-              final rawDuration = moreInfo['duration'] ?? map['duration'] ?? '0';
+              final album = _unescapeHtml(
+                (moreInfo['album'] ?? map['album'] ?? 'DilSe').toString(),
+              );
+              final rawDuration =
+                  moreInfo['duration'] ?? map['duration'] ?? '0';
               final durSec = int.tryParse(rawDuration.toString()) ?? 0;
 
               String songThumb = (map['image'] ?? '').toString();
@@ -211,17 +299,19 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
                 songThumb = songThumb.replaceAll('50x50', '500x500');
               }
 
-              topSongs.add(SongModel(
-                id: (map['id'] ?? '').toString(),
-                title: title,
-                artist: artist,
-                album: album,
-                thumbnailUrl: songThumb,
-                streamUrl: '',
-                duration: Duration(seconds: durSec),
-                source: 'jiosaavn',
-                bitrate: '320kbps',
-              ));
+              topSongs.add(
+                SongModel(
+                  id: (map['id'] ?? '').toString(),
+                  title: title,
+                  artist: artist,
+                  album: album,
+                  thumbnailUrl: songThumb,
+                  streamUrl: '',
+                  duration: Duration(seconds: durSec),
+                  source: 'jiosaavn',
+                  bitrate: '320kbps',
+                ),
+              );
             }
           }
 
@@ -230,7 +320,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
           if (decoded['topAlbums'] is List) {
             for (final raw in (decoded['topAlbums'] as List)) {
               if (raw is! Map) continue;
-              topAlbums.add(AlbumModel.fromJson(Map<String, dynamic>.from(raw)));
+              topAlbums.add(
+                AlbumModel.fromJson(Map<String, dynamic>.from(raw)),
+              );
             }
           }
 
@@ -242,7 +334,11 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         }
       }
     } catch (_) {}
-    return (topSongs: <SongModel>[], topAlbums: <AlbumModel>[], followerCount: 0);
+    return (
+      topSongs: <SongModel>[],
+      topAlbums: <AlbumModel>[],
+      followerCount: 0,
+    );
   }
 
   static String _unescapeHtml(String text) {
@@ -266,15 +362,22 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
-      if (decoded is Map && decoded['match'] == true && decoded['data'] != null) {
-        return SongModel.fromJson(Map<String, dynamic>.from(decoded['data'] as Map));
+      if (decoded is Map &&
+          decoded['match'] == true &&
+          decoded['data'] != null) {
+        return SongModel.fromJson(
+          Map<String, dynamic>.from(decoded['data'] as Map),
+        );
       }
     }
     return null;
   }
 
   @override
-  Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15}) async {
+  Future<List<SongModel>> getRecommendations({
+    String query = 'telugu',
+    int limit = 15,
+  }) async {
     final uri = ApiEndpoints.jioRecommendationsUri(
       query: query,
       limit: limit,
@@ -287,7 +390,10 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       final decoded = jsonDecode(response.body);
       if (decoded is List) {
         return decoded
-            .map((item) => SongModel.fromJson(Map<String, dynamic>.from(item as Map)))
+            .map(
+              (item) =>
+                  SongModel.fromJson(Map<String, dynamic>.from(item as Map)),
+            )
             .toList();
       }
     }
@@ -308,11 +414,14 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       'clientVersion': '1.20240101.01.00',
       'hl': 'en',
       'gl': 'IN',
-    }
+    },
   };
 
   @override
-  Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(String seedQuery, {int limit = 50}) async {
+  Future<List<Map<String, dynamic>>> fetchYtmRadioTracks(
+    String seedQuery, {
+    int limit = 50,
+  }) async {
     try {
       String? videoId;
       final trimmed = seedQuery.trim();
@@ -322,16 +431,20 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         videoId = trimmed;
       } else {
         // 1. Resolve seed query to a YouTube Music videoId via InnerTube search
-        final searchUri = Uri.parse('https://music.youtube.com/youtubei/v1/search');
-        final searchRes = await client.post(
-          searchUri,
-          headers: _ytmHeaders,
-          body: jsonEncode({
-            'context': _ytmContext,
-            'query': trimmed,
-            'params': 'EgWKAQIIAWoKEAkQChADEAQQBQ%3D%3D',
-          }),
-        ).timeout(const Duration(seconds: 8));
+        final searchUri = Uri.parse(
+          'https://music.youtube.com/youtubei/v1/search',
+        );
+        final searchRes = await client
+            .post(
+              searchUri,
+              headers: _ytmHeaders,
+              body: jsonEncode({
+                'context': _ytmContext,
+                'query': trimmed,
+                'params': 'EgWKAQIIAWoKEAkQChADEAQQBQ%3D%3D',
+              }),
+            )
+            .timeout(const Duration(seconds: 8));
 
         if (searchRes.statusCode == 200) {
           final searchData = jsonDecode(searchRes.body);
@@ -341,14 +454,13 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         // Secondary fallback search without strict protobuf filter for regional/complex queries
         if (videoId == null || videoId.isEmpty) {
           try {
-            final fbRes = await client.post(
-              searchUri,
-              headers: _ytmHeaders,
-              body: jsonEncode({
-                'context': _ytmContext,
-                'query': trimmed,
-              }),
-            ).timeout(const Duration(seconds: 6));
+            final fbRes = await client
+                .post(
+                  searchUri,
+                  headers: _ytmHeaders,
+                  body: jsonEncode({'context': _ytmContext, 'query': trimmed}),
+                )
+                .timeout(const Duration(seconds: 6));
             if (fbRes.statusCode == 200) {
               final fbData = jsonDecode(fbRes.body);
               videoId = _extractVideoIdFromYtmSearch(fbData);
@@ -360,7 +472,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
       if (videoId == null || videoId.isEmpty) return [];
 
       // 2. Fetch Google's radio co-listening automix graph (RDAMVM$videoId)
-      final List<Map<String, dynamic>> tracks = await _fetchInnerTubeNextTracks(videoId);
+      final List<Map<String, dynamic>> tracks = await _fetchInnerTubeNextTracks(
+        videoId,
+      );
 
       // 3. Neural Continuation Chaining:
       // If primary neural automix returned fewer than 35 tracks, chain using the last track
@@ -383,27 +497,33 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchInnerTubeNextTracks(String videoId) async {
+  Future<List<Map<String, dynamic>>> _fetchInnerTubeNextTracks(
+    String videoId,
+  ) async {
     try {
       final nextUri = Uri.parse('https://music.youtube.com/youtubei/v1/next');
-      final nextRes = await client.post(
-        nextUri,
-        headers: _ytmHeaders,
-        body: jsonEncode({
-          'context': _ytmContext,
-          'videoId': videoId,
-          'playlistId': 'RDAMVM$videoId',
-          'enablePersistentPlaylistPanel': true,
-        }),
-      ).timeout(const Duration(seconds: 8));
+      final nextRes = await client
+          .post(
+            nextUri,
+            headers: _ytmHeaders,
+            body: jsonEncode({
+              'context': _ytmContext,
+              'videoId': videoId,
+              'playlistId': 'RDAMVM$videoId',
+              'enablePersistentPlaylistPanel': true,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
 
       if (nextRes.statusCode != 200) return [];
 
       final nextData = jsonDecode(nextRes.body);
-      final tabs = nextData['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']
-          ?['watchNextTabbedResultsRenderer']?['tabs'] as List?;
-      final upNext = tabs?[0]?['tabRenderer']?['content']?['musicQueueRenderer']?['content']
-          ?['playlistPanelRenderer']?['contents'] as List?;
+      final tabs =
+          nextData['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']?['watchNextTabbedResultsRenderer']?['tabs']
+              as List?;
+      final upNext =
+          tabs?[0]?['tabRenderer']?['content']?['musicQueueRenderer']?['content']?['playlistPanelRenderer']?['contents']
+              as List?;
 
       if (upNext == null) return [];
 
@@ -415,8 +535,11 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         if (vid == null || vid.isEmpty) continue;
         if (vid == videoId && tracks.isNotEmpty) continue;
 
-        final title = r['title']?['runs']?[0]?['text'] as String? ?? 'Unknown Title';
-        final artist = r['longBylineText']?['runs']?[0]?['text'] as String? ?? 'Unknown Artist';
+        final title =
+            r['title']?['runs']?[0]?['text'] as String? ?? 'Unknown Title';
+        final artist =
+            r['longBylineText']?['runs']?[0]?['text'] as String? ??
+            'Unknown Artist';
         final length = r['lengthText']?['runs']?[0]?['text'] as String? ?? '';
         final thumbnails = r['thumbnail']?['thumbnails'] as List?;
         final thumbUrl = (thumbnails != null && thumbnails.isNotEmpty)
@@ -442,18 +565,22 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
   static String? _extractVideoIdFromYtmSearch(dynamic searchData) {
     if (searchData is! Map) return null;
-    final contents = searchData['contents']?['tabbedSearchResultsRenderer']?['tabs']?[0]?['tabRenderer']
-        ?['content']?['sectionListRenderer']?['contents'] as List?;
+    final contents =
+        searchData['contents']?['tabbedSearchResultsRenderer']?['tabs']?[0]?['tabRenderer']?['content']?['sectionListRenderer']?['contents']
+            as List?;
     if (contents != null) {
       for (final section in contents) {
-        final items = (section['musicShelfRenderer']?['contents'] ??
-            section['itemSectionRenderer']?['contents']) as List?;
+        final items =
+            (section['musicShelfRenderer']?['contents'] ??
+                    section['itemSectionRenderer']?['contents'])
+                as List?;
         if (items != null && items.isNotEmpty) {
           for (final item in items) {
             final renderer = item['musicResponsiveListItemRenderer'];
-            final playNav = renderer?['overlay']?['musicItemThumbnailOverlayRenderer']?['content']
-                ?['musicPlayButtonRenderer']?['playNavigationEndpoint'];
-            final vid = playNav?['watchEndpoint']?['videoId'] as String? ??
+            final playNav =
+                renderer?['overlay']?['musicItemThumbnailOverlayRenderer']?['content']?['musicPlayButtonRenderer']?['playNavigationEndpoint'];
+            final vid =
+                playNav?['watchEndpoint']?['videoId'] as String? ??
                 renderer?['playlistItemData']?['videoId'] as String?;
             if (vid != null && vid.isNotEmpty) return vid;
           }
@@ -485,15 +612,20 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         // Direct LRCLIB get API (with duration if available)
         queries.add(() async {
           try {
-            final durParam = durationSec != null && durationSec > 0 ? '&duration=$durationSec' : '';
+            final durParam = durationSec != null && durationSec > 0
+                ? '&duration=$durationSec'
+                : '';
             final getUri = Uri.parse(
               'https://lrclib.net/api/get?track_name=${Uri.encodeComponent(cleanT)}&artist_name=${Uri.encodeComponent(cleanA)}$durParam',
             );
-            final res = await client.get(getUri, headers: safeHeaders).timeout(const Duration(seconds: 4));
+            final res = await client
+                .get(getUri, headers: safeHeaders)
+                .timeout(const Duration(seconds: 4));
             if (res.statusCode == 200) {
               final decoded = jsonDecode(res.body);
               if (decoded is Map<String, dynamic> &&
-                  (decoded['syncedLyrics'] != null || decoded['plainLyrics'] != null)) {
+                  (decoded['syncedLyrics'] != null ||
+                      decoded['plainLyrics'] != null)) {
                 candidatePool.add(decoded);
               }
             }
@@ -506,7 +638,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
             final searchUri = Uri.parse(
               'https://lrclib.net/api/search?q=${Uri.encodeComponent("$cleanT $cleanA")}',
             );
-            final res = await client.get(searchUri, headers: safeHeaders).timeout(const Duration(seconds: 4));
+            final res = await client
+                .get(searchUri, headers: safeHeaders)
+                .timeout(const Duration(seconds: 4));
             if (res.statusCode == 200) {
               final decoded = jsonDecode(res.body);
               if (decoded is List) {
@@ -523,7 +657,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
           final searchTrackUri = Uri.parse(
             'https://lrclib.net/api/search?track_name=${Uri.encodeComponent(cleanT)}',
           );
-          final res = await client.get(searchTrackUri, headers: safeHeaders).timeout(const Duration(seconds: 4));
+          final res = await client
+              .get(searchTrackUri, headers: safeHeaders)
+              .timeout(const Duration(seconds: 4));
           if (res.statusCode == 200) {
             final decoded = jsonDecode(res.body);
             if (decoded is List) {
@@ -614,7 +750,10 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         .replaceAll('’', "'")
         .replaceAll('–', '-')
         .replaceAll('—', '-');
-    s = s.replaceAll(RegExp(r'\b(?:feat\.?|ft\.?)\s+[^(\]]+', caseSensitive: false), ' ');
+    s = s.replaceAll(
+      RegExp(r'\b(?:feat\.?|ft\.?)\s+[^(\]]+', caseSensitive: false),
+      ' ',
+    );
     s = s.replaceAll(RegExp(r'\[.*?\]|\(.*?\)', caseSensitive: false), ' ');
     s = s.replaceAll(
       RegExp(
@@ -634,7 +773,13 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
   static String _cleanArtist(String raw) {
     var s = raw
-        .replaceAll(RegExp(r'\b(?:vevo|records|music|official|channel)\b', caseSensitive: false), ' ')
+        .replaceAll(
+          RegExp(
+            r'\b(?:vevo|records|music|official|channel)\b',
+            caseSensitive: false,
+          ),
+          ' ',
+        )
         .replaceAll(RegExp(r'\s+-\s+Topic\b', caseSensitive: false), ' ');
     return s.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
@@ -687,7 +832,8 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     }
 
     final candTrack = (candidate['trackName']?.toString() ?? '').toLowerCase();
-    final candArtist = (candidate['artistName']?.toString() ?? '').toLowerCase();
+    final candArtist = (candidate['artistName']?.toString() ?? '')
+        .toLowerCase();
 
     final cTitle = _cleanTitle(candTrack).toLowerCase();
     final tTitle = _cleanTitle(targetTitle).toLowerCase();
@@ -700,8 +846,15 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     }
 
     if (targetArtist.isNotEmpty && candArtist.isNotEmpty) {
-      final tTokens = targetArtist.toLowerCase().split(RegExp(r'\s+')).where((w) => w.length > 2).toSet();
-      final cTokens = candArtist.split(RegExp(r'\s+')).where((w) => w.length > 2).toSet();
+      final tTokens = targetArtist
+          .toLowerCase()
+          .split(RegExp(r'\s+'))
+          .where((w) => w.length > 2)
+          .toSet();
+      final cTokens = candArtist
+          .split(RegExp(r'\s+'))
+          .where((w) => w.length > 2)
+          .toSet();
       if (tTokens.intersection(cTokens).isNotEmpty) {
         score += 180;
       } else if (tTokens.isNotEmpty && cTokens.isNotEmpty) {
@@ -710,7 +863,10 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     }
 
     final num? cDurNum = candidate['duration'] as num?;
-    if (targetDurationSec != null && targetDurationSec > 0 && cDurNum != null && cDurNum > 0) {
+    if (targetDurationSec != null &&
+        targetDurationSec > 0 &&
+        cDurNum != null &&
+        cDurNum > 0) {
       final diff = (cDurNum.toDouble() - targetDurationSec).abs();
       if (diff > 60) {
         return -9999;
@@ -730,16 +886,24 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     return score;
   }
 
-  Future<Map<String, dynamic>?> _fetchJioSaavnLyrics(String cleanTitle, String cleanArtist) async {
+  Future<Map<String, dynamic>?> _fetchJioSaavnLyrics(
+    String cleanTitle,
+    String cleanArtist,
+  ) async {
     try {
       final query = '$cleanTitle $cleanArtist'.trim();
       final searchUrl = Uri.parse(
         'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&cc=in&api_version=4&ctx=android&n=5&p=1&q=${Uri.encodeComponent(query)}',
       );
-      final res = await client.get(searchUrl, headers: {
-        'User-Agent': 'SaavnAndroid/9.0.0',
-        'Accept': 'application/json',
-      }).timeout(const Duration(seconds: 4));
+      final res = await client
+          .get(
+            searchUrl,
+            headers: {
+              'User-Agent': 'SaavnAndroid/9.0.0',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 4));
 
       if (res.statusCode == 200) {
         final decoded = jsonDecode(res.body);
@@ -747,24 +911,33 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
         if (results != null) {
           for (final r in results) {
             final id = r['id']?.toString();
-            final hasLyrics = r['more_info']?['has_lyrics']?.toString() == 'true' ||
+            final hasLyrics =
+                r['more_info']?['has_lyrics']?.toString() == 'true' ||
                 r['has_lyrics']?.toString() == 'true';
             if (id == null || !hasLyrics) continue;
 
             final lyricsUrl = Uri.parse(
               'https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&lyrics_id=$id&ctx=web6dot0&api_version=4&_format=json',
             );
-            final lRes = await client.get(lyricsUrl, headers: {
-              'User-Agent': 'SaavnAndroid/9.0.0',
-              'Accept': 'application/json',
-            }).timeout(const Duration(seconds: 4));
+            final lRes = await client
+                .get(
+                  lyricsUrl,
+                  headers: {
+                    'User-Agent': 'SaavnAndroid/9.0.0',
+                    'Accept': 'application/json',
+                  },
+                )
+                .timeout(const Duration(seconds: 4));
 
             if (lRes.statusCode == 200) {
               final lData = jsonDecode(lRes.body);
               final rawLyrics = lData['lyrics']?.toString();
               if (rawLyrics != null && rawLyrics.trim().length > 10) {
                 final clean = rawLyrics
-                    .replaceAll(RegExp(r'<br\s*[\/]?>', caseSensitive: false), '\n')
+                    .replaceAll(
+                      RegExp(r'<br\s*[\/]?>', caseSensitive: false),
+                      '\n',
+                    )
                     .replaceAll('&quot;', '"')
                     .replaceAll('&#039;', "'")
                     .replaceAll('&amp;', '&')
@@ -774,7 +947,9 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
                 return {
                   'id': 'jio_$id',
                   'trackName': r['title']?.toString() ?? cleanTitle,
-                  'artistName': r['more_info']?['artistMap']?['primary_artists']?[0]?['name']?.toString() ??
+                  'artistName':
+                      r['more_info']?['artistMap']?['primary_artists']?[0]?['name']
+                          ?.toString() ??
                       r['subtitle']?.toString() ??
                       cleanArtist,
                   'plainLyrics': clean,
@@ -790,7 +965,11 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
     return null;
   }
 
-  Future<Map<String, dynamic>?> _fetchYtmLyrics(String videoId, String cleanTitle, String cleanArtist) async {
+  Future<Map<String, dynamic>?> _fetchYtmLyrics(
+    String videoId,
+    String cleanTitle,
+    String cleanArtist,
+  ) async {
     try {
       final nextUri = Uri.parse('https://music.youtube.com/youtubei/v1/next');
       final headers = {
@@ -806,38 +985,39 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
           'clientVersion': '1.20240101.01.00',
           'hl': 'en',
           'gl': 'IN',
-        }
+        },
       };
 
       final nextRes = await client
           .post(
             nextUri,
             headers: headers,
-            body: jsonEncode({
-              'videoId': videoId,
-              'context': context,
-            }),
+            body: jsonEncode({'videoId': videoId, 'context': context}),
           )
           .timeout(const Duration(seconds: 4));
 
       if (nextRes.statusCode == 200) {
         final nextData = jsonDecode(nextRes.body);
-        final tabs = nextData['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']
-            ?['watchNextTabbedResultsRenderer']?['tabs'] as List?;
+        final tabs =
+            nextData['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']?['watchNextTabbedResultsRenderer']?['tabs']
+                as List?;
         String? lyricsBrowseId;
         if (tabs != null) {
           for (final t in tabs) {
             final tab = t['tabRenderer'];
             final tabTitle = tab?['title']?.toString().toLowerCase() ?? '';
             if (tabTitle.contains('lyric')) {
-              lyricsBrowseId = tab?['endpoint']?['browseEndpoint']?['browseId']?.toString();
+              lyricsBrowseId = tab?['endpoint']?['browseEndpoint']?['browseId']
+                  ?.toString();
               break;
             }
           }
         }
 
         if (lyricsBrowseId != null && lyricsBrowseId.isNotEmpty) {
-          final browseUri = Uri.parse('https://music.youtube.com/youtubei/v1/browse');
+          final browseUri = Uri.parse(
+            'https://music.youtube.com/youtubei/v1/browse',
+          );
           final browseRes = await client
               .post(
                 browseUri,
@@ -851,10 +1031,14 @@ class CloudflareEdgeDatasourceImpl implements CloudflareEdgeDatasource {
 
           if (browseRes.statusCode == 200) {
             final browseData = jsonDecode(browseRes.body);
-            final section = browseData['contents']?['sectionListRenderer']?['contents']?[0]?['musicDescriptionShelfRenderer'];
+            final section =
+                browseData['contents']?['sectionListRenderer']?['contents']?[0]?['musicDescriptionShelfRenderer'];
             final runs = section?['description']?['runs'] as List?;
             if (runs != null) {
-              final text = runs.map((r) => r['text']?.toString() ?? '').join('').trim();
+              final text = runs
+                  .map((r) => r['text']?.toString() ?? '')
+                  .join('')
+                  .trim();
               if (text.length > 10) {
                 return {
                   'id': 'ytm_$videoId',

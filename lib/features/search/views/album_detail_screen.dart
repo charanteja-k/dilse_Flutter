@@ -20,10 +20,7 @@ import '../viewmodels/album_detail_viewmodel.dart';
 class AlbumDetailScreen extends StatelessWidget {
   final AlbumModel album;
 
-  const AlbumDetailScreen({
-    super.key,
-    required this.album,
-  });
+  const AlbumDetailScreen({super.key, required this.album});
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +75,8 @@ class _AlbumDetailView extends StatelessWidget {
               ),
             )
           : vm.errorMessage != null
-              ? _buildErrorView(context, vm)
-              : _buildContent(context, vm),
+          ? _buildErrorView(context, vm)
+          : _buildContent(context, vm),
     );
   }
 
@@ -156,7 +153,8 @@ class _AlbumDetailView extends StatelessWidget {
                       ? Image.network(
                           album.thumbnailUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildPlaceholderArt(context),
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildPlaceholderArt(context),
                         )
                       : _buildPlaceholderArt(context),
                 ),
@@ -222,7 +220,8 @@ class _AlbumDetailView extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => _playAll(context, tracks, shuffle: false),
+                          onPressed: () =>
+                              _playAll(context, tracks, shuffle: false),
                           icon: Icon(
                             Icons.play_arrow_rounded,
                             color: context.colors.oledBackground,
@@ -239,7 +238,9 @@ class _AlbumDetailView extends StatelessWidget {
                             backgroundColor: context.colors.textPrimary,
                             foregroundColor: context.colors.oledBackground,
                             elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: context.spacing.sm),
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.spacing.sm,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: context.radius.asBorderRadiusFull,
                             ),
@@ -249,7 +250,8 @@ class _AlbumDetailView extends StatelessWidget {
                       SizedBox(width: context.spacing.sm),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => _playAll(context, tracks, shuffle: true),
+                          onPressed: () =>
+                              _playAll(context, tracks, shuffle: true),
                           icon: Icon(
                             Icons.shuffle_rounded,
                             color: context.colors.textPrimary,
@@ -268,7 +270,9 @@ class _AlbumDetailView extends StatelessWidget {
                               width: context.sizes.borderThin,
                             ),
                             elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: context.spacing.sm),
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.spacing.sm,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: context.radius.asBorderRadiusFull,
                             ),
@@ -286,17 +290,19 @@ class _AlbumDetailView extends StatelessWidget {
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final song = tracks[index];
-                return _buildTrackTile(context, song, index + 1, tracks);
-              },
-              childCount: tracks.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final song = tracks[index];
+              return _buildTrackTile(context, song, index + 1, tracks);
+            }, childCount: tracks.length),
           ),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(height: context.sizes.miniPlayerHeight + context.sizes.navDockHeight + context.spacing.xl),
+          child: SizedBox(
+            height:
+                context.sizes.miniPlayerHeight +
+                context.sizes.navDockHeight +
+                context.spacing.xl,
+          ),
         ),
       ],
     );
@@ -375,7 +381,9 @@ class _AlbumDetailView extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.typography.titleMedium.copyWith(
-                      color: isCurrent ? context.colors.textPrimary : context.colors.textPrimary,
+                      color: isCurrent
+                          ? context.colors.textPrimary
+                          : context.colors.textPrimary,
                       fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
@@ -420,7 +428,11 @@ class _AlbumDetailView extends StatelessWidget {
     );
   }
 
-  void _playAll(BuildContext context, List<SongModel> tracks, {required bool shuffle}) {
+  void _playAll(
+    BuildContext context,
+    List<SongModel> tracks, {
+    required bool shuffle,
+  }) {
     HapticFeedback.mediumImpact();
     final playerVm = context.read<AudioPlayerViewModel>();
     final queue = List<SongModel>.from(tracks);

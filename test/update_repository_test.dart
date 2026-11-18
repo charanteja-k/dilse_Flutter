@@ -15,7 +15,8 @@ class _FakeUpdateRepository extends UpdateRepositoryImpl {
   _FakeUpdateRepository({required super.remoteDatasource});
 
   @override
-  Future<({String version, String buildNumber})> getInstalledPackageInfo() async {
+  Future<({String version, String buildNumber})>
+  getInstalledPackageInfo() async {
     return (version: '1.0.0', buildNumber: '1');
   }
 }
@@ -57,51 +58,55 @@ void main() {
   });
 
   group('GithubUpdateDatasourceImpl & UpdateViewModel', () {
-    test('prefers APK asset and falls back to /releases when /latest returns 404 for pre-release', () async {
-      final client = MockClient((request) async {
-        if (request.url.path.endsWith('/releases/latest')) {
-          return http.Response('{"message":"Not Found"}', 404);
-        }
-        if (request.url.path.endsWith('/releases')) {
-          return http.Response(
-            json.encode([
-              {
-                'tag_name': 'v1.0.2-beta',
-                'name': 'Beta Test Build',
-                'body': 'Added GitHub OTA updater',
-                'prerelease': true,
-                'draft': false,
-                'html_url': 'https://github.com/charanteja-k/dilse-releases/releases/tag/v1.0.2-beta',
-                'published_at': '2026-11-10T10:00:00Z',
-                'assets': [
-                  {
-                    'name': 'app-arm64-v8a-release.apk',
-                    'size': 25165824,
-                    'browser_download_url':
-                        'https://github.com/charanteja-k/dilse-releases/releases/download/v1.0.2-beta/app-arm64-v8a-release.apk',
-                  },
-                ],
-              },
-            ]),
-            200,
-          );
-        }
-        return http.Response('{}', 404);
-      });
+    test(
+      'prefers APK asset and falls back to /releases when /latest returns 404 for pre-release',
+      () async {
+        final client = MockClient((request) async {
+          if (request.url.path.endsWith('/releases/latest')) {
+            return http.Response('{"message":"Not Found"}', 404);
+          }
+          if (request.url.path.endsWith('/releases')) {
+            return http.Response(
+              json.encode([
+                {
+                  'tag_name': 'v1.0.2-beta',
+                  'name': 'Beta Test Build',
+                  'body': 'Added GitHub OTA updater',
+                  'prerelease': true,
+                  'draft': false,
+                  'html_url':
+                      'https://github.com/charanteja-k/dilse-releases/releases/tag/v1.0.2-beta',
+                  'published_at': '2026-11-10T10:00:00Z',
+                  'assets': [
+                    {
+                      'name': 'app-arm64-v8a-release.apk',
+                      'size': 25165824,
+                      'browser_download_url':
+                          'https://github.com/charanteja-k/dilse-releases/releases/download/v1.0.2-beta/app-arm64-v8a-release.apk',
+                    },
+                  ],
+                },
+              ]),
+              200,
+            );
+          }
+          return http.Response('{}', 404);
+        });
 
-      final repo = _FakeUpdateRepository(
-        remoteDatasource: GithubUpdateDatasourceImpl(client: client),
-      );
-      final vm = UpdateViewModel(updateRepository: repo);
+        final repo = _FakeUpdateRepository(
+          remoteDatasource: GithubUpdateDatasourceImpl(client: client),
+        );
+        final vm = UpdateViewModel(updateRepository: repo);
 
-      await vm.initialize();
+        await vm.initialize();
 
-      expect(vm.hasAvailableUpdate, isTrue);
-      expect(vm.latestUpdate?.tagName, equals('v1.0.2-beta'));
-      expect(vm.latestUpdate?.hasApk, isTrue);
-      expect(vm.latestUpdate?.formattedSize, equals('24.0 MB'));
-      expect(vm.downloadState.phase, equals(OtaDownloadPhase.idle));
-    });
+        expect(vm.hasAvailableUpdate, isTrue);
+        expect(vm.latestUpdate?.tagName, equals('v1.0.2-beta'));
+        expect(vm.latestUpdate?.hasApk, isTrue);
+        expect(vm.latestUpdate?.formattedSize, equals('24.0 MB'));
+        expect(vm.downloadState.phase, equals(OtaDownloadPhase.idle));
+      },
+    );
 
     test('parses custom GitHub repo URL and slug inputs cleanly', () async {
       final client = MockClient((request) async {
@@ -129,4 +134,3 @@ void main() {
     });
   });
 }
-

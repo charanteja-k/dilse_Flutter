@@ -4,11 +4,7 @@ import '../../../data/models/artist_model.dart';
 import '../../../data/models/song_model.dart';
 import '../../../data/repositories/audio_repository.dart';
 
-enum ArtistFilter {
-  all,
-  topTracks,
-  albums,
-}
+enum ArtistFilter { all, topTracks, albums }
 
 /// ViewModel managing artist profile state, top tracks, and discography albums.
 /// Follows AGENTS.md:
@@ -38,10 +34,7 @@ class ArtistDetailViewModel extends ChangeNotifier {
 
   bool _isDisposed = false;
 
-  ArtistDetailViewModel({
-    required this.audioRepository,
-    required this.artist,
-  }) {
+  ArtistDetailViewModel({required this.audioRepository, required this.artist}) {
     fetchArtistDetails();
   }
 
@@ -78,4 +71,3 @@ class ArtistDetailViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

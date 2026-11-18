@@ -66,7 +66,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void _onPageScrolled() {
     if (_pageController.hasClients &&
         _pageController.position.hasContentDimensions) {
-      final page = (_pageController.page ?? _activePageIndex.toDouble()).round();
+      final page = (_pageController.page ?? _activePageIndex.toDouble())
+          .round();
       if (page != _activePageIndex && page >= 0) {
         setState(() {
           _activePageIndex = page;
@@ -77,7 +78,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   void _triggerDoubleTapSeek(int direction) {
     HapticFeedback.lightImpact();
-    context.read<AudioPlayerViewModel>().seekRelative(Duration(seconds: direction * 10));
+    context.read<AudioPlayerViewModel>().seekRelative(
+      Duration(seconds: direction * 10),
+    );
     _doubleTapSeekTimer?.cancel();
     setState(() {
       _doubleTapSeekDirection = direction;
@@ -233,7 +236,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   children: [
                     // Top Header Bar
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: context.spacing.sm),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.spacing.sm,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -260,8 +265,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                 width: context.sizes.heroCardWidth * 0.15,
                                 height: context.spacing.xxs,
                                 decoration: BoxDecoration(
-                                  color: context.colors.textSecondary.withAlpha(80),
-                                  borderRadius: context.radius.asBorderRadiusFull,
+                                  color: context.colors.textSecondary.withAlpha(
+                                    80,
+                                  ),
+                                  borderRadius:
+                                      context.radius.asBorderRadiusFull,
                                 ),
                               ),
                             ),
@@ -304,9 +312,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                     opacity: _showLyrics ? 0.0 : 1.0,
                                     child: NotificationListener<ScrollNotification>(
                                       onNotification: (notification) {
-                                        if (notification is ScrollStartNotification) {
+                                        if (notification
+                                            is ScrollStartNotification) {
                                           _isUserDraggingPage = true;
-                                        } else if (notification is ScrollEndNotification) {
+                                        } else if (notification
+                                            is ScrollEndNotification) {
                                           _isUserDraggingPage = false;
                                         }
                                         return false;
@@ -320,27 +330,45 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                               _activePageIndex = index;
                                             });
                                           }
-                                          if (_isUserDraggingPage && index != player.currentIndex) {
+                                          if (_isUserDraggingPage &&
+                                              index != player.currentIndex) {
                                             HapticFeedback.selectionClick();
-                                            context.read<AudioPlayerViewModel>().skipToIndex(index);
+                                            context
+                                                .read<AudioPlayerViewModel>()
+                                                .skipToIndex(index);
                                           }
                                         },
                                         physics: const BouncingScrollPhysics(),
                                         itemBuilder: (context, index) {
                                           final track = queue[index];
-                                          final isCurrent = index == player.currentIndex;
+                                          final isCurrent =
+                                              index == player.currentIndex;
 
                                           return AnimatedBuilder(
                                             animation: _pageController,
                                             builder: (context, child) {
-                                              double page = player.currentIndex.toDouble();
+                                              double page = player.currentIndex
+                                                  .toDouble();
                                               if (_pageController.hasClients &&
-                                                  _pageController.position.hasContentDimensions) {
-                                                page = _pageController.page ?? player.currentIndex.toDouble();
+                                                  _pageController
+                                                      .position
+                                                      .hasContentDimensions) {
+                                                page =
+                                                    _pageController.page ??
+                                                    player.currentIndex
+                                                        .toDouble();
                                               }
                                               final diff = (page - index).abs();
-                                              final scale = (1.0 - (diff * 0.16)).clamp(0.84, 1.0);
-                                              final opacity = (1.0 - (diff * 0.45)).clamp(0.40, 1.0);
+                                              final scale =
+                                                  (1.0 - (diff * 0.16)).clamp(
+                                                    0.84,
+                                                    1.0,
+                                                  );
+                                              final opacity =
+                                                  (1.0 - (diff * 0.45)).clamp(
+                                                    0.40,
+                                                    1.0,
+                                                  );
 
                                               return Transform.scale(
                                                 scale: scale,
@@ -352,141 +380,248 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                             },
                                             child: Center(
                                               child: GestureDetector(
-                                                behavior: HitTestBehavior.opaque,
+                                                behavior:
+                                                    HitTestBehavior.opaque,
                                                 onDoubleTapDown: isCurrent
                                                     ? (details) {
-                                                        if (details.localPosition.dx < carouselSize / 2) {
-                                                          _triggerDoubleTapSeek(-1);
+                                                        if (details
+                                                                .localPosition
+                                                                .dx <
+                                                            carouselSize / 2) {
+                                                          _triggerDoubleTapSeek(
+                                                            -1,
+                                                          );
                                                         } else {
-                                                          _triggerDoubleTapSeek(1);
+                                                          _triggerDoubleTapSeek(
+                                                            1,
+                                                          );
                                                         }
                                                       }
                                                     : null,
                                                 child: Stack(
                                                   alignment: Alignment.center,
                                                   children: [
-                                                    player.artworkStyle == ArtworkStyle.vinyl
+                                                    player.artworkStyle ==
+                                                            ArtworkStyle.vinyl
                                                         ? VinylRecordPlayer(
-                                                            key: ValueKey('vinyl_${track.id}'),
-                                                            imageUrl: track.thumbnailUrl,
-                                                            isPlaying: isCurrent && player.isPlaying,
-                                                            dominantColor: isCurrent
+                                                            key: ValueKey(
+                                                              'vinyl_${track.id}',
+                                                            ),
+                                                            imageUrl: track
+                                                                .thumbnailUrl,
+                                                            isPlaying:
+                                                                isCurrent &&
+                                                                player
+                                                                    .isPlaying,
+                                                            dominantColor:
+                                                                isCurrent
                                                                 ? dominantColor
-                                                                : context.colors.floatingDockSurface,
-                                                            vibrantColor: isCurrent
+                                                                : context
+                                                                      .colors
+                                                                      .floatingDockSurface,
+                                                            vibrantColor:
+                                                                isCurrent
                                                                 ? vibrantColor
-                                                                : context.colors.brandRuby,
-                                                            size: carouselSize * 0.94,
+                                                                : context
+                                                                      .colors
+                                                                      .brandRuby,
+                                                            size:
+                                                                carouselSize *
+                                                                0.94,
                                                           )
                                                         : Container(
                                                             width: carouselSize,
-                                                            height: carouselSize,
+                                                            height:
+                                                                carouselSize,
                                                             decoration: BoxDecoration(
-                                                              borderRadius: BorderRadius.circular(
-                                                                context.sizes.playerArtworkRadius,
-                                                              ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    context
+                                                                        .sizes
+                                                                        .playerArtworkRadius,
+                                                                  ),
                                                               boxShadow: [
                                                                 BoxShadow(
-                                                                  color: (isCurrent
-                                                                          ? dominantColor
-                                                                          : context.colors.oledBackground)
-                                                                      .withAlpha(150),
-                                                                  blurRadius: 36,
-                                                                  spreadRadius: 6,
-                                                                  offset: const Offset(0, 16),
+                                                                  color:
+                                                                      (isCurrent
+                                                                              ? dominantColor
+                                                                              : context.colors.oledBackground)
+                                                                          .withAlpha(
+                                                                            150,
+                                                                          ),
+                                                                  blurRadius:
+                                                                      36,
+                                                                  spreadRadius:
+                                                                      6,
+                                                                  offset:
+                                                                      const Offset(
+                                                                        0,
+                                                                        16,
+                                                                      ),
                                                                 ),
                                                                 BoxShadow(
-                                                                  color: (isCurrent
-                                                                          ? vibrantColor
-                                                                          : context.colors.oledBackground)
-                                                                      .withAlpha(90),
-                                                                  blurRadius: 48,
-                                                                  spreadRadius: 8,
-                                                                  offset: const Offset(0, 8),
+                                                                  color:
+                                                                      (isCurrent
+                                                                              ? vibrantColor
+                                                                              : context.colors.oledBackground)
+                                                                          .withAlpha(
+                                                                            90,
+                                                                          ),
+                                                                  blurRadius:
+                                                                      48,
+                                                                  spreadRadius:
+                                                                      8,
+                                                                  offset:
+                                                                      const Offset(
+                                                                        0,
+                                                                        8,
+                                                                      ),
                                                                 ),
                                                               ],
                                                             ),
                                                             child: ClipRRect(
-                                                              borderRadius: BorderRadius.circular(
-                                                                context.sizes.playerArtworkRadius,
-                                                              ),
-                                                              child: track.thumbnailUrl.isNotEmpty
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    context
+                                                                        .sizes
+                                                                        .playerArtworkRadius,
+                                                                  ),
+                                                              child:
+                                                                  track
+                                                                      .thumbnailUrl
+                                                                      .isNotEmpty
                                                                   ? Image.network(
-                                                                      track.thumbnailUrl,
-                                                                      fit: BoxFit.cover,
-                                                                      errorBuilder: (context, error, stackTrace) =>
-                                                                          Container(
-                                                                        color: context.colors.cardDarkSurface,
-                                                                        child: Icon(
-                                                                          Icons.music_note,
-                                                                          color: context.colors.textSecondary,
-                                                                          size: context.sizes.iconLg * 2,
-                                                                        ),
-                                                                      ),
+                                                                      track
+                                                                          .thumbnailUrl,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      errorBuilder:
+                                                                          (
+                                                                            context,
+                                                                            error,
+                                                                            stackTrace,
+                                                                          ) => Container(
+                                                                            color:
+                                                                                context.colors.cardDarkSurface,
+                                                                            child: Icon(
+                                                                              Icons.music_note,
+                                                                              color: context.colors.textSecondary,
+                                                                              size:
+                                                                                  context.sizes.iconLg *
+                                                                                  2,
+                                                                            ),
+                                                                          ),
                                                                     )
                                                                   : Container(
-                                                                      color: context.colors.cardDarkSurface,
+                                                                      color: context
+                                                                          .colors
+                                                                          .cardDarkSurface,
                                                                       child: Icon(
-                                                                        Icons.music_note,
-                                                                        color: context.colors.textSecondary,
-                                                                        size: context.sizes.iconLg * 2,
+                                                                        Icons
+                                                                            .music_note,
+                                                                        color: context
+                                                                            .colors
+                                                                            .textSecondary,
+                                                                        size:
+                                                                            context.sizes.iconLg *
+                                                                            2,
                                                                       ),
                                                                     ),
                                                             ),
                                                           ),
 
                                                     // Double-Tap Quick Seek Visual Badge
-                                                    if (isCurrent && _doubleTapSeekDirection != null)
+                                                    if (isCurrent &&
+                                                        _doubleTapSeekDirection !=
+                                                            null)
                                                       Positioned.fill(
                                                         child: IgnorePointer(
                                                           child: AnimatedOpacity(
-                                                            duration: const Duration(milliseconds: 150),
+                                                            duration:
+                                                                const Duration(
+                                                                  milliseconds:
+                                                                      150,
+                                                                ),
                                                             opacity: 1.0,
                                                             child: Container(
                                                               decoration: BoxDecoration(
-                                                                borderRadius: BorderRadius.circular(
-                                                                  context.sizes.playerArtworkRadius,
-                                                                ),
-                                                                color: context.colors.oledBackground.withAlpha(90),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      context
+                                                                          .sizes
+                                                                          .playerArtworkRadius,
+                                                                    ),
+                                                                color: context
+                                                                    .colors
+                                                                    .oledBackground
+                                                                    .withAlpha(
+                                                                      90,
+                                                                    ),
                                                               ),
                                                               child: Align(
-                                                                alignment: _doubleTapSeekDirection == -1
-                                                                    ? Alignment.centerLeft
-                                                                    : Alignment.centerRight,
+                                                                alignment:
+                                                                    _doubleTapSeekDirection ==
+                                                                        -1
+                                                                    ? Alignment
+                                                                          .centerLeft
+                                                                    : Alignment
+                                                                          .centerRight,
                                                                 child: Container(
-                                                                  width: carouselSize * 0.48,
-                                                                  height: carouselSize,
+                                                                  width:
+                                                                      carouselSize *
+                                                                      0.48,
+                                                                  height:
+                                                                      carouselSize,
                                                                   decoration: BoxDecoration(
                                                                     borderRadius: BorderRadius.horizontal(
-                                                                      left: _doubleTapSeekDirection == -1
+                                                                      left:
+                                                                          _doubleTapSeekDirection ==
+                                                                              -1
                                                                           ? Radius.circular(
                                                                               context.sizes.playerArtworkRadius,
                                                                             )
                                                                           : Radius.zero,
-                                                                      right: _doubleTapSeekDirection == 1
+                                                                      right:
+                                                                          _doubleTapSeekDirection ==
+                                                                              1
                                                                           ? Radius.circular(
                                                                               context.sizes.playerArtworkRadius,
                                                                             )
                                                                           : Radius.zero,
                                                                     ),
-                                                                    color: Colors.white.withAlpha(46),
+                                                                    color: Colors
+                                                                        .white
+                                                                        .withAlpha(
+                                                                          46,
+                                                                        ),
                                                                   ),
                                                                   child: Column(
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
                                                                     children: [
                                                                       Icon(
-                                                                        _doubleTapSeekDirection == -1
+                                                                        _doubleTapSeekDirection ==
+                                                                                -1
                                                                             ? Icons.replay_10_rounded
                                                                             : Icons.forward_10_rounded,
-                                                                        color: Colors.white,
-                                                                        size: 42,
+                                                                        color: Colors
+                                                                            .white,
+                                                                        size:
+                                                                            42,
                                                                       ),
-                                                                      SizedBox(height: context.spacing.xxs),
+                                                                      SizedBox(
+                                                                        height: context
+                                                                            .spacing
+                                                                            .xxs,
+                                                                      ),
                                                                       Text(
                                                                         '${_doubleTapSeekDirection == -1 ? '-' : '+'}${(_doubleTapSeekCounter.clamp(1, 99)) * 10} sec',
                                                                         style: context.typography.titleMedium.copyWith(
-                                                                          color: Colors.white,
-                                                                          fontWeight: FontWeight.bold,
+                                                                          color:
+                                                                              Colors.white,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
                                                                         ),
                                                                       ),
                                                                     ],
@@ -522,7 +657,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                         vertical: context.spacing.sm,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: context.colors.oledBackground.withAlpha(56),
+                                        color: context.colors.oledBackground
+                                            .withAlpha(56),
                                         borderRadius: BorderRadius.circular(
                                           context.radius.artwork,
                                         ),
@@ -531,21 +667,30 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                           ? Center(
                                               child: CircularProgressIndicator(
                                                 color: vibrantColor,
-                                                strokeWidth: context.spacing.xxs,
+                                                strokeWidth:
+                                                    context.spacing.xxs,
                                               ),
                                             )
                                           : AnimatedLyrics(
-                                              key: ValueKey('lyrics_${shownSong.id}'),
-                                              rawLyrics: player.currentLyricsSynced ??
+                                              key: ValueKey(
+                                                'lyrics_${shownSong.id}',
+                                              ),
+                                              rawLyrics:
+                                                  player.currentLyricsSynced ??
                                                   player.currentLyricsPlain ??
                                                   '',
                                               songTitle: shownSong.title,
                                               songArtist: shownSong.artist,
-                                              positionStream: player.positionStream,
+                                              positionStream:
+                                                  player.positionStream,
                                               initialPosition: player.position,
                                               vibrantColor: vibrantColor,
                                               onSeek: (target) {
-                                                context.read<AudioPlayerViewModel>().seek(target);
+                                                context
+                                                    .read<
+                                                      AudioPlayerViewModel
+                                                    >()
+                                                    .seek(target);
                                               },
                                             ),
                                     ),
@@ -562,7 +707,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
                     // Track Metadata & Action Icons
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.spacing.md,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -584,7 +731,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                         shownSong.artist,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: context.typography.playerSubtitle,
+                                        style:
+                                            context.typography.playerSubtitle,
                                       ),
                                     ),
                                     SizedBox(width: context.spacing.xs),
@@ -595,7 +743,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: Colors.white.withAlpha(30),
-                                        borderRadius: context.radius.asBorderRadiusXs,
+                                        borderRadius:
+                                            context.radius.asBorderRadiusXs,
                                         border: Border.all(
                                           color: Colors.white.withAlpha(40),
                                           width: context.sizes.borderThin,
@@ -605,12 +754,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                         shownSong.bitrate.isNotEmpty
                                             ? '${shownSong.bitrate.toUpperCase()} AAC'
                                             : '320 KBPS AAC',
-                                        style: context.typography.captionMuted.copyWith(
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                          color: context.colors.textPrimary,
-                                        ),
+                                        style: context.typography.captionMuted
+                                            .copyWith(
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.4,
+                                              color: context.colors.textPrimary,
+                                            ),
                                       ),
                                     ),
                                   ],
@@ -632,7 +782,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             tooltip: 'Shuffle',
                             onPressed: () {
                               HapticFeedback.selectionClick();
-                              context.read<AudioPlayerViewModel>().toggleShuffle();
+                              context
+                                  .read<AudioPlayerViewModel>()
+                                  .toggleShuffle();
                             },
                           ),
 
@@ -651,7 +803,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             tooltip: 'Repeat',
                             onPressed: () {
                               HapticFeedback.selectionClick();
-                              context.read<AudioPlayerViewModel>().toggleRepeatMode();
+                              context
+                                  .read<AudioPlayerViewModel>()
+                                  .toggleRepeatMode();
                             },
                           ),
 
@@ -670,10 +824,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             tooltip: isLiked ? 'Unlike' : 'Like',
                             onPressed: () {
                               HapticFeedback.lightImpact();
-                              context.read<AudioPlayerViewModel>().toggleLike(shownSong);
+                              context.read<AudioPlayerViewModel>().toggleLike(
+                                shownSong,
+                              );
                               DilSeNotification.heart(
                                 context,
-                                isLiked ? 'Removed from Liked Songs' : 'Added to Liked Songs',
+                                isLiked
+                                    ? 'Removed from Liked Songs'
+                                    : 'Added to Liked Songs',
                                 subtitle: shownSong.title,
                               );
                             },
@@ -686,7 +844,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
                     // Acoustic Waveform Scrubber
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.spacing.md,
+                      ),
                       child: WaveformScrubber(
                         position: player.position,
                         duration: player.duration > Duration.zero
@@ -717,7 +877,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             scaleDown: 0.88,
                             onTap: () {
                               HapticFeedback.mediumImpact();
-                              context.read<AudioPlayerViewModel>().skipPrevious();
+                              context
+                                  .read<AudioPlayerViewModel>()
+                                  .skipPrevious();
                             },
                             child: SizedBox(
                               width: context.sizes.playerSkipIconSize + 16,
@@ -739,7 +901,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             scaleDown: 0.92,
                             onTap: () {
                               HapticFeedback.mediumImpact();
-                              context.read<AudioPlayerViewModel>().togglePlayPause();
+                              context
+                                  .read<AudioPlayerViewModel>()
+                                  .togglePlayPause();
                             },
                             child: SizedBox(
                               width: context.sizes.playerHeroPlaySize,
@@ -750,31 +914,40 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                         width: context.sizes.iconLg,
                                         height: context.sizes.iconLg,
                                         child: CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            context.colors.textPrimary,
-                                          ),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                context.colors.textPrimary,
+                                              ),
                                           strokeWidth: context.spacing.xxs,
                                         ),
                                       ),
                                     )
                                   : Center(
                                       child: AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 220),
+                                        duration: const Duration(
+                                          milliseconds: 220,
+                                        ),
                                         transitionBuilder: (child, animation) =>
                                             ScaleTransition(
-                                          scale: animation,
-                                          child: FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                          ),
-                                        ),
+                                              scale: animation,
+                                              child: FadeTransition(
+                                                opacity: animation,
+                                                child: child,
+                                              ),
+                                            ),
                                         child: Icon(
                                           player.isPlaying
-                                              ? Icons.pause_circle_filled_rounded
-                                              : Icons.play_circle_filled_rounded,
+                                              ? Icons
+                                                    .pause_circle_filled_rounded
+                                              : Icons
+                                                    .play_circle_filled_rounded,
                                           key: ValueKey<bool>(player.isPlaying),
                                           color: context.colors.textPrimary,
-                                          size: context.sizes.playerHeroPlayIconSize + 16,
+                                          size:
+                                              context
+                                                  .sizes
+                                                  .playerHeroPlayIconSize +
+                                              16,
                                         ),
                                       ),
                                     ),
@@ -841,7 +1014,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                   decoration: _showLyrics
                                       ? BoxDecoration(
                                           color: vibrantColor.withAlpha(50),
-                                          borderRadius: context.radius.asBorderRadiusLg,
+                                          borderRadius:
+                                              context.radius.asBorderRadiusLg,
                                         )
                                       : null,
                                   child: Column(
@@ -859,14 +1033,17 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       SizedBox(height: context.spacing.xxs),
                                       Text(
                                         'Lyrics',
-                                        style: context.typography.captionMuted.copyWith(
-                                          color: _showLyrics
-                                              ? vibrantColor
-                                              : context.colors.textSecondary,
-                                          fontWeight: _showLyrics
-                                              ? FontWeight.w700
-                                              : FontWeight.w500,
-                                        ),
+                                        style: context.typography.captionMuted
+                                            .copyWith(
+                                              color: _showLyrics
+                                                  ? vibrantColor
+                                                  : context
+                                                        .colors
+                                                        .textSecondary,
+                                              fontWeight: _showLyrics
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w500,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -903,20 +1080,27 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                               right: -10,
                                               child: Container(
                                                 padding: EdgeInsets.symmetric(
-                                                  horizontal: context.spacing.xxs,
+                                                  horizontal:
+                                                      context.spacing.xxs,
                                                   vertical: 1.5,
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: vibrantColor,
-                                                  borderRadius: context.radius.asBorderRadiusSm,
+                                                  borderRadius: context
+                                                      .radius
+                                                      .asBorderRadiusSm,
                                                 ),
                                                 child: Text(
                                                   '${queue.length}',
-                                                  style: context.typography.captionMuted.copyWith(
-                                                    color: Colors.white,
-                                                    fontSize: 9.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                  style: context
+                                                      .typography
+                                                      .captionMuted
+                                                      .copyWith(
+                                                        color: Colors.white,
+                                                        fontSize: 9.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -938,7 +1122,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           Expanded(
                             child: Center(
                               child: _BorderlessScaleButton(
-                                onTap: () => SongOptionsBottomSheet.show(context, shownSong),
+                                onTap: () => SongOptionsBottomSheet.show(
+                                  context,
+                                  shownSong,
+                                ),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: context.spacing.sm,

@@ -24,11 +24,7 @@ class SearchScreen extends StatefulWidget {
   final VoidCallback? onBackToHome;
   final bool autoFocus;
 
-  const SearchScreen({
-    super.key,
-    this.onBackToHome,
-    this.autoFocus = false,
-  });
+  const SearchScreen({super.key, this.onBackToHome, this.autoFocus = false});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -110,7 +106,9 @@ class _SearchScreenState extends State<SearchScreen> {
               _buildSearchHeader(context, searchVm),
 
               // Filter Rail (Visible when search has query or results)
-              if (searchVm.query.isNotEmpty && !searchVm.isLoading && searchVm.errorMessage == null)
+              if (searchVm.query.isNotEmpty &&
+                  !searchVm.isLoading &&
+                  searchVm.errorMessage == null)
                 _buildFilterRail(context, searchVm),
 
               // Main Content Area
@@ -122,12 +120,12 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       )
                     : searchVm.errorMessage != null
-                        ? _buildErrorView(context, searchVm)
-                        : searchVm.query.isEmpty
-                            ? _buildExploreView(context, searchVm)
-                            : !searchVm.hasResults
-                                ? _buildEmptyResultsView(context, searchVm)
-                                : _buildSearchResultsList(context, searchVm),
+                    ? _buildErrorView(context, searchVm)
+                    : searchVm.query.isEmpty
+                    ? _buildExploreView(context, searchVm)
+                    : !searchVm.hasResults
+                    ? _buildEmptyResultsView(context, searchVm)
+                    : _buildSearchResultsList(context, searchVm),
               ),
             ],
           ),
@@ -214,7 +212,8 @@ class _SearchScreenState extends State<SearchScreen> {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: SearchFilter.values.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.xs),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.xs),
         itemBuilder: (context, index) {
           final filter = SearchFilter.values[index];
           final isSelected = filter == searchVm.selectedFilter;
@@ -231,10 +230,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 vertical: context.spacing.xxs,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? context.colors.brandRuby : context.colors.cardDarkSurface,
+                color: isSelected
+                    ? context.colors.brandRuby
+                    : context.colors.cardDarkSurface,
                 borderRadius: context.radius.asBorderRadiusFull,
                 border: Border.all(
-                  color: isSelected ? context.colors.brandRuby : context.colors.solidMatteBorder,
+                  color: isSelected
+                      ? context.colors.brandRuby
+                      : context.colors.solidMatteBorder,
                   width: context.sizes.borderThin,
                 ),
               ),
@@ -242,7 +245,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Text(
                   filter.label,
                   style: context.typography.captionMuted.copyWith(
-                    color: isSelected ? context.colors.oledBackground : context.colors.textPrimary,
+                    color: isSelected
+                        ? context.colors.oledBackground
+                        : context.colors.textPrimary,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                   ),
                 ),
@@ -264,7 +269,8 @@ class _SearchScreenState extends State<SearchScreen> {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.sm,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -274,10 +280,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'RECENT SEARCHES',
-                style: context.typography.eyebrow,
-              ),
+              Text('RECENT SEARCHES', style: context.typography.eyebrow),
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -331,10 +334,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         size: context.sizes.iconSm - 2,
                       ),
                       SizedBox(width: context.spacing.xs),
-                      Text(
-                        term,
-                        style: context.typography.titleMedium,
-                      ),
+                      Text(term, style: context.typography.titleMedium),
                       SizedBox(width: context.spacing.xs),
                       GestureDetector(
                         onTap: () {
@@ -360,10 +360,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'EXPLORE GENRES & VIBES',
-              style: context.typography.eyebrow,
-            ),
+            Text('EXPLORE GENRES & VIBES', style: context.typography.eyebrow),
             Icon(
               Icons.explore_outlined,
               color: context.colors.brandRuby,
@@ -381,7 +378,8 @@ class _SearchScreenState extends State<SearchScreen> {
             crossAxisCount: 2,
             crossAxisSpacing: context.spacing.xs,
             mainAxisSpacing: context.spacing.xs,
-            mainAxisExtent: context.sizes.quickAccessTileHeight + context.spacing.lg,
+            mainAxisExtent:
+                context.sizes.quickAccessTileHeight + context.spacing.lg,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
@@ -426,7 +424,10 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildSearchResultsList(BuildContext context, SearchViewModel searchVm) {
+  Widget _buildSearchResultsList(
+    BuildContext context,
+    SearchViewModel searchVm,
+  ) {
     if (searchVm.selectedFilter == SearchFilter.albums) {
       return _buildAlbumsView(context, searchVm);
     }
@@ -451,7 +452,8 @@ class _SearchScreenState extends State<SearchScreen> {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.xs,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -460,13 +462,19 @@ class _SearchScreenState extends State<SearchScreen> {
         if (topSong != null) ...[
           Padding(
             padding: EdgeInsets.only(top: context.spacing.xs),
-            child: _buildSpotlightCard(context, topSong, currentSong, isPlaying),
+            child: _buildSpotlightCard(
+              context,
+              topSong,
+              currentSong,
+              isPlaying,
+            ),
           ),
           SizedBox(height: context.spacing.md),
         ],
 
         // On "All Results", show matching Albums shelf if present
-        if (searchVm.selectedFilter == SearchFilter.all && albums.isNotEmpty) ...[
+        if (searchVm.selectedFilter == SearchFilter.all &&
+            albums.isNotEmpty) ...[
           _buildSectionHeaderWithAction(
             context,
             'ALBUMS',
@@ -479,7 +487,8 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
 
         // On "All Results", show matching Artists shelf if present
-        if (searchVm.selectedFilter == SearchFilter.all && artists.isNotEmpty) ...[
+        if (searchVm.selectedFilter == SearchFilter.all &&
+            artists.isNotEmpty) ...[
           _buildSectionHeaderWithAction(
             context,
             'ARTISTS',
@@ -495,10 +504,7 @@ class _SearchScreenState extends State<SearchScreen> {
         if (songs.isNotEmpty) ...[
           Padding(
             padding: EdgeInsets.only(bottom: context.spacing.xs),
-            child: Text(
-              'TRACKS',
-              style: context.typography.eyebrow,
-            ),
+            child: Text('TRACKS', style: context.typography.eyebrow),
           ),
           ...List.generate(songs.length, (index) {
             final song = songs[index];
@@ -524,10 +530,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: context.typography.eyebrow,
-        ),
+        Text(title, style: context.typography.eyebrow),
         GestureDetector(
           onTap: () {
             HapticFeedback.lightImpact();
@@ -548,14 +551,18 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildHorizontalAlbumShelf(BuildContext context, List<AlbumModel> albums) {
+  Widget _buildHorizontalAlbumShelf(
+    BuildContext context,
+    List<AlbumModel> albums,
+  ) {
     return SizedBox(
       height: 148,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: albums.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.sm),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.sm),
         itemBuilder: (context, index) {
           final album = albums[index];
           return GestureDetector(
@@ -575,11 +582,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           ? Image.network(
                               album.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.album_rounded,
-                                color: context.colors.textSecondary,
-                                size: context.sizes.iconLg,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.album_rounded,
+                                    color: context.colors.textSecondary,
+                                    size: context.sizes.iconLg,
+                                  ),
                             )
                           : Icon(
                               Icons.album_rounded,
@@ -613,14 +621,18 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildHorizontalArtistShelf(BuildContext context, List<ArtistModel> artists) {
+  Widget _buildHorizontalArtistShelf(
+    BuildContext context,
+    List<ArtistModel> artists,
+  ) {
     return SizedBox(
       height: 130,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: artists.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.md),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.md),
         itemBuilder: (context, index) {
           final artist = artists[index];
           return GestureDetector(
@@ -638,11 +650,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           ? Image.network(
                               artist.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.person_rounded,
-                                color: context.colors.textSecondary,
-                                size: context.sizes.iconLg,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.person_rounded,
+                                    color: context.colors.textSecondary,
+                                    size: context.sizes.iconLg,
+                                  ),
                             )
                           : Icon(
                               Icons.person_rounded,
@@ -698,7 +711,8 @@ class _SearchScreenState extends State<SearchScreen> {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.sm,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -752,7 +766,9 @@ class _SearchScreenState extends State<SearchScreen> {
               Text(
                 album.artist.isNotEmpty
                     ? '${album.artist} • ${album.year}'
-                    : (album.language.isNotEmpty ? '${album.language} • ${album.year}' : album.year),
+                    : (album.language.isNotEmpty
+                          ? '${album.language} • ${album.year}'
+                          : album.year),
                 style: context.typography.captionMuted,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -784,12 +800,14 @@ class _SearchScreenState extends State<SearchScreen> {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.sm,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
       itemCount: artists.length,
-      separatorBuilder: (context, index) => SizedBox(height: context.spacing.sm),
+      separatorBuilder: (context, index) =>
+          SizedBox(height: context.spacing.sm),
       itemBuilder: (context, index) {
         final artist = artists[index];
         return GestureDetector(
@@ -866,19 +884,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onAlbumTapped(BuildContext context, AlbumModel album) {
     HapticFeedback.lightImpact();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AlbumDetailScreen(album: album),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => AlbumDetailScreen(album: album)));
   }
 
   void _onArtistTapped(BuildContext context, ArtistModel artist) {
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ArtistDetailScreen(artist: artist),
-      ),
+      MaterialPageRoute(builder: (_) => ArtistDetailScreen(artist: artist)),
     );
   }
 
@@ -897,7 +911,9 @@ class _SearchScreenState extends State<SearchScreen> {
         color: context.colors.cardDarkSurface,
         borderRadius: context.radius.asBorderRadiusLg,
         border: Border.all(
-          color: isThisPlaying ? context.colors.brandRuby : context.colors.solidMatteBorder,
+          color: isThisPlaying
+              ? context.colors.brandRuby
+              : context.colors.solidMatteBorder,
           width: context.sizes.borderThin,
         ),
       ),
@@ -1086,10 +1102,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
               // Duration text
               if (durationStr.isNotEmpty) ...[
-                Text(
-                  durationStr,
-                  style: context.typography.captionMuted,
-                ),
+                Text(durationStr, style: context.typography.captionMuted),
                 SizedBox(width: context.spacing.xs),
               ],
 
@@ -1111,7 +1124,10 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildEmptyResultsView(BuildContext context, SearchViewModel searchVm) {
+  Widget _buildEmptyResultsView(
+    BuildContext context,
+    SearchViewModel searchVm,
+  ) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(context.spacing.xl),
@@ -1200,7 +1216,8 @@ class _MiniEqualizerWave extends StatefulWidget {
   State<_MiniEqualizerWave> createState() => _MiniEqualizerWaveState();
 }
 
-class _MiniEqualizerWaveState extends State<_MiniEqualizerWave> with SingleTickerProviderStateMixin {
+class _MiniEqualizerWaveState extends State<_MiniEqualizerWave>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override

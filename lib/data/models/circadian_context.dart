@@ -19,7 +19,10 @@ class CircadianContext {
   });
 
   /// Factory resolving current context based on the wall-clock hour.
-  factory CircadianContext.fromHour(int hour, {String primaryLanguage = 'Telugu'}) {
+  factory CircadianContext.fromHour(
+    int hour, {
+    String primaryLanguage = 'Telugu',
+  }) {
     if (hour >= 5 && hour < 12) {
       return CircadianContext(
         title: 'Morning Melodies',
@@ -56,4 +59,3 @@ class CircadianContext {
     );
   }
 }
-

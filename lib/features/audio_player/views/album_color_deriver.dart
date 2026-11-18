@@ -38,7 +38,9 @@ class AlbumColorDeriver {
 
     // Instant deterministic color mapping based on song metadata.
     // Curated with high saturation and deep luminance for rich ambient aura behind the player.
-    final hash = (song.title.hashCode ^ (song.artist.hashCode * 31) ^ (id.hashCode * 17)).abs();
+    final hash =
+        (song.title.hashCode ^ (song.artist.hashCode * 31) ^ (id.hashCode * 17))
+            .abs();
     final double hue = (hash % 360).toDouble();
 
     final dominant = HSLColor.fromAHSL(1.0, hue, 0.65, 0.22).toColor();
@@ -64,4 +66,3 @@ class AlbumColorDeriver {
     _cache.clear();
   }
 }
-

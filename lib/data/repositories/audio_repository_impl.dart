@@ -12,19 +12,35 @@ class AudioRepositoryImpl implements AudioRepository {
   AudioRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) {
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) {
     return remoteDatasource.searchAlbums(query, limit: limit, page: page);
   }
 
   @override
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) {
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) {
     return remoteDatasource.searchArtists(query, limit: limit, page: page);
   }
 
   @override
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  }) async {
     // 1. Fetch search results with requested limit
-    final rawResults = await remoteDatasource.searchSongs(query, limit: limit, page: page);
+    final rawResults = await remoteDatasource.searchSongs(
+      query,
+      limit: limit,
+      page: page,
+    );
 
     // 2. Client-side fast deduplication: suppress identical title + artist playlist clones
     final seenKeys = <String>{};
@@ -41,11 +57,19 @@ class AudioRepositoryImpl implements AudioRepository {
     // 3. Smart enrichment: if duplicate clones were removed, pull top artist tracks
     // to fill the list up to the requested limit so the user has full variety.
     if (distinctSongs.isNotEmpty && distinctSongs.length < limit) {
-      final primaryArtist = distinctSongs.first.artist.split(RegExp(r'[,/|&]')).first.trim();
-      if (primaryArtist.isNotEmpty && !primaryArtist.toLowerCase().contains('unknown')) {
+      final primaryArtist = distinctSongs.first.artist
+          .split(RegExp(r'[,/|&]'))
+          .first
+          .trim();
+      if (primaryArtist.isNotEmpty &&
+          !primaryArtist.toLowerCase().contains('unknown')) {
         try {
           final neededCount = limit - distinctSongs.length;
-          final artistResults = await remoteDatasource.searchSongs(primaryArtist, limit: neededCount + 5, page: 1);
+          final artistResults = await remoteDatasource.searchSongs(
+            primaryArtist,
+            limit: neededCount + 5,
+            page: 1,
+          );
           for (final song in artistResults) {
             final key = '${song.title.trim()}:::${song.artist.trim()}';
             if (!seenKeys.contains(key)) {
@@ -67,7 +91,10 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   @override
-  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId) {
+  Future<
+    ({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})
+  >
+  getArtistDetails(String artistId) {
     return remoteDatasource.getArtistDetails(artistId);
   }
 
@@ -77,7 +104,10 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   @override
-  Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15}) {
+  Future<List<SongModel>> getRecommendations({
+    String query = 'telugu',
+    int limit = 15,
+  }) {
     return remoteDatasource.getRecommendations(query: query, limit: limit);
   }
 
@@ -95,14 +125,20 @@ class AudioRepositoryImpl implements AudioRepository {
     final seedQuery = isYtId
         ? seedSong.id
         : '${seedSong.title} $primaryArtist'.trim();
-    List<Map<String, dynamic>> ytmTracks = await remoteDatasource.fetchYtmRadioTracks(seedQuery, limit: limit);
+    List<Map<String, dynamic>> ytmTracks = await remoteDatasource
+        .fetchYtmRadioTracks(seedQuery, limit: limit);
 
     // Fallback Tier 1: If over-specified title query returned empty, try clean title alone
     if (ytmTracks.isEmpty && !isYtId && seedSong.title.isNotEmpty) {
       final cleanT = _cleanSeedTitle(seedSong.title);
       if (cleanT.isNotEmpty && cleanT != seedQuery) {
-        final retryQuery = primaryArtist.isNotEmpty ? '$cleanT $primaryArtist' : cleanT;
-        ytmTracks = await remoteDatasource.fetchYtmRadioTracks(retryQuery, limit: limit);
+        final retryQuery = primaryArtist.isNotEmpty
+            ? '$cleanT $primaryArtist'
+            : cleanT;
+        ytmTracks = await remoteDatasource.fetchYtmRadioTracks(
+          retryQuery,
+          limit: limit,
+        );
       }
     }
 
@@ -112,7 +148,9 @@ class AudioRepositoryImpl implements AudioRepository {
     // Fallback Tier 2: If YouTube Music radio graph still returned empty,
     // populate queue using JioSaavn search on primary artist or title keywords
     if (ytmTracks.isEmpty) {
-      final fallbackTerm = primaryArtist.isNotEmpty ? primaryArtist : seedSong.title;
+      final fallbackTerm = primaryArtist.isNotEmpty
+          ? primaryArtist
+          : seedSong.title;
       try {
         final fallbackSongs = await searchSongs(fallbackTerm, limit: limit);
         for (final song in fallbackSongs) {
@@ -131,8 +169,11 @@ class AudioRepositoryImpl implements AudioRepository {
     for (final track in ytmTracks) {
       final id = (track['id'] ?? '').toString();
       final title = (track['title'] ?? '').toString().trim();
-      final artist = (track['author'] ?? track['artist'] ?? '').toString().trim();
-      final thumbnail = (track['thumbnail'] ?? track['thumbnailUrl'] ?? '').toString();
+      final artist = (track['author'] ?? track['artist'] ?? '')
+          .toString()
+          .trim();
+      final thumbnail = (track['thumbnail'] ?? track['thumbnailUrl'] ?? '')
+          .toString();
       final rawDuration = track['duration'];
 
       if (id.isEmpty || title.isEmpty) continue;
@@ -152,24 +193,35 @@ class AudioRepositoryImpl implements AudioRepository {
         } else if (rawDuration.contains(':')) {
           final parts = rawDuration.trim().split(':');
           if (parts.length == 2) {
-            parsedDur = Duration(minutes: int.tryParse(parts[0]) ?? 0, seconds: int.tryParse(parts[1]) ?? 0);
+            parsedDur = Duration(
+              minutes: int.tryParse(parts[0]) ?? 0,
+              seconds: int.tryParse(parts[1]) ?? 0,
+            );
           } else if (parts.length == 3) {
-            parsedDur = Duration(hours: int.tryParse(parts[0]) ?? 0, minutes: int.tryParse(parts[1]) ?? 0, seconds: int.tryParse(parts[2]) ?? 0);
+            parsedDur = Duration(
+              hours: int.tryParse(parts[0]) ?? 0,
+              minutes: int.tryParse(parts[1]) ?? 0,
+              seconds: int.tryParse(parts[2]) ?? 0,
+            );
           }
         }
       }
 
-      queue.add(SongModel(
-        id: id,
-        title: title,
-        artist: artist,
-        album: 'DilSe Radio',
-        thumbnailUrl: thumbnail.isNotEmpty ? thumbnail : 'https://i.ytimg.com/vi/$id/hqdefault.jpg',
-        streamUrl: '',
-        duration: parsedDur,
-        source: 'google_automix',
-        bitrate: '320kbps',
-      ));
+      queue.add(
+        SongModel(
+          id: id,
+          title: title,
+          artist: artist,
+          album: 'DilSe Radio',
+          thumbnailUrl: thumbnail.isNotEmpty
+              ? thumbnail
+              : 'https://i.ytimg.com/vi/$id/hqdefault.jpg',
+          streamUrl: '',
+          duration: parsedDur,
+          source: 'google_automix',
+          bitrate: '320kbps',
+        ),
+      );
 
       if (queue.length >= limit) break;
     }
@@ -186,8 +238,12 @@ class AudioRepositoryImpl implements AudioRepository {
           queue[1] = nextTrack.copyWith(
             streamUrl: resolved.streamUrl,
             album: resolved.album.isNotEmpty ? resolved.album : nextTrack.album,
-            thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : nextTrack.thumbnailUrl,
-            duration: resolved.duration > Duration.zero ? resolved.duration : nextTrack.duration,
+            thumbnailUrl: resolved.thumbnailUrl.isNotEmpty
+                ? resolved.thumbnailUrl
+                : nextTrack.thumbnailUrl,
+            duration: resolved.duration > Duration.zero
+                ? resolved.duration
+                : nextTrack.duration,
           );
         }
       } catch (_) {}
@@ -217,7 +273,10 @@ class AudioRepositoryImpl implements AudioRepository {
         .replaceAll('”', '"')
         .replaceAll('‘', "'")
         .replaceAll('’', "'");
-    s = s.replaceAll(RegExp(r'\b(?:feat\.?|ft\.?)\s+[^(\]]+', caseSensitive: false), ' ');
+    s = s.replaceAll(
+      RegExp(r'\b(?:feat\.?|ft\.?)\s+[^(\]]+', caseSensitive: false),
+      ' ',
+    );
     s = s.replaceAll(RegExp(r'\[.*?\]|\(.*?\)', caseSensitive: false), ' ');
     s = s.replaceAll(
       RegExp(

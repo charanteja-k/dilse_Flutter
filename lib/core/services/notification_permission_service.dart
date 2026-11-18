@@ -16,7 +16,9 @@ class NotificationPermissionService {
   }
 
   /// Explicitly requests notification permission and provides immediate user feedback.
-  static Future<bool> requestNotificationPermission(BuildContext context) async {
+  static Future<bool> requestNotificationPermission(
+    BuildContext context,
+  ) async {
     if (kIsWeb) return true;
     if (!Platform.isAndroid) return true;
 
@@ -59,7 +61,8 @@ class NotificationPermissionService {
       if (result.isPermanentlyDenied && context.mounted) {
         DilSeNotification.show(
           context,
-          message: 'Enable notifications in Settings for lock screen media controls',
+          message:
+              'Enable notifications in Settings for lock screen media controls',
           type: DilSeNotificationType.warning,
           customIcon: Icons.notifications_active_rounded,
         );
@@ -86,7 +89,10 @@ class NotificationPermissionService {
         ),
         title: Row(
           children: [
-            Icon(Icons.notifications_active_rounded, color: context.colors.brandRuby),
+            Icon(
+              Icons.notifications_active_rounded,
+              color: context.colors.brandRuby,
+            ),
             SizedBox(width: context.spacing.sm),
             Text(
               'Enable Controls',

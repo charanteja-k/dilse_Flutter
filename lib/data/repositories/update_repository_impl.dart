@@ -25,7 +25,8 @@ class UpdateRepositoryImpl implements UpdateRepository {
   const UpdateRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<({String version, String buildNumber})> getInstalledPackageInfo() async {
+  Future<({String version, String buildNumber})>
+  getInstalledPackageInfo() async {
     final pkg = await PackageInfo.fromPlatform();
     return (version: pkg.version, buildNumber: pkg.buildNumber);
   }
@@ -46,7 +47,10 @@ class UpdateRepositoryImpl implements UpdateRepository {
   }
 
   @override
-  Future<void> setTargetRepo({required String owner, required String repo}) async {
+  Future<void> setTargetRepo({
+    required String owner,
+    required String repo,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefRepoOwnerKey, owner.trim());
     await prefs.setString(_prefRepoNameKey, repo.trim());
@@ -102,12 +106,8 @@ class UpdateRepositoryImpl implements UpdateRepository {
       return null;
     }
 
-    final hasUpdate = compareVersion(
-          latest.tagName,
-          pkg.version,
-          pkg.buildNumber,
-        ) >
-        0;
+    final hasUpdate =
+        compareVersion(latest.tagName, pkg.version, pkg.buildNumber) > 0;
 
     final fallbackPage = latest.htmlUrl.isNotEmpty
         ? latest.htmlUrl
@@ -182,7 +182,8 @@ class UpdateRepositoryImpl implements UpdateRepository {
     final strippedPrefix = raw.replaceAll(RegExp(r'^[vV]'), '').trim();
     final plusSplit = strippedPrefix.split('+');
     final buildNumber = plusSplit.length > 1
-        ? (int.tryParse(plusSplit[1].replaceAll(RegExp(r'[^0-9]'), '')) ?? fallbackBuild)
+        ? (int.tryParse(plusSplit[1].replaceAll(RegExp(r'[^0-9]'), '')) ??
+              fallbackBuild)
         : fallbackBuild;
 
     // Strip pre-release suffix (e.g. "1.0.2-beta" -> "1.0.2") before parsing ints
@@ -207,7 +208,8 @@ class UpdateRepositoryImpl implements UpdateRepository {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       yield const OtaDownloadState(
         phase: OtaDownloadPhase.error,
-        errorMessage: 'Inline APK install is supported on Android devices only.',
+        errorMessage:
+            'Inline APK install is supported on Android devices only.',
       );
       return;
     }
@@ -240,7 +242,8 @@ class UpdateRepositoryImpl implements UpdateRepository {
     StreamSubscription<OtaEvent>? sub;
 
     try {
-      final safeFilename = (filename != null &&
+      final safeFilename =
+          (filename != null &&
               filename.isNotEmpty &&
               !filename.contains('/') &&
               filename.toLowerCase().endsWith('.apk'))
@@ -248,101 +251,99 @@ class UpdateRepositoryImpl implements UpdateRepository {
           : 'dilse_latest.apk';
 
       sub = OtaUpdate()
-          .execute(
-            downloadUrl,
-            destinationFilename: safeFilename,
-          )
+          .execute(downloadUrl, destinationFilename: safeFilename)
           .listen(
-        (OtaEvent event) {
-          switch (event.status) {
-            case OtaStatus.DOWNLOADING:
-              final pct = int.tryParse(event.value ?? '0') ?? 0;
-              controller.add(
-                OtaDownloadState(
-                  phase: OtaDownloadPhase.downloading,
-                  progressPercent: pct.clamp(0, 100),
-                  statusMessage: 'Downloading APK... ($pct%)',
-                ),
-              );
-              break;
-            case OtaStatus.INSTALLING:
-              controller.add(
-                const OtaDownloadState(
-                  phase: OtaDownloadPhase.installing,
-                  progressPercent: 100,
-                  statusMessage: 'Launching Android installer...',
-                ),
-              );
-              break;
-            case OtaStatus.INSTALLATION_DONE:
-              controller.add(
-                const OtaDownloadState(
-                  phase: OtaDownloadPhase.completed,
-                  progressPercent: 100,
-                  statusMessage: 'Installation complete!',
-                ),
-              );
-              controller.close();
-              break;
-            case OtaStatus.PERMISSION_NOT_GRANTED_ERROR:
-              controller.add(
-                const OtaDownloadState(
-                  phase: OtaDownloadPhase.permissionDenied,
-                  errorMessage: 'Install permission was not granted.',
-                ),
-              );
-              controller.close();
-              break;
-            case OtaStatus.ALREADY_RUNNING_ERROR:
-              controller.add(
-                const OtaDownloadState(
-                  phase: OtaDownloadPhase.error,
-                  errorMessage: 'An update download is already in progress.',
-                ),
-              );
-              controller.close();
-              break;
-            case OtaStatus.CANCELED:
-              controller.add(
-                const OtaDownloadState(
-                  phase: OtaDownloadPhase.idle,
-                  statusMessage: 'Download canceled.',
-                ),
-              );
-              controller.close();
-              break;
-            case OtaStatus.INSTALLATION_ERROR:
-            case OtaStatus.INTERNAL_ERROR:
-            case OtaStatus.DOWNLOAD_ERROR:
-            case OtaStatus.CHECKSUM_ERROR:
-              controller.add(
-                OtaDownloadState(
-                  phase: OtaDownloadPhase.error,
-                  errorMessage:
-                      'Update failed (${event.status.name}): ${event.value ?? 'Unknown error'}',
-                ),
-              );
-              controller.close();
-              break;
-          }
-        },
-        onError: (Object err) {
-          if (!controller.isClosed) {
-            controller.add(
-              OtaDownloadState(
-                phase: OtaDownloadPhase.error,
-                errorMessage: 'Download error: $err',
-              ),
-            );
-            controller.close();
-          }
-        },
-        onDone: () {
-          if (!controller.isClosed) {
-            controller.close();
-          }
-        },
-      );
+            (OtaEvent event) {
+              switch (event.status) {
+                case OtaStatus.DOWNLOADING:
+                  final pct = int.tryParse(event.value ?? '0') ?? 0;
+                  controller.add(
+                    OtaDownloadState(
+                      phase: OtaDownloadPhase.downloading,
+                      progressPercent: pct.clamp(0, 100),
+                      statusMessage: 'Downloading APK... ($pct%)',
+                    ),
+                  );
+                  break;
+                case OtaStatus.INSTALLING:
+                  controller.add(
+                    const OtaDownloadState(
+                      phase: OtaDownloadPhase.installing,
+                      progressPercent: 100,
+                      statusMessage: 'Launching Android installer...',
+                    ),
+                  );
+                  break;
+                case OtaStatus.INSTALLATION_DONE:
+                  controller.add(
+                    const OtaDownloadState(
+                      phase: OtaDownloadPhase.completed,
+                      progressPercent: 100,
+                      statusMessage: 'Installation complete!',
+                    ),
+                  );
+                  controller.close();
+                  break;
+                case OtaStatus.PERMISSION_NOT_GRANTED_ERROR:
+                  controller.add(
+                    const OtaDownloadState(
+                      phase: OtaDownloadPhase.permissionDenied,
+                      errorMessage: 'Install permission was not granted.',
+                    ),
+                  );
+                  controller.close();
+                  break;
+                case OtaStatus.ALREADY_RUNNING_ERROR:
+                  controller.add(
+                    const OtaDownloadState(
+                      phase: OtaDownloadPhase.error,
+                      errorMessage:
+                          'An update download is already in progress.',
+                    ),
+                  );
+                  controller.close();
+                  break;
+                case OtaStatus.CANCELED:
+                  controller.add(
+                    const OtaDownloadState(
+                      phase: OtaDownloadPhase.idle,
+                      statusMessage: 'Download canceled.',
+                    ),
+                  );
+                  controller.close();
+                  break;
+                case OtaStatus.INSTALLATION_ERROR:
+                case OtaStatus.INTERNAL_ERROR:
+                case OtaStatus.DOWNLOAD_ERROR:
+                case OtaStatus.CHECKSUM_ERROR:
+                  controller.add(
+                    OtaDownloadState(
+                      phase: OtaDownloadPhase.error,
+                      errorMessage:
+                          'Update failed (${event.status.name}): ${event.value ?? 'Unknown error'}',
+                    ),
+                  );
+                  controller.close();
+                  break;
+              }
+            },
+            onError: (Object err) {
+              if (!controller.isClosed) {
+                controller.add(
+                  OtaDownloadState(
+                    phase: OtaDownloadPhase.error,
+                    errorMessage: 'Download error: $err',
+                  ),
+                );
+                controller.close();
+              }
+            },
+            onDone: () {
+              if (!controller.isClosed) {
+                controller.close();
+              }
+            },
+          );
     } catch (e) {
       if (!controller.isClosed) {
         controller.add(
@@ -372,4 +373,3 @@ class UpdateRepositoryImpl implements UpdateRepository {
     return false;
   }
 }
-

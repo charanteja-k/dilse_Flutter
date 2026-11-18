@@ -60,7 +60,11 @@ class GithubUpdateDatasourceImpl implements GithubUpdateDatasource {
     // Fallback: GitHub returns 404 on /releases/latest when a repo is private,
     // has 0 releases, or only contains pre-releases. Query /releases to disambiguate.
     if (response.statusCode == 404) {
-      final releases = await fetchAllReleases(owner: owner, repo: repo, perPage: 10);
+      final releases = await fetchAllReleases(
+        owner: owner,
+        repo: repo,
+        perPage: 10,
+      );
       final nonDrafts = releases.where((r) => !r.isDraft).toList();
       if (nonDrafts.isNotEmpty) {
         return nonDrafts.first;
@@ -105,7 +109,11 @@ class GithubUpdateDatasourceImpl implements GithubUpdateDatasource {
     throw _mapHttpError(response.statusCode, owner, repo);
   }
 
-  GithubReleaseException _mapHttpError(int statusCode, String owner, String repo) {
+  GithubReleaseException _mapHttpError(
+    int statusCode,
+    String owner,
+    String repo,
+  ) {
     if (statusCode == 404) {
       return GithubReleaseException(
         'Repository "$owner/$repo" not found or is private. Point to a public GitHub repo to fetch releases.',
@@ -152,11 +160,14 @@ class GithubUpdateDatasourceImpl implements GithubUpdateDatasource {
       final lower = name.toLowerCase();
       if (!lower.endsWith('.apk')) continue;
 
-      final candidateUrl = (asset['browser_download_url'] as String? ?? '').trim();
+      final candidateUrl = (asset['browser_download_url'] as String? ?? '')
+          .trim();
       final candidateSize = (asset['size'] as num?)?.toInt() ?? 0;
       if (candidateUrl.isEmpty) continue;
 
-      if (apkDownloadUrl == null || lower.contains('universal') || lower.contains('arm64')) {
+      if (apkDownloadUrl == null ||
+          lower.contains('universal') ||
+          lower.contains('arm64')) {
         apkDownloadUrl = candidateUrl;
         apkFileName = name;
         apkSize = candidateSize;
@@ -178,4 +189,3 @@ class GithubUpdateDatasourceImpl implements GithubUpdateDatasource {
     );
   }
 }
-

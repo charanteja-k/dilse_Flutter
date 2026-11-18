@@ -144,18 +144,18 @@ class _HomeScreenState extends State<HomeScreen> {
               const DownloadsScreen()
             else
               SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                _buildTopBar(context, homeVm),
-                Expanded(
-                  child: homeVm.isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            color: context.colors.brandRuby,
-                          ),
-                        )
-                      : homeVm.errorMessage != null
+                bottom: false,
+                child: Column(
+                  children: [
+                    _buildTopBar(context, homeVm),
+                    Expanded(
+                      child: homeVm.isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: context.colors.brandRuby,
+                              ),
+                            )
+                          : homeVm.errorMessage != null
                           ? _buildErrorView(context, homeVm)
                           : RefreshIndicator(
                               color: context.colors.brandRuby,
@@ -165,13 +165,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 physics: const BouncingScrollPhysics(),
                                 padding: EdgeInsets.only(
                                   top: context.spacing.xs,
-                                  bottom: context.sizes.miniPlayerHeight +
+                                  bottom:
+                                      context.sizes.miniPlayerHeight +
                                       context.sizes.navDockHeight +
                                       context.spacing.xl,
                                 ),
                                 children: [
                                   // 1. Smart Playback Quick Resume Banner (when no active track is loaded)
-                                  if (!hasActivePlayback && homeVm.quickResumeSong != null)
+                                  if (!hasActivePlayback &&
+                                      homeVm.quickResumeSong != null)
                                     _buildQuickResumeBanner(
                                       context,
                                       homeVm.quickResumeSong!,
@@ -201,7 +203,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         homeVm.circadianContext.subtitle,
                                       ),
                                       SizedBox(height: context.spacing.sm),
-                                      _buildHorizontalSongShelf(context, homeVm.circadianMix),
+                                      _buildHorizontalSongShelf(
+                                        context,
+                                        homeVm.circadianMix,
+                                      ),
                                       SizedBox(height: context.spacing.lg),
                                     ],
 
@@ -213,19 +218,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'Updated Daily • ${homeVm.selectedLanguage}',
                                       ),
                                       SizedBox(height: context.spacing.sm),
-                                      _buildHorizontalSongShelf(context, homeVm.topChartsIndia),
+                                      _buildHorizontalSongShelf(
+                                        context,
+                                        homeVm.topChartsIndia,
+                                      ),
                                       SizedBox(height: context.spacing.lg),
                                     ],
 
                                     // BLOCKBUSTER SOUNDTRACKS & ALBUMS
-                                    if (homeVm.blockbusterAlbums.isNotEmpty) ...[
+                                    if (homeVm
+                                        .blockbusterAlbums
+                                        .isNotEmpty) ...[
                                       _buildSectionHeader(
                                         context,
                                         'BLOCKBUSTER SOUNDTRACKS & ALBUMS',
                                         'Original Soundtracks & Compilations',
                                       ),
                                       SizedBox(height: context.spacing.sm),
-                                      _buildHorizontalSongShelf(context, homeVm.blockbusterAlbums),
+                                      _buildHorizontalSongShelf(
+                                        context,
+                                        homeVm.blockbusterAlbums,
+                                      ),
                                       SizedBox(height: context.spacing.lg),
                                     ],
 
@@ -237,63 +250,66 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'Curated for your taste',
                                       ),
                                       SizedBox(height: context.spacing.sm),
-                                      _buildHorizontalSongShelf(context, homeVm.madeForYou),
+                                      _buildHorizontalSongShelf(
+                                        context,
+                                        homeVm.madeForYou,
+                                      ),
                                       SizedBox(height: context.spacing.lg),
                                     ],
                                   ],
                                 ],
                               ),
                             ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Floating MiniPlayer & Matte Navigation Dock stacked at the bottom
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: AnimatedSlide(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeInOutCubic,
-              offset: isDockVisible ? Offset.zero : const Offset(0, 1.4),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: isDockVisible ? 1.0 : 0.0,
-                child: IgnorePointer(
-                  ignoring: !isDockVisible,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const MiniPlayer(),
-                      FloatingNavDock(
-                        selectedIndex: _selectedNavIndex,
-                        onTabSelected: (index) {
-                          setState(() {
-                            _selectedNavIndex = index;
-                            _isNavVisible = true;
-                          });
-                        },
-                      ),
-                    ],
+            // Floating MiniPlayer & Matte Navigation Dock stacked at the bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeInOutCubic,
+                offset: isDockVisible ? Offset.zero : const Offset(0, 1.4),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isDockVisible ? 1.0 : 0.0,
+                  child: IgnorePointer(
+                    ignoring: !isDockVisible,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const MiniPlayer(),
+                        FloatingNavDock(
+                          selectedIndex: _selectedNavIndex,
+                          onTabSelected: (index) {
+                            setState(() {
+                              _selectedNavIndex = index;
+                              _isNavVisible = true;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
 
-          // Floating Spinning Vinyl CD Player (Appears when scrolled down and playback is active, draggable between left & right)
-          if (hasActivePlayback)
-            FloatingVinylDisc(
-              isVisible: !isDockVisible,
-              song: currentSong,
-              isPlaying: isPlaying,
-            ),
-        ],
+            // Floating Spinning Vinyl CD Player (Appears when scrolled down and playback is active, draggable between left & right)
+            if (hasActivePlayback)
+              FloatingVinylDisc(
+                isVisible: !isDockVisible,
+                song: currentSong,
+                isPlaying: isPlaying,
+              ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _buildTopBar(BuildContext context, HomeViewModel homeVm) {
@@ -310,10 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _getGreeting(),
-                  style: context.typography.eyebrow,
-                ),
+                Text(_getGreeting(), style: context.typography.eyebrow),
                 SizedBox(height: context.spacing.xxs),
                 Text(
                   'Charan',
@@ -476,10 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: context.colors.textSecondary,
                     ),
                     SizedBox(width: context.spacing.xxs),
-                    Text(
-                      'JUMP BACK IN',
-                      style: context.typography.eyebrow,
-                    ),
+                    Text('JUMP BACK IN', style: context.typography.eyebrow),
                   ],
                 ),
                 SizedBox(height: context.spacing.xxs),
@@ -591,11 +601,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Image.network(
                               item.imageUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                iconData,
-                                color: context.colors.textPrimary,
-                                size: context.sizes.iconSm,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    iconData,
+                                    color: context.colors.textPrimary,
+                                    size: context.sizes.iconSm,
+                                  ),
                             ),
                           )
                         : Icon(
@@ -650,7 +661,8 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: homeVm.availableMoods.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.xs),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.xs),
         itemBuilder: (context, index) {
           final mood = homeVm.availableMoods[index];
           final isSelected = index == homeVm.selectedMoodIndex;
@@ -667,10 +679,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 vertical: context.spacing.xs,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? context.colors.brandRuby : context.colors.cardDarkSurface,
+                color: isSelected
+                    ? context.colors.brandRuby
+                    : context.colors.cardDarkSurface,
                 borderRadius: context.radius.asBorderRadiusFull,
                 border: Border.all(
-                  color: isSelected ? context.colors.brandRuby : context.colors.solidMatteBorder,
+                  color: isSelected
+                      ? context.colors.brandRuby
+                      : context.colors.solidMatteBorder,
                   width: context.sizes.borderThin,
                 ),
               ),
@@ -678,7 +694,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   mood,
                   style: context.typography.titleMedium.copyWith(
-                    color: isSelected ? context.colors.oledBackground : context.colors.textSecondary,
+                    color: isSelected
+                        ? context.colors.oledBackground
+                        : context.colors.textSecondary,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
@@ -732,7 +750,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    if (!homeVm.isLoadingVibe && homeVm.vibeRadioTracks.isNotEmpty)
+                    if (!homeVm.isLoadingVibe &&
+                        homeVm.vibeRadioTracks.isNotEmpty)
                       Text(
                         '${homeVm.vibeRadioTracks.length} tracks',
                         style: context.typography.captionMuted,
@@ -749,7 +768,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   activeMood.description,
                   style: context.typography.bodyMedium,
                 ),
-                if (!homeVm.isLoadingVibe && homeVm.vibeRadioTracks.isNotEmpty) ...[
+                if (!homeVm.isLoadingVibe &&
+                    homeVm.vibeRadioTracks.isNotEmpty) ...[
                   SizedBox(height: context.spacing.md),
                   Row(
                     children: [
@@ -780,9 +800,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           context.read<AudioPlayerViewModel>().playFromQueue(
-                                homeVm.vibeRadioTracks,
-                                initialIndex: 0,
-                              );
+                            homeVm.vibeRadioTracks,
+                            initialIndex: 0,
+                          );
                         },
                       ),
                       SizedBox(width: context.spacing.sm),
@@ -813,9 +833,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           HapticFeedback.lightImpact();
                           final shuffled = homeVm.buildShuffledVibeQueue();
                           context.read<AudioPlayerViewModel>().playFromQueue(
-                                shuffled,
-                                initialIndex: 0,
-                              );
+                            shuffled,
+                            initialIndex: 0,
+                          );
                         },
                       ),
                     ],
@@ -885,7 +905,8 @@ class _HomeScreenState extends State<HomeScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: homeVm.vibeRadioTracks.length,
-              separatorBuilder: (context, index) => SizedBox(height: context.spacing.xs),
+              separatorBuilder: (context, index) =>
+                  SizedBox(height: context.spacing.xs),
               itemBuilder: (context, index) {
                 final song = homeVm.vibeRadioTracks[index];
                 return ListTile(
@@ -900,12 +921,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? Image.network(
                               song.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.music_note,
-                                color: context.colors.textSecondary,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.music_note,
+                                    color: context.colors.textSecondary,
+                                  ),
                             )
-                          : Icon(Icons.music_note, color: context.colors.textSecondary),
+                          : Icon(
+                              Icons.music_note,
+                              color: context.colors.textSecondary,
+                            ),
                     ),
                   ),
                   title: Text(
@@ -929,17 +954,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       context.read<AudioPlayerViewModel>().playFromQueue(
-                            homeVm.vibeRadioTracks,
-                            initialIndex: index,
-                          );
+                        homeVm.vibeRadioTracks,
+                        initialIndex: index,
+                      );
                     },
                   ),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     context.read<AudioPlayerViewModel>().playFromQueue(
-                          homeVm.vibeRadioTracks,
-                          initialIndex: index,
-                        );
+                      homeVm.vibeRadioTracks,
+                      initialIndex: index,
+                    );
                   },
                 );
               },
@@ -950,27 +975,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, String subtitle) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    String subtitle,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: context.typography.titleLarge,
-          ),
+          Text(title, style: context.typography.titleLarge),
           SizedBox(height: context.spacing.xxs),
-          Text(
-            subtitle,
-            style: context.typography.bodyMedium,
-          ),
+          Text(subtitle, style: context.typography.bodyMedium),
         ],
       ),
     );
   }
 
-  Widget _buildHorizontalSongShelf(BuildContext context, List<SongModel> tracks) {
+  Widget _buildHorizontalSongShelf(
+    BuildContext context,
+    List<SongModel> tracks,
+  ) {
     return SizedBox(
       height: context.sizes.trackShelfHeight,
       child: ListView.separated(
@@ -978,14 +1004,18 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: tracks.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.md),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.md),
         itemBuilder: (context, index) {
           final song = tracks[index];
 
           return GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              context.read<AudioPlayerViewModel>().playFromQueue(tracks, initialIndex: index);
+              context.read<AudioPlayerViewModel>().playFromQueue(
+                tracks,
+                initialIndex: index,
+              );
             },
             child: SizedBox(
               width: context.sizes.songCardSize,
@@ -1003,11 +1033,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? Image.network(
                               song.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.music_note,
-                                color: context.colors.textSecondary,
-                                size: context.sizes.iconLg,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.music_note,
+                                    color: context.colors.textSecondary,
+                                    size: context.sizes.iconLg,
+                                  ),
                             )
                           : Icon(
                               Icons.music_note,

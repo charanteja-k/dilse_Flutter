@@ -47,8 +47,8 @@ class JustAudioDriverImpl implements SoLoudAudioDriver {
   Duration _currentDuration = Duration.zero;
 
   JustAudioDriverImpl({ja.AudioPlayer? player, DilSeAudioHandler? audioHandler})
-      : _player = player ?? audioHandler?.player ?? ja.AudioPlayer(),
-        _audioHandler = audioHandler {
+    : _player = player ?? audioHandler?.player ?? ja.AudioPlayer(),
+      _audioHandler = audioHandler {
     _playerStateSub = _player.playerStateStream.listen((state) {
       if (state.processingState == ja.ProcessingState.loading ||
           state.processingState == ja.ProcessingState.buffering) {

@@ -346,7 +346,10 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
           animation: _controller,
           builder: (context, child) {
             return Transform.translate(
-              offset: Offset(0, _slideAnimation.value * context.sizes.navDockHeight),
+              offset: Offset(
+                0,
+                _slideAnimation.value * context.sizes.navDockHeight,
+              ),
               child: Transform.scale(
                 scaleX: _scaleXAnimation.value,
                 scaleY: _scaleYAnimation.value,
@@ -373,7 +376,11 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
             child: Align(
               alignment: Alignment.topCenter,
               child: Container(
-                constraints: BoxConstraints(maxWidth: context.sizes.heroCardWidth + context.sizes.heroCardHeight),
+                constraints: BoxConstraints(
+                  maxWidth:
+                      context.sizes.heroCardWidth +
+                      context.sizes.heroCardHeight,
+                ),
                 padding: context.spacing.insetsSymmetric(
                   horizontal: context.spacing.md,
                   vertical: context.spacing.sm + context.spacing.xxs,
@@ -387,7 +394,9 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: context.colors.oledBackground.withValues(alpha: 0.70),
+                      color: context.colors.oledBackground.withValues(
+                        alpha: 0.70,
+                      ),
                       blurRadius: context.spacing.lg,
                       offset: Offset(0, context.spacing.sm),
                     ),
@@ -397,7 +406,8 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: context.spacing.insetsXs + context.spacing.insetsXxs,
+                      padding:
+                          context.spacing.insetsXs + context.spacing.insetsXxs,
                       decoration: BoxDecoration(
                         color: context.colors.cardDarkSurface,
                         shape: BoxShape.circle,
@@ -422,7 +432,8 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
+                          if (widget.subtitle != null &&
+                              widget.subtitle!.isNotEmpty) ...[
                             SizedBox(height: context.spacing.xxs),
                             Text(
                               widget.subtitle!,
@@ -456,4 +467,3 @@ class _DilSeNotificationPillState extends State<_DilSeNotificationPill>
     );
   }
 }
-

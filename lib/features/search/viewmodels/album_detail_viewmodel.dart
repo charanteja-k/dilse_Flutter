@@ -22,10 +22,7 @@ class AlbumDetailViewModel extends ChangeNotifier {
 
   bool _isDisposed = false;
 
-  AlbumDetailViewModel({
-    required this.audioRepository,
-    required this.album,
-  }) {
+  AlbumDetailViewModel({required this.audioRepository, required this.album}) {
     fetchAlbumTracks();
   }
 
@@ -54,4 +51,3 @@ class AlbumDetailViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

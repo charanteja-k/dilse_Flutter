@@ -40,7 +40,12 @@ class AlbumModel {
       id: (json['id'] ?? '').toString(),
       title: (json['title'] ?? json['name'] ?? 'Unknown Album').toString(),
       subtitle: (json['subtitle'] ?? '').toString(),
-      artist: (moreInfo['music'] ?? json['artist'] ?? json['subtitle'] ?? 'DilSe Artist').toString(),
+      artist:
+          (moreInfo['music'] ??
+                  json['artist'] ??
+                  json['subtitle'] ??
+                  'DilSe Artist')
+              .toString(),
       year: (json['year'] ?? moreInfo['year'] ?? '').toString(),
       language: (json['language'] ?? moreInfo['language'] ?? '').toString(),
       thumbnailUrl: cleanArt,
@@ -61,4 +66,3 @@ class AlbumModel {
     };
   }
 }
-

@@ -78,7 +78,8 @@ class LibraryScreen extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: LibrarySection.values.length,
-        separatorBuilder: (context, index) => SizedBox(width: context.spacing.xs),
+        separatorBuilder: (context, index) =>
+            SizedBox(width: context.spacing.xs),
         itemBuilder: (context, index) {
           final section = LibrarySection.values[index];
           final isSelected = section == vm.currentSection;
@@ -146,7 +147,8 @@ class LibraryScreen extends StatelessWidget {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.md,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -221,7 +223,8 @@ class LibraryScreen extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: playlists.length,
-            separatorBuilder: (context, index) => SizedBox(height: context.spacing.xs),
+            separatorBuilder: (context, index) =>
+                SizedBox(height: context.spacing.xs),
             itemBuilder: (context, index) {
               final pl = playlists[index];
               return _buildPlaylistTile(context, pl, vm);
@@ -232,7 +235,10 @@ class LibraryScreen extends StatelessWidget {
   }
 
   Widget _buildPlaylistTile(
-      BuildContext context, PlaylistModel pl, LibraryViewModel vm) {
+    BuildContext context,
+    PlaylistModel pl,
+    LibraryViewModel vm,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.cardDarkSurface,
@@ -344,7 +350,8 @@ class LibraryScreen extends StatelessWidget {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.md,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -353,10 +360,7 @@ class LibraryScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '${songs.length} Tracks',
-              style: context.typography.eyebrow,
-            ),
+            Text('${songs.length} Tracks', style: context.typography.eyebrow),
             Row(
               children: [
                 IconButton(
@@ -368,9 +372,9 @@ class LibraryScreen extends StatelessWidget {
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     final shuffled = List<SongModel>.from(songs)..shuffle();
-                    context
-                        .read<AudioPlayerViewModel>()
-                        .playFromQueue(shuffled);
+                    context.read<AudioPlayerViewModel>().playFromQueue(
+                      shuffled,
+                    );
                   },
                 ),
                 SizedBox(width: context.spacing.xs),
@@ -426,7 +430,8 @@ class LibraryScreen extends StatelessWidget {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.md,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -455,12 +460,14 @@ class LibraryScreen extends StatelessWidget {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.md,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
       itemCount: albums.length,
-      separatorBuilder: (context, index) => SizedBox(height: context.spacing.xs),
+      separatorBuilder: (context, index) =>
+          SizedBox(height: context.spacing.xs),
       itemBuilder: (context, index) {
         final album = albums[index];
         return ListTile(
@@ -492,12 +499,14 @@ class LibraryScreen extends StatelessWidget {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.md,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
       itemCount: artists.length,
-      separatorBuilder: (context, index) => SizedBox(height: context.spacing.xs),
+      separatorBuilder: (context, index) =>
+          SizedBox(height: context.spacing.xs),
       itemBuilder: (context, index) {
         final artist = artists[index];
         return ListTile(
@@ -596,10 +605,7 @@ class LibraryScreen extends StatelessWidget {
             width: context.sizes.borderThin,
           ),
         ),
-        title: Text(
-          'New Playlist',
-          style: context.typography.titleLarge,
-        ),
+        title: Text('New Playlist', style: context.typography.titleLarge),
         content: TextField(
           controller: controller,
           style: context.typography.titleMedium,

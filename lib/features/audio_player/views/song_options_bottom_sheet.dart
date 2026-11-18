@@ -80,11 +80,12 @@ class SongOptionsBottomSheet extends StatelessWidget {
                           ? Image.network(
                               song.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.music_note,
-                                color: context.colors.textSecondary,
-                                size: context.sizes.iconLg,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.music_note,
+                                    color: context.colors.textSecondary,
+                                    size: context.sizes.iconLg,
+                                  ),
                             )
                           : Icon(
                               Icons.music_note,
@@ -167,8 +168,12 @@ class SongOptionsBottomSheet extends StatelessWidget {
             // Action: Like / Unlike
             ListTile(
               leading: Icon(
-                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                color: isLiked ? context.colors.brandRuby : context.colors.textPrimary,
+                isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                color: isLiked
+                    ? context.colors.brandRuby
+                    : context.colors.textPrimary,
                 size: context.sizes.iconMd,
               ),
               title: Text(
@@ -189,11 +194,15 @@ class SongOptionsBottomSheet extends StatelessWidget {
                 size: context.sizes.iconMd,
               ),
               title: Text(
-                isVinyl ? 'Switch to Card Artwork' : 'Switch to Vinyl Record Mode',
+                isVinyl
+                    ? 'Switch to Card Artwork'
+                    : 'Switch to Vinyl Record Mode',
                 style: context.typography.titleMedium,
               ),
               subtitle: Text(
-                isVinyl ? 'Current: Rotating Vinyl Disc' : 'Current: Classic Card Art',
+                isVinyl
+                    ? 'Current: Rotating Vinyl Disc'
+                    : 'Current: Classic Card Art',
                 style: context.typography.captionMuted,
               ),
               onTap: () {
@@ -246,10 +255,15 @@ class _SpecPill extends StatelessWidget {
       children: [
         Icon(icon, color: context.colors.brandRuby, size: context.sizes.iconSm),
         SizedBox(height: context.spacing.xxs),
-        Text(value, style: context.typography.titleMedium.copyWith(fontSize: 12.0)),
-        Text(label, style: context.typography.captionMuted.copyWith(fontSize: 10.0)),
+        Text(
+          value,
+          style: context.typography.titleMedium.copyWith(fontSize: 12.0),
+        ),
+        Text(
+          label,
+          style: context.typography.captionMuted.copyWith(fontSize: 10.0),
+        ),
       ],
     );
   }
 }
-

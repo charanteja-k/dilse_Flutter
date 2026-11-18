@@ -131,7 +131,10 @@ class SearchViewModel extends ChangeNotifier {
   List<String> get recentSearches => List.unmodifiable(_recentSearches);
   List<SearchCategory> get categories => _categories;
   SearchFilter get selectedFilter => _selectedFilter;
-  bool get hasResults => _searchResults.isNotEmpty || _albumResults.isNotEmpty || _artistResults.isNotEmpty;
+  bool get hasResults =>
+      _searchResults.isNotEmpty ||
+      _albumResults.isNotEmpty ||
+      _artistResults.isNotEmpty;
 
   /// Returns results filtered according to the active [SearchFilter].
   List<SongModel> get filteredResults {
@@ -141,17 +144,22 @@ class SearchViewModel extends ChangeNotifier {
         return _searchResults;
       case SearchFilter.artists:
         final q = _query.toLowerCase();
-        final matches = _searchResults.where((s) => s.artist.toLowerCase().contains(q)).toList();
+        final matches = _searchResults
+            .where((s) => s.artist.toLowerCase().contains(q))
+            .toList();
         return matches.isNotEmpty ? matches : _searchResults;
       case SearchFilter.albums:
         final q = _query.toLowerCase();
-        final matches = _searchResults.where((s) => s.album.toLowerCase().contains(q)).toList();
+        final matches = _searchResults
+            .where((s) => s.album.toLowerCase().contains(q))
+            .toList();
         return matches.isNotEmpty ? matches : _searchResults;
     }
   }
 
   /// Top #1 matching track for the dedicated Spotlight card.
-  SongModel? get topResult => filteredResults.isNotEmpty ? filteredResults.first : null;
+  SongModel? get topResult =>
+      filteredResults.isNotEmpty ? filteredResults.first : null;
 
   /// Remaining track list excluding the top spotlight track.
   List<SongModel> get remainingResults {
@@ -255,4 +263,3 @@ class SearchViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

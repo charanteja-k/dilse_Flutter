@@ -58,7 +58,9 @@ class SongModel {
       title: (json['title'] ?? 'Unknown Title').toString(),
       artist: (json['author'] ?? json['artist'] ?? 'Unknown Artist').toString(),
       album: (json['album'] ?? 'DilSe').toString(),
-      thumbnailUrl: (json['thumbnail'] ?? json['thumbnailUrl'] ?? json['artwork'] ?? '').toString(),
+      thumbnailUrl:
+          (json['thumbnail'] ?? json['thumbnailUrl'] ?? json['artwork'] ?? '')
+              .toString(),
       streamUrl: (json['streamUrl'] ?? '').toString(),
       duration: parsedDuration,
       source: (json['source'] ?? 'jiosaavn').toString(),
@@ -113,6 +115,6 @@ class SongModel {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'SongModel(id: $id, title: $title, artist: $artist, streamUrl: $streamUrl)';
+  String toString() =>
+      'SongModel(id: $id, title: $title, artist: $artist, streamUrl: $streamUrl)';
 }
-

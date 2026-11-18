@@ -21,4 +21,3 @@ extension ThemeContextExtensions on BuildContext {
   AppTypography get typography =>
       Theme.of(this).extension<AppTypography>() ?? AppTypography.standard;
 }
-

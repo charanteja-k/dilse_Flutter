@@ -117,7 +117,10 @@ void main() {
       await vm.toggleLike(sampleSong1);
       await vm.toggleLike(sampleSong2);
 
-      expect(vm.derivedAlbums, containsAll(['Ala Vaikunthapurramuloo', 'Brahmastra']));
+      expect(
+        vm.derivedAlbums,
+        containsAll(['Ala Vaikunthapurramuloo', 'Brahmastra']),
+      );
       expect(vm.derivedArtists, containsAll(['Sid Sriram', 'Arijit Singh']));
     });
   });
@@ -150,4 +153,3 @@ void main() {
     });
   });
 }
-

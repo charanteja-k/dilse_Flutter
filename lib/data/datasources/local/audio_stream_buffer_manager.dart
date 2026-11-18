@@ -21,7 +21,10 @@ class AudioStreamBufferManagerImpl implements AudioStreamBufferManager {
   AudioStreamBufferManagerImpl({required this.client});
 
   @override
-  Future<File> prepareStreamBuffer(String streamUrl, {required String songId}) async {
+  Future<File> prepareStreamBuffer(
+    String streamUrl, {
+    required String songId,
+  }) async {
     final tempDir = await getTemporaryDirectory();
     final bufferDir = Directory('${tempDir.path}/dilse_stream_buffer');
     if (!await bufferDir.exists()) {
@@ -33,7 +36,9 @@ class AudioStreamBufferManagerImpl implements AudioStreamBufferManager {
 
     // If already fully buffered, return immediately
     if (await bufferFile.exists() && await bufferFile.length() > 100 * 1024) {
-      debugPrint('[BufferManager] Serving cached stream for $songId: ${bufferFile.path}');
+      debugPrint(
+        '[BufferManager] Serving cached stream for $songId: ${bufferFile.path}',
+      );
       return bufferFile;
     }
 
@@ -43,10 +48,14 @@ class AudioStreamBufferManagerImpl implements AudioStreamBufferManager {
     if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
       await bufferFile.writeAsBytes(response.bodyBytes, flush: true);
       _activeBuffers[songId] = bufferFile;
-      debugPrint('[BufferManager] Buffered ${response.bodyBytes.length} bytes to ${bufferFile.path}');
+      debugPrint(
+        '[BufferManager] Buffered ${response.bodyBytes.length} bytes to ${bufferFile.path}',
+      );
       return bufferFile;
     } else {
-      throw Exception('Failed to buffer audio from $streamUrl (HTTP ${response.statusCode})');
+      throw Exception(
+        'Failed to buffer audio from $streamUrl (HTTP ${response.statusCode})',
+      );
     }
   }
 

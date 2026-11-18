@@ -9,24 +9,64 @@ void main() async {
 
   final seedQueries = <String, List<String>>{
     'Telugu': [
-      'Samajavaragamana', 'Butta Bomma', 'Inkem Inkem', 'Ramuloo Ramulaa', 'Oo Antava',
-      'Srivalli', 'Chitti', 'Kurchi Madathapetti', 'Priya Mithunam', 'Adiga Adiga'
+      'Samajavaragamana',
+      'Butta Bomma',
+      'Inkem Inkem',
+      'Ramuloo Ramulaa',
+      'Oo Antava',
+      'Srivalli',
+      'Chitti',
+      'Kurchi Madathapetti',
+      'Priya Mithunam',
+      'Adiga Adiga',
     ],
     'Hindi': [
-      'Kesariya', 'Tum Hi Ho', 'Channa Mereya', 'Apna Bana Le', 'Raataan Lambiyan',
-      'Shayad', 'Kalank', 'Kabira', 'Agar Tum Saath Ho', 'Tujh Mein Rab Dikhta Hai'
+      'Kesariya',
+      'Tum Hi Ho',
+      'Channa Mereya',
+      'Apna Bana Le',
+      'Raataan Lambiyan',
+      'Shayad',
+      'Kalank',
+      'Kabira',
+      'Agar Tum Saath Ho',
+      'Tujh Mein Rab Dikhta Hai',
     ],
     'Tamil': [
-      'Rowdy Baby', 'Vaathi Coming', 'Arabic Kuthu', 'Enjoy Enjaami', 'Kutty Pattas',
-      'Master the Blaster', 'Chellamma', 'Two Two Two', 'Naan Pizhai', 'Bae Don'
+      'Rowdy Baby',
+      'Vaathi Coming',
+      'Arabic Kuthu',
+      'Enjoy Enjaami',
+      'Kutty Pattas',
+      'Master the Blaster',
+      'Chellamma',
+      'Two Two Two',
+      'Naan Pizhai',
+      'Bae Don',
     ],
     'English': [
-      'Shape of You', 'Blinding Lights', 'Stay', 'Levitating', 'Someone You Loved',
-      'Bad Habits', 'Save Your Tears', 'Watermelon Sugar', 'Peaches', 'As It Was'
+      'Shape of You',
+      'Blinding Lights',
+      'Stay',
+      'Levitating',
+      'Someone You Loved',
+      'Bad Habits',
+      'Save Your Tears',
+      'Watermelon Sugar',
+      'Peaches',
+      'As It Was',
     ],
     'Punjabi': [
-      'Brown Munde', 'Insane', 'Excuses', 'Spaceship', 'Majhail',
-      'Desires', 'Tere Te', 'G.O.A.T.', 'Born to Shine', 'Clash'
+      'Brown Munde',
+      'Insane',
+      'Excuses',
+      'Spaceship',
+      'Majhail',
+      'Desires',
+      'Tere Te',
+      'G.O.A.T.',
+      'Born to Shine',
+      'Clash',
     ],
   };
 
@@ -34,20 +74,30 @@ void main() async {
   final datasource = CloudflareEdgeDatasourceImpl(client: client);
   final repository = AudioRepositoryImpl(remoteDatasource: datasource);
 
-  print('========================================================================');
+  print(
+    '========================================================================',
+  );
   print('🚀 GOOGLE INNER-TUBE RADIO QUEUE GENERATION BENCHMARK');
   print('Target: 10 Seed Songs × 5 Languages = 50 Tests');
-  print('Pipeline: Seed -> Google Co-Listening Graph -> JioSaavn 320k Stream Resolution');
-  print('========================================================================\n');
+  print(
+    'Pipeline: Seed -> Google Co-Listening Graph -> JioSaavn 320k Stream Resolution',
+  );
+  print(
+    '========================================================================\n',
+  );
 
   int totalPassed = 0;
   int totalFailed = 0;
   final stopwatch = Stopwatch()..start();
 
   for (final lang in languages) {
-    print('------------------------------------------------------------------------');
+    print(
+      '------------------------------------------------------------------------',
+    );
     print('🌐 LANGUAGE: $lang (10 Seeds)');
-    print('------------------------------------------------------------------------');
+    print(
+      '------------------------------------------------------------------------',
+    );
 
     final seeds = seedQueries[lang]!;
     int langPassed = 0;
@@ -60,7 +110,9 @@ void main() async {
         // 1. Resolve initial seed song
         final searchResult = await repository.searchSongs(seedQuery, limit: 1);
         if (searchResult.isEmpty) {
-          print('[$lang #${i + 1}/10] ❌ Could not resolve initial seed: "$seedQuery"');
+          print(
+            '[$lang #${i + 1}/10] ❌ Could not resolve initial seed: "$seedQuery"',
+          );
           totalFailed++;
           continue;
         }
@@ -68,16 +120,23 @@ void main() async {
         final seedSong = searchResult.first;
 
         // 2. Generate algorithmic queue powered by Google InnerTube
-        final queue = await repository.generateAlgorithmicQueue(seedSong: seedSong, limit: 15);
+        final queue = await repository.generateAlgorithmicQueue(
+          seedSong: seedSong,
+          limit: 15,
+        );
         testWatch.stop();
 
         if (queue.length > 1) {
           langPassed++;
           totalPassed++;
           final nextTrack = queue[1];
-          print('[$lang #${i + 1}/10] ✅ PASS (${testWatch.elapsedMilliseconds}ms) Seed: "${seedSong.title}" -> Queue Size: ${queue.length} | Next: "${nextTrack.title}" (${nextTrack.bitrate})');
+          print(
+            '[$lang #${i + 1}/10] ✅ PASS (${testWatch.elapsedMilliseconds}ms) Seed: "${seedSong.title}" -> Queue Size: ${queue.length} | Next: "${nextTrack.title}" (${nextTrack.bitrate})',
+          );
         } else {
-          print('[$lang #${i + 1}/10] ⚠️ Queue only returned seed (No recommendations found): "$seedQuery"');
+          print(
+            '[$lang #${i + 1}/10] ⚠️ Queue only returned seed (No recommendations found): "$seedQuery"',
+          );
           totalFailed++;
         }
       } catch (e) {
@@ -94,13 +153,18 @@ void main() async {
   stopwatch.stop();
   client.close();
 
-  print('========================================================================');
+  print(
+    '========================================================================',
+  );
   print('🎯 FINAL QUEUE GENERATION REPORT');
   print('Total Seeds Tested : 50');
   print('Total Queues Formed: $totalPassed');
   print('Failed Queues      : $totalFailed');
   print('Success Rate       : ${(totalPassed / 50 * 100).toStringAsFixed(1)}%');
-  print('Total Duration     : ${(stopwatch.elapsedMilliseconds / 1000).toStringAsFixed(2)}s');
-  print('========================================================================');
+  print(
+    'Total Duration     : ${(stopwatch.elapsedMilliseconds / 1000).toStringAsFixed(2)}s',
+  );
+  print(
+    '========================================================================',
+  );
 }
-

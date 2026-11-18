@@ -36,7 +36,10 @@ class HomeViewModel extends ChangeNotifier {
   final Map<int, List<SongModel>> _vibeCache = {};
 
   HomeViewModel({required this.audioRepository})
-      : _circadianContext = CircadianContext.fromHour(DateTime.now().hour, primaryLanguage: 'Telugu');
+    : _circadianContext = CircadianContext.fromHour(
+        DateTime.now().hour,
+        primaryLanguage: 'Telugu',
+      );
 
   // Getters
   String get selectedLanguage => _selectedLanguage;
@@ -46,12 +49,15 @@ class HomeViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   CircadianContext get circadianContext => _circadianContext;
-  SongModel? get quickResumeSong => _isQuickResumeDismissed ? null : _quickResumeSong;
+  SongModel? get quickResumeSong =>
+      _isQuickResumeDismissed ? null : _quickResumeSong;
 
-  List<QuickAccessItem> get quickAccessItems => List.unmodifiable(_quickAccessItems);
+  List<QuickAccessItem> get quickAccessItems =>
+      List.unmodifiable(_quickAccessItems);
   List<SongModel> get circadianMix => List.unmodifiable(_circadianMix);
   List<SongModel> get topChartsIndia => List.unmodifiable(_topChartsIndia);
-  List<SongModel> get blockbusterAlbums => List.unmodifiable(_blockbusterAlbums);
+  List<SongModel> get blockbusterAlbums =>
+      List.unmodifiable(_blockbusterAlbums);
   List<SongModel> get madeForYou => List.unmodifiable(_madeForYou);
   List<SongModel> get vibeRadioTracks => List.unmodifiable(_vibeRadioTracks);
 
@@ -101,9 +107,11 @@ class HomeViewModel extends ChangeNotifier {
     ),
   ];
 
-  List<String> get availableMoods => moodCategories.map((m) => m.label).toList(growable: false);
+  List<String> get availableMoods =>
+      moodCategories.map((m) => m.label).toList(growable: false);
 
-  MoodCategory get activeMoodCategory => moodCategories[_selectedMoodIndex.clamp(0, moodCategories.length - 1)];
+  MoodCategory get activeMoodCategory =>
+      moodCategories[_selectedMoodIndex.clamp(0, moodCategories.length - 1)];
 
   void _safeNotify() {
     if (!_isDisposed) {
@@ -134,19 +142,37 @@ class HomeViewModel extends ChangeNotifier {
         // Daily Mix 1 seed
         audioRepository.searchSongs('$_selectedLanguage Mix', limit: 12),
         // Daily Mix 2 seed
-        audioRepository.searchSongs('$_selectedLanguage Acoustic Chill', limit: 12),
+        audioRepository.searchSongs(
+          '$_selectedLanguage Acoustic Chill',
+          limit: 12,
+        ),
         // Nostalgic mix seed (Slot 4)
-        audioRepository.searchSongs('$_selectedLanguage Retro Classics 90s 2000s', limit: 12),
+        audioRepository.searchSongs(
+          '$_selectedLanguage Retro Classics 90s 2000s',
+          limit: 12,
+        ),
         // Circadian time-of-day contextual shelf
         audioRepository.searchSongs(_circadianContext.query, limit: 14),
         // Top Charts India
-        audioRepository.searchSongs('Top Charts India $_selectedLanguage', limit: 14),
+        audioRepository.searchSongs(
+          'Top Charts India $_selectedLanguage',
+          limit: 14,
+        ),
         // Blockbuster Soundtracks & Albums
-        audioRepository.searchSongs('$_selectedLanguage Latest Movie Soundtracks', limit: 14),
+        audioRepository.searchSongs(
+          '$_selectedLanguage Latest Movie Soundtracks',
+          limit: 14,
+        ),
         // Made For You (Algorithmic radar)
-        audioRepository.getRecommendations(query: _selectedLanguage.toLowerCase(), limit: 14),
+        audioRepository.getRecommendations(
+          query: _selectedLanguage.toLowerCase(),
+          limit: 14,
+        ),
         // Trending Now seed (Slot 6)
-        audioRepository.searchSongs('$_selectedLanguage Trending Hits', limit: 12),
+        audioRepository.searchSongs(
+          '$_selectedLanguage Trending Hits',
+          limit: 12,
+        ),
       ]);
 
       if (_isDisposed || currentEpoch != _loadEpoch) return;
@@ -192,7 +218,9 @@ class HomeViewModel extends ChangeNotifier {
           title: 'Nostalgic',
           subtitle: 'Forgotten favorites & deep cuts',
           iconKey: 'nostalgic',
-          imageUrl: nostalgicSongs.isNotEmpty ? nostalgicSongs.first.thumbnailUrl : null,
+          imageUrl: nostalgicSongs.isNotEmpty
+              ? nostalgicSongs.first.thumbnailUrl
+              : null,
           songs: nostalgicSongs,
         ),
         QuickAccessItem(
@@ -200,7 +228,9 @@ class HomeViewModel extends ChangeNotifier {
           title: 'Top Charts India',
           subtitle: 'Updated Daily',
           iconKey: 'top_charts',
-          imageUrl: _topChartsIndia.isNotEmpty ? _topChartsIndia.first.thumbnailUrl : null,
+          imageUrl: _topChartsIndia.isNotEmpty
+              ? _topChartsIndia.first.thumbnailUrl
+              : null,
           songs: _topChartsIndia,
         ),
         QuickAccessItem(
@@ -208,7 +238,9 @@ class HomeViewModel extends ChangeNotifier {
           title: 'Trending Now',
           subtitle: 'Global & Regional Hits',
           iconKey: 'trending',
-          imageUrl: trendingSongs.isNotEmpty ? trendingSongs.first.thumbnailUrl : null,
+          imageUrl: trendingSongs.isNotEmpty
+              ? trendingSongs.first.thumbnailUrl
+              : null,
           songs: trendingSongs,
         ),
       ];

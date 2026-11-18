@@ -33,12 +33,6 @@ class ArtistModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'role': role,
-      'thumbnailUrl': thumbnailUrl,
-    };
+    return {'id': id, 'name': name, 'role': role, 'thumbnailUrl': thumbnailUrl};
   }
 }
-

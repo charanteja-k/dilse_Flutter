@@ -139,13 +139,14 @@ class QueueBottomSheet extends StatelessWidget {
                     onReorderItem: (oldIndex, newIndex) {
                       HapticFeedback.selectionClick();
                       context.read<AudioPlayerViewModel>().reorderQueue(
-                            oldIndex,
-                            oldIndex < newIndex ? newIndex + 1 : newIndex,
-                          );
+                        oldIndex,
+                        oldIndex < newIndex ? newIndex + 1 : newIndex,
+                      );
                     },
                     itemBuilder: (context, index) {
                       final track = queue[index];
-                      final isCurrent = currentSong != null && track.id == currentSong.id;
+                      final isCurrent =
+                          currentSong != null && track.id == currentSong.id;
 
                       return Dismissible(
                         key: ValueKey('queue_track_${track.id}_$index'),
@@ -162,7 +163,9 @@ class QueueBottomSheet extends StatelessWidget {
                         ),
                         onDismissed: (_) {
                           HapticFeedback.lightImpact();
-                          context.read<AudioPlayerViewModel>().removeQueueTrack(index);
+                          context.read<AudioPlayerViewModel>().removeQueueTrack(
+                            index,
+                          );
                         },
                         child: Container(
                           margin: EdgeInsets.symmetric(
@@ -176,7 +179,9 @@ class QueueBottomSheet extends StatelessWidget {
                             borderRadius: context.radius.asBorderRadiusMd,
                             border: isCurrent
                                 ? Border.all(
-                                    color: context.colors.brandRuby.withAlpha(120),
+                                    color: context.colors.brandRuby.withAlpha(
+                                      120,
+                                    ),
                                     width: context.sizes.borderThin,
                                   )
                                 : null,
@@ -196,11 +201,15 @@ class QueueBottomSheet extends StatelessWidget {
                                     ? Image.network(
                                         track.thumbnailUrl,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Icon(
-                                          Icons.music_note,
-                                          color: context.colors.textSecondary,
-                                          size: context.sizes.iconMd,
-                                        ),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Icon(
+                                                  Icons.music_note,
+                                                  color: context
+                                                      .colors
+                                                      .textSecondary,
+                                                  size: context.sizes.iconMd,
+                                                ),
                                       )
                                     : Icon(
                                         Icons.music_note,
@@ -249,7 +258,9 @@ class QueueBottomSheet extends StatelessWidget {
                             ),
                             onTap: () {
                               HapticFeedback.lightImpact();
-                              context.read<AudioPlayerViewModel>().skipToIndex(index);
+                              context.read<AudioPlayerViewModel>().skipToIndex(
+                                index,
+                              );
                             },
                           ),
                         ),

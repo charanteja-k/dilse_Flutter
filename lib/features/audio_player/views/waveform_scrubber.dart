@@ -65,7 +65,9 @@ class _WaveformScrubberState extends State<WaveformScrubber> {
     final nonNegative = duration.isNegative ? Duration.zero : duration;
     final hours = nonNegative.inHours;
     final minutes = nonNegative.inMinutes.remainder(60);
-    final seconds = (nonNegative.inSeconds.remainder(60)).toString().padLeft(2, '0');
+    final seconds = (nonNegative.inSeconds.remainder(
+      60,
+    )).toString().padLeft(2, '0');
     if (hours > 0) {
       return '$hours:${minutes.toString().padLeft(2, '0')}:$seconds';
     }
@@ -193,8 +195,8 @@ class _WaveformScrubberState extends State<WaveformScrubber> {
                 child: Text(
                   hasValidDuration
                       ? (_showRemainingCountdown
-                          ? '-${_formatDuration(remaining)}'
-                          : _formatDuration(widget.duration))
+                            ? '-${_formatDuration(remaining)}'
+                            : _formatDuration(widget.duration))
                       : '--:--',
                   style: context.typography.captionMuted.copyWith(
                     color: context.colors.textSecondary,

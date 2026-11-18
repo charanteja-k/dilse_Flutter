@@ -170,7 +170,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
   }
 
   @override
-  ThemeExtension<AppTypography> lerp(ThemeExtension<AppTypography>? other, double t) {
+  ThemeExtension<AppTypography> lerp(
+    ThemeExtension<AppTypography>? other,
+    double t,
+  ) {
     if (other is! AppTypography) return this;
     return AppTypography(
       displayLarge: TextStyle.lerp(displayLarge, other.displayLarge, t)!,

@@ -60,7 +60,8 @@ class AppUpdateInfo {
       currentVersion: (json['currentVersion'] as String? ?? '').trim(),
       currentBuildNumber: (json['currentBuildNumber'] as String? ?? '').trim(),
       hasUpdate: json['hasUpdate'] as bool? ?? false,
-      hasApk: json['hasApk'] as bool? ?? download.toLowerCase().endsWith('.apk'),
+      hasApk:
+          json['hasApk'] as bool? ?? download.toLowerCase().endsWith('.apk'),
       releasePageUrl: json['releasePageUrl'] as String?,
     );
   }
@@ -128,4 +129,3 @@ class OtaDownloadState {
 
   static const idle = OtaDownloadState(phase: OtaDownloadPhase.idle);
 }
-

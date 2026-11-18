@@ -139,14 +139,15 @@ class _VinylRecordPlayerState extends State<VinylRecordPlayer>
                                   fit: BoxFit.cover,
                                   width: labelSize,
                                   height: labelSize,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    color: context.colors.cardDarkSurface,
-                                    child: Icon(
-                                      Icons.music_note_rounded,
-                                      color: context.colors.textSecondary,
-                                      size: context.sizes.iconLg,
-                                    ),
-                                  ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        color: context.colors.cardDarkSurface,
+                                        child: Icon(
+                                          Icons.music_note_rounded,
+                                          color: context.colors.textSecondary,
+                                          size: context.sizes.iconLg,
+                                        ),
+                                      ),
                                 )
                               : Container(
                                   color: context.colors.cardDarkSurface,
@@ -161,7 +162,9 @@ class _VinylRecordPlayerState extends State<VinylRecordPlayer>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: context.colors.oledBackground.withAlpha(128),
+                                color: context.colors.oledBackground.withAlpha(
+                                  128,
+                                ),
                                 width: 2,
                               ),
                             ),
@@ -237,4 +240,3 @@ class _VinylGroovesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

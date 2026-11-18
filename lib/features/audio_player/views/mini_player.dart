@@ -13,13 +13,20 @@ class MiniPlayer extends StatelessWidget {
   void _openFullPlayer(BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const PlayerScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const PlayerScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(0.0, 1.0);
           const end = Offset.zero;
           const curve = Curves.easeOutCubic;
-          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(position: animation.drive(tween), child: child);
+          final tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
         },
       ),
     );
@@ -36,7 +43,9 @@ class MiniPlayer extends StatelessWidget {
 
     final durationMs = player.duration.inMilliseconds;
     final positionMs = player.position.inMilliseconds;
-    final progress = durationMs > 0 ? (positionMs / durationMs).clamp(0.0, 1.0) : 0.0;
+    final progress = durationMs > 0
+        ? (positionMs / durationMs).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       margin: EdgeInsets.symmetric(
@@ -86,11 +95,15 @@ class MiniPlayer extends StatelessWidget {
                                     ? Image.network(
                                         song.thumbnailUrl,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Icon(
-                                          Icons.music_note,
-                                          color: context.colors.textSecondary,
-                                          size: context.sizes.iconMd,
-                                        ),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Icon(
+                                                  Icons.music_note,
+                                                  color: context
+                                                      .colors
+                                                      .textSecondary,
+                                                  size: context.sizes.iconMd,
+                                                ),
                                       )
                                     : Icon(
                                         Icons.music_note,
@@ -135,7 +148,8 @@ class MiniPlayer extends StatelessWidget {
                         color: context.colors.textPrimary,
                         size: context.sizes.iconMd,
                       ),
-                      onPressed: () => context.read<AudioPlayerViewModel>().skipPrevious(),
+                      onPressed: () =>
+                          context.read<AudioPlayerViewModel>().skipPrevious(),
                     ),
 
                     // Play / Pause / Buffering Indicator
@@ -160,7 +174,9 @@ class MiniPlayer extends StatelessWidget {
                           color: context.colors.brandRuby,
                           size: context.sizes.iconLg,
                         ),
-                        onPressed: () => context.read<AudioPlayerViewModel>().togglePlayPause(),
+                        onPressed: () => context
+                            .read<AudioPlayerViewModel>()
+                            .togglePlayPause(),
                       ),
 
                     // Skip Next
@@ -170,7 +186,8 @@ class MiniPlayer extends StatelessWidget {
                         color: context.colors.textPrimary,
                         size: context.sizes.iconMd,
                       ),
-                      onPressed: () => context.read<AudioPlayerViewModel>().skipNext(),
+                      onPressed: () =>
+                          context.read<AudioPlayerViewModel>().skipNext(),
                     ),
                   ],
                 ),
@@ -181,7 +198,9 @@ class MiniPlayer extends StatelessWidget {
             LinearProgressIndicator(
               value: progress,
               backgroundColor: context.colors.cardDarkSurface,
-              valueColor: AlwaysStoppedAnimation<Color>(context.colors.brandRuby),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                context.colors.brandRuby,
+              ),
               minHeight: context.spacing.xxs,
             ),
           ],

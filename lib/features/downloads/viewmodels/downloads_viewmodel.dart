@@ -25,10 +25,12 @@ class DownloadsViewModel extends ChangeNotifier {
     if (_searchFilter.trim().isEmpty) return _downloadedSongs;
     final q = _searchFilter.toLowerCase();
     return _downloadedSongs
-        .where((s) =>
-            s.title.toLowerCase().contains(q) ||
-            s.artist.toLowerCase().contains(q) ||
-            s.album.toLowerCase().contains(q))
+        .where(
+          (s) =>
+              s.title.toLowerCase().contains(q) ||
+              s.artist.toLowerCase().contains(q) ||
+              s.album.toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -112,4 +114,3 @@ class DownloadsViewModel extends ChangeNotifier {
     }
   }
 }
-

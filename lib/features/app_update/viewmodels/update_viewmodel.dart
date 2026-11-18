@@ -49,7 +49,8 @@ class UpdateViewModel extends ChangeNotifier {
 
   String? get activeDownloadTag => _activeDownloadTag;
   OtaDownloadState get downloadState => _downloadState;
-  bool get isDownloading => _downloadState.phase == OtaDownloadPhase.downloading;
+  bool get isDownloading =>
+      _downloadState.phase == OtaDownloadPhase.downloading;
   bool get hasAvailableUpdate => _latestUpdate?.hasUpdate ?? false;
   bool get canRunInlineOta =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
@@ -182,10 +183,7 @@ class UpdateViewModel extends ChangeNotifier {
     _releasesErrorMessage = null;
     _safeNotify();
 
-    await updateRepository.setTargetRepo(
-      owner: _repoOwner,
-      repo: _repoName,
-    );
+    await updateRepository.setTargetRepo(owner: _repoOwner, repo: _repoName);
     await checkForUpdate(silent: false, includeReleases: true);
     return true;
   }
@@ -205,8 +203,10 @@ class UpdateViewModel extends ChangeNotifier {
         .replaceFirst(RegExp(r'^https?://(www\.)?github\.com/'), '')
         .replaceAll(RegExp(r'\.git$'), '');
 
-    final segments =
-        trimmed.split('/').where((part) => part.trim().isNotEmpty).toList();
+    final segments = trimmed
+        .split('/')
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
     if (segments.length < 2) return null;
 
     final owner = segments[0].trim();
@@ -247,38 +247,38 @@ class UpdateViewModel extends ChangeNotifier {
           filename: filename ?? 'dilse_$tagName.apk',
         )
         .listen(
-      (state) {
-        if (_isDisposed) return;
-        _downloadState = state;
-        if (state.phase == OtaDownloadPhase.installing ||
-            state.phase == OtaDownloadPhase.completed ||
-            state.phase == OtaDownloadPhase.error ||
-            state.phase == OtaDownloadPhase.permissionDenied ||
-            state.phase == OtaDownloadPhase.idle) {
-          // Release active download lock once installer Intent has handed off or failed
-          if (state.phase != OtaDownloadPhase.downloading) {
+          (state) {
+            if (_isDisposed) return;
+            _downloadState = state;
+            if (state.phase == OtaDownloadPhase.installing ||
+                state.phase == OtaDownloadPhase.completed ||
+                state.phase == OtaDownloadPhase.error ||
+                state.phase == OtaDownloadPhase.permissionDenied ||
+                state.phase == OtaDownloadPhase.idle) {
+              // Release active download lock once installer Intent has handed off or failed
+              if (state.phase != OtaDownloadPhase.downloading) {
+                _activeDownloadTag = null;
+              }
+            }
+            _safeNotify();
+          },
+          onError: (Object err) {
+            if (_isDisposed) return;
             _activeDownloadTag = null;
-          }
-        }
-        _safeNotify();
-      },
-      onError: (Object err) {
-        if (_isDisposed) return;
-        _activeDownloadTag = null;
-        _downloadState = OtaDownloadState(
-          phase: OtaDownloadPhase.error,
-          errorMessage: 'Download failed: $err',
+            _downloadState = OtaDownloadState(
+              phase: OtaDownloadPhase.error,
+              errorMessage: 'Download failed: $err',
+            );
+            _safeNotify();
+          },
+          onDone: () {
+            if (_isDisposed) return;
+            if (_downloadState.phase == OtaDownloadPhase.downloading) {
+              _activeDownloadTag = null;
+            }
+            _safeNotify();
+          },
         );
-        _safeNotify();
-      },
-      onDone: () {
-        if (_isDisposed) return;
-        if (_downloadState.phase == OtaDownloadPhase.downloading) {
-          _activeDownloadTag = null;
-        }
-        _safeNotify();
-      },
-    );
   }
 
   void clearDownloadFeedback() {
@@ -298,4 +298,3 @@ class UpdateViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

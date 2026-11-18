@@ -7,22 +7,31 @@ void main() {
       expect(LyricsTransliterationService.hasIndicScript('రాజమండ్రి'), isTrue);
       expect(LyricsTransliterationService.hasIndicScript('तुम ही हो'), isTrue);
       expect(LyricsTransliterationService.hasIndicScript('கண்ணம்மா'), isTrue);
-      expect(LyricsTransliterationService.hasIndicScript('Hello world! 123'), isFalse);
+      expect(
+        LyricsTransliterationService.hasIndicScript('Hello world! 123'),
+        isFalse,
+      );
     });
 
-    test('transliterateText converts Telugu to phonetic English pronunciation', () {
-      final input = 'రాజమండ్రి రాగమంజరి';
-      final romanized = LyricsTransliterationService.transliterateText(input);
-      expect(romanized.toLowerCase(), contains('raajamamdri'));
-      expect(romanized.toLowerCase(), contains('raagamamjari'));
-    });
+    test(
+      'transliterateText converts Telugu to phonetic English pronunciation',
+      () {
+        final input = 'రాజమండ్రి రాగమంజరి';
+        final romanized = LyricsTransliterationService.transliterateText(input);
+        expect(romanized.toLowerCase(), contains('raajamamdri'));
+        expect(romanized.toLowerCase(), contains('raagamamjari'));
+      },
+    );
 
-    test('transliterateText converts Devanagari to phonetic English pronunciation', () {
-      final input = 'तुम ही हो';
-      final romanized = LyricsTransliterationService.transliterateText(input);
-      expect(romanized.toLowerCase(), contains('tum'));
-      expect(romanized.toLowerCase(), contains('ho'));
-    });
+    test(
+      'transliterateText converts Devanagari to phonetic English pronunciation',
+      () {
+        final input = 'तुम ही हो';
+        final romanized = LyricsTransliterationService.transliterateText(input);
+        expect(romanized.toLowerCase(), contains('tum'));
+        expect(romanized.toLowerCase(), contains('ho'));
+      },
+    );
 
     test('toTeluguScript converts Romanized Tenglish into Telugu script', () {
       final input = 'samajavaragamana';

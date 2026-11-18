@@ -41,7 +41,9 @@ class HeadlessAudioDriver implements SoLoudAudioDriver {
   @override
   Future<void> playSong(SongModel song) async {
     _activeSong = song;
-    _dur = song.duration > Duration.zero ? song.duration : const Duration(minutes: 3, seconds: 30);
+    _dur = song.duration > Duration.zero
+        ? song.duration
+        : const Duration(minutes: 3, seconds: 30);
     _durCtrl.add(_dur);
     _pos = Duration.zero;
     _posCtrl.add(_pos);
@@ -91,22 +93,36 @@ class MockAudioRepo implements AudioRepository {
   });
 
   @override
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  }) async {
     return mockSearchResults
-        .where((s) =>
-            s.title.toLowerCase().contains(query.toLowerCase()) ||
-            s.artist.toLowerCase().contains(query.toLowerCase()))
+        .where(
+          (s) =>
+              s.title.toLowerCase().contains(query.toLowerCase()) ||
+              s.artist.toLowerCase().contains(query.toLowerCase()),
+        )
         .take(limit)
         .toList();
   }
 
   @override
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) async {
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     return [];
   }
 
   @override
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) async {
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     return [];
   }
 
@@ -122,7 +138,10 @@ class MockAudioRepo implements AudioRepository {
   }
 
   @override
-  Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15}) async {
+  Future<List<SongModel>> getRecommendations({
+    String query = 'telugu',
+    int limit = 15,
+  }) async {
     return mockRadioTracks.take(limit).toList();
   }
 
@@ -201,69 +220,72 @@ void main() {
     expect(searchVm.searchResults, isEmpty);
   });
 
-  test('Tapping individual song from Search triggers playSong and 50-song Google ML automix queue', () async {
-    const tappedSong = SongModel(
-      id: 'target_seed',
-      title: 'Chuttamalle',
-      artist: 'Shilpa Rao',
-      album: 'Devara',
-      streamUrl: 'https://cdn.dilse.app/audio/target_seed.m4a',
-      thumbnailUrl: 'https://cdn.dilse.app/img/target_seed.jpg',
-      duration: Duration(seconds: 220),
-    );
+  test(
+    'Tapping individual song from Search triggers playSong and 50-song Google ML automix queue',
+    () async {
+      const tappedSong = SongModel(
+        id: 'target_seed',
+        title: 'Chuttamalle',
+        artist: 'Shilpa Rao',
+        album: 'Devara',
+        streamUrl: 'https://cdn.dilse.app/audio/target_seed.m4a',
+        thumbnailUrl: 'https://cdn.dilse.app/img/target_seed.jpg',
+        duration: Duration(seconds: 220),
+      );
 
-    final ml50Songs = List.generate(
-      50,
-      (i) => SongModel(
-        id: 'ml_radio_$i',
-        title: 'Automix Recommendation $i',
-        artist: 'Automix Artist $i',
-        album: 'Automix Album $i',
-        streamUrl: 'https://cdn.dilse.app/audio/ml_radio_$i.m4a',
-        thumbnailUrl: 'https://cdn.dilse.app/img/ml_radio_$i.jpg',
-        duration: const Duration(seconds: 210),
-      ),
-    );
+      final ml50Songs = List.generate(
+        50,
+        (i) => SongModel(
+          id: 'ml_radio_$i',
+          title: 'Automix Recommendation $i',
+          artist: 'Automix Artist $i',
+          album: 'Automix Album $i',
+          streamUrl: 'https://cdn.dilse.app/audio/ml_radio_$i.m4a',
+          thumbnailUrl: 'https://cdn.dilse.app/img/ml_radio_$i.jpg',
+          duration: const Duration(seconds: 210),
+        ),
+      );
 
-    final mockRepo = MockAudioRepo(
-      mockSearchResults: [tappedSong],
-      mockRadioTracks: ml50Songs,
-    );
+      final mockRepo = MockAudioRepo(
+        mockSearchResults: [tappedSong],
+        mockRadioTracks: ml50Songs,
+      );
 
-    final queueManager = QueueManager();
-    final fakeDriver = HeadlessAudioDriver();
+      final queueManager = QueueManager();
+      final fakeDriver = HeadlessAudioDriver();
 
-    final playerVm = AudioPlayerViewModel(
-      audioDriver: fakeDriver,
-      queueManager: queueManager,
-      audioRepository: mockRepo,
-    );
+      final playerVm = AudioPlayerViewModel(
+        audioDriver: fakeDriver,
+        queueManager: queueManager,
+        audioRepository: mockRepo,
+      );
 
-    // Initial state
-    expect(playerVm.currentSong, isNull);
-    expect(queueManager.currentQueue, isEmpty);
+      // Initial state
+      expect(playerVm.currentSong, isNull);
+      expect(queueManager.currentQueue, isEmpty);
 
-    // User taps on the search result song
-    await playerVm.playSong(tappedSong);
+      // User taps on the search result song
+      await playerVm.playSong(tappedSong);
 
-    // 1. Playback starts immediately on target song
-    expect(fakeDriver.activeSong?.id, tappedSong.id);
-    expect(playerVm.currentSong?.title, 'Chuttamalle');
+      // 1. Playback starts immediately on target song
+      expect(fakeDriver.activeSong?.id, tappedSong.id);
+      expect(playerVm.currentSong?.title, 'Chuttamalle');
 
-    // 2. Allow background Google ML InnerTube queue generation to complete
-    await Future.delayed(const Duration(milliseconds: 150));
+      // 2. Allow background Google ML InnerTube queue generation to complete
+      await Future.delayed(const Duration(milliseconds: 150));
 
-    // 3. Queue manager now has 50 songs (the seed song + upcoming Google ML recommendations)
-    expect(queueManager.currentQueue.length, 50);
-    expect(queueManager.currentQueue.first.id, tappedSong.id);
-    expect(queueManager.currentQueue[1].title, 'Automix Recommendation 1');
-    expect(queueManager.currentQueue[49].title, 'Automix Recommendation 49');
+      // 3. Queue manager now has 50 songs (the seed song + upcoming Google ML recommendations)
+      expect(queueManager.currentQueue.length, 50);
+      expect(queueManager.currentQueue.first.id, tappedSong.id);
+      expect(queueManager.currentQueue[1].title, 'Automix Recommendation 1');
+      expect(queueManager.currentQueue[49].title, 'Automix Recommendation 49');
 
-    // 4. Test skipping to next track from the generated queue
-    await playerVm.skipNext();
-    expect(playerVm.currentSong?.title, 'Automix Recommendation 1');
-    expect(queueManager.currentIndex, 1);
+      // 4. Test skipping to next track from the generated queue
+      await playerVm.skipNext();
+      expect(playerVm.currentSong?.title, 'Automix Recommendation 1');
+      expect(queueManager.currentIndex, 1);
 
-    fakeDriver.dispose();
-  });
+      fakeDriver.dispose();
+    },
+  );
 }

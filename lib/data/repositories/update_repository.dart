@@ -37,4 +37,3 @@ abstract class UpdateRepository {
 
   Future<bool> openExternalUrl(String url);
 }
-

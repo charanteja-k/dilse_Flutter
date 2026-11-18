@@ -88,4 +88,3 @@ class AppRadius extends ThemeExtension<AppRadius> {
     );
   }
 }
-

@@ -97,8 +97,10 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
             const begin = Offset(0.0, 1.0);
             const end = Offset.zero;
             const curve = Curves.easeOutCubic;
-            final tween =
-                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final tween = Tween(
+              begin: begin,
+              end: end,
+            ).chain(CurveTween(curve: curve));
             return SlideTransition(
               position: animation.drive(tween),
               child: child,
@@ -151,7 +153,9 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
               onPanUpdate: (details) {
                 _dragDistance += details.delta.distance;
                 setState(() {
-                  final curX = _customX ?? (_isDockedLeft ? defaultLeftX : defaultRightX);
+                  final curX =
+                      _customX ??
+                      (_isDockedLeft ? defaultLeftX : defaultRightX);
                   final curY = _customY ?? defaultY;
 
                   // Constrain inside screen bounds with edge margins
@@ -180,7 +184,8 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
 
                 // Snap magnetically to the closer horizontal edge (left or right)
                 setState(() {
-                  final currentCenterX = (_customX ?? defaultRightX) + (discSize / 2);
+                  final currentCenterX =
+                      (_customX ?? defaultRightX) + (discSize / 2);
                   final isLeft = currentCenterX < (screenWidth / 2);
                   _isDockedLeft = isLeft;
 
@@ -212,7 +217,9 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
                             spreadRadius: context.spacing.xxs,
                           ),
                           BoxShadow(
-                            color: context.colors.solidMatteBorder.withAlpha(120),
+                            color: context.colors.solidMatteBorder.withAlpha(
+                              120,
+                            ),
                             blurRadius: context.spacing.sm,
                             spreadRadius: 0,
                           ),
@@ -235,7 +242,9 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: context.colors.oledBackground.withAlpha(220),
+                              color: context.colors.oledBackground.withAlpha(
+                                220,
+                              ),
                               blurRadius: context.spacing.md,
                               offset: Offset(0, context.spacing.xs),
                             ),
@@ -243,8 +252,11 @@ class _FloatingVinylDiscState extends State<FloatingVinylDisc>
                         ),
                         child: CustomPaint(
                           painter: _MiniVinylGroovesPainter(
-                            grooveColor: context.colors.solidMatteBorder.withAlpha(90),
-                            sheenColor: context.colors.textPrimary.withAlpha(25),
+                            grooveColor: context.colors.solidMatteBorder
+                                .withAlpha(90),
+                            sheenColor: context.colors.textPrimary.withAlpha(
+                              25,
+                            ),
                           ),
                           child: Center(
                             child: _buildCenterLabel(context, discSize),

@@ -23,7 +23,7 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> Function()? onSkipToPrevious;
 
   DilSeAudioHandler({ja.AudioPlayer? player})
-      : _player = player ?? ja.AudioPlayer() {
+    : _player = player ?? ja.AudioPlayer() {
     _initStreams();
   }
 
@@ -85,25 +85,23 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _initStreams() {
-    _playbackEventSub = _player.playbackEventStream.listen(
-      (ja.PlaybackEvent event) {
-        _broadcastPlaybackState(queueIndex: event.currentIndex);
-      },
-    );
+    _playbackEventSub = _player.playbackEventStream.listen((
+      ja.PlaybackEvent event,
+    ) {
+      _broadcastPlaybackState(queueIndex: event.currentIndex);
+    });
 
-    _playerStateSub = _player.playerStateStream.listen(
-      (ja.PlayerState state) {
-        _broadcastPlaybackState();
-      },
-    );
+    _playerStateSub = _player.playerStateStream.listen((ja.PlayerState state) {
+      _broadcastPlaybackState();
+    });
 
-    _durationSub = _player.durationStream.listen(
-      (Duration? duration) {
-        if (mediaItem.value != null && duration != null && duration > Duration.zero) {
-          mediaItem.add(mediaItem.value!.copyWith(duration: duration));
-        }
-      },
-    );
+    _durationSub = _player.durationStream.listen((Duration? duration) {
+      if (mediaItem.value != null &&
+          duration != null &&
+          duration > Duration.zero) {
+        mediaItem.add(mediaItem.value!.copyWith(duration: duration));
+      }
+    });
   }
 
   /// Proactively keeps Android Foreground Service alive during screen-off song transitions.
@@ -152,7 +150,9 @@ class DilSeAudioHandler extends BaseAudioHandler with SeekHandler {
         title: song.title,
         artist: song.artist,
         duration: song.duration > Duration.zero ? song.duration : null,
-        artUri: song.thumbnailUrl.isNotEmpty ? Uri.tryParse(song.thumbnailUrl) : null,
+        artUri: song.thumbnailUrl.isNotEmpty
+            ? Uri.tryParse(song.thumbnailUrl)
+            : null,
       ),
     );
   }

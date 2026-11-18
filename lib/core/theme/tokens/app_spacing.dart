@@ -39,10 +39,14 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   EdgeInsets get insetsXl => EdgeInsets.all(xl);
   EdgeInsets get insetsXxl => EdgeInsets.all(xxl);
 
-  EdgeInsets insetsHorizontal(double value) => EdgeInsets.symmetric(horizontal: value);
-  EdgeInsets insetsVertical(double value) => EdgeInsets.symmetric(vertical: value);
-  EdgeInsets insetsSymmetric({required double horizontal, required double vertical}) =>
-      EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
+  EdgeInsets insetsHorizontal(double value) =>
+      EdgeInsets.symmetric(horizontal: value);
+  EdgeInsets insetsVertical(double value) =>
+      EdgeInsets.symmetric(vertical: value);
+  EdgeInsets insetsSymmetric({
+    required double horizontal,
+    required double vertical,
+  }) => EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
 
   @override
   AppSpacing copyWith({
@@ -79,4 +83,3 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     );
   }
 }
-

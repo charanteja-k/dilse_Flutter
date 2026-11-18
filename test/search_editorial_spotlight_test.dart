@@ -9,17 +9,29 @@ class MockAudioRepository implements AudioRepository {
   List<SongModel> mockResults = [];
 
   @override
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1}) async {
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  }) async {
     return mockResults;
   }
 
   @override
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1}) async {
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     return [];
   }
 
   @override
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1}) async {
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  }) async {
     return [];
   }
 
@@ -71,9 +83,24 @@ void main() {
     });
 
     test('Top Result and Remaining Results partition correctly', () async {
-      final song1 = createTestSong('1', 'Samajavaragamana', 'Sid Sriram', 'Ala Vaikunthapurramuloo');
-      final song2 = createTestSong('2', 'Ramuloo Ramulaa', 'Anurag Kulkarni', 'Ala Vaikunthapurramuloo');
-      final song3 = createTestSong('3', 'Butta Bomma', 'Armaan Malik', 'Ala Vaikunthapurramuloo');
+      final song1 = createTestSong(
+        '1',
+        'Samajavaragamana',
+        'Sid Sriram',
+        'Ala Vaikunthapurramuloo',
+      );
+      final song2 = createTestSong(
+        '2',
+        'Ramuloo Ramulaa',
+        'Anurag Kulkarni',
+        'Ala Vaikunthapurramuloo',
+      );
+      final song3 = createTestSong(
+        '3',
+        'Butta Bomma',
+        'Armaan Malik',
+        'Ala Vaikunthapurramuloo',
+      );
 
       mockRepo.mockResults = [song1, song2, song3];
 
@@ -87,8 +114,18 @@ void main() {
     });
 
     test('SearchFilter switching updates filtered results', () async {
-      final song1 = createTestSong('1', 'Samajavaragamana', 'Sid Sriram', 'Ala Vaikunthapurramuloo');
-      final song2 = createTestSong('2', 'Kesariya', 'Arijit Singh', 'Brahmastra');
+      final song1 = createTestSong(
+        '1',
+        'Samajavaragamana',
+        'Sid Sriram',
+        'Ala Vaikunthapurramuloo',
+      );
+      final song2 = createTestSong(
+        '2',
+        'Kesariya',
+        'Arijit Singh',
+        'Brahmastra',
+      );
 
       mockRepo.mockResults = [song1, song2];
       await viewModel.search('sid');

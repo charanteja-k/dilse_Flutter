@@ -4,13 +4,31 @@ import '../models/song_model.dart';
 
 /// Repository contract for song fetching, search, and recommendation flows.
 abstract class AudioRepository {
-  Future<List<SongModel>> searchSongs(String query, {int limit = 20, int page = 1});
-  Future<List<AlbumModel>> searchAlbums(String query, {int limit = 15, int page = 1});
-  Future<List<ArtistModel>> searchArtists(String query, {int limit = 15, int page = 1});
+  Future<List<SongModel>> searchSongs(
+    String query, {
+    int limit = 20,
+    int page = 1,
+  });
+  Future<List<AlbumModel>> searchAlbums(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  });
+  Future<List<ArtistModel>> searchArtists(
+    String query, {
+    int limit = 15,
+    int page = 1,
+  });
   Future<List<SongModel>> getAlbumDetails(String albumId);
-  Future<({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})> getArtistDetails(String artistId);
+  Future<
+    ({List<SongModel> topSongs, List<AlbumModel> topAlbums, int followerCount})
+  >
+  getArtistDetails(String artistId);
   Future<SongModel?> resolveSingleTrack(String title, {String? artist});
-  Future<List<SongModel>> getRecommendations({String query = 'telugu', int limit = 15});
+  Future<List<SongModel>> getRecommendations({
+    String query = 'telugu',
+    int limit = 15,
+  });
 
   /// Generates a high-fidelity queue powered by Google's recommendation graph
   /// resolved into 320kbps JioSaavn streams.
@@ -27,4 +45,3 @@ abstract class AudioRepository {
     String? videoId,
   });
 }
-

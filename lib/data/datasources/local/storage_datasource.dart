@@ -30,7 +30,9 @@ class StorageDatasourceImpl implements StorageDatasource {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList(_likedKey) ?? [];
     return raw
-        .map((str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>))
+        .map(
+          (str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -46,8 +48,10 @@ class StorageDatasourceImpl implements StorageDatasource {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList(_playlistsKey) ?? [];
     return raw
-        .map((str) =>
-            PlaylistModel.fromJson(jsonDecode(str) as Map<String, dynamic>))
+        .map(
+          (str) =>
+              PlaylistModel.fromJson(jsonDecode(str) as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -63,7 +67,9 @@ class StorageDatasourceImpl implements StorageDatasource {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList(_historyKey) ?? [];
     return raw
-        .map((str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>))
+        .map(
+          (str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -79,7 +85,9 @@ class StorageDatasourceImpl implements StorageDatasource {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList(_downloadsKey) ?? [];
     return raw
-        .map((str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>))
+        .map(
+          (str) => SongModel.fromJson(jsonDecode(str) as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -90,4 +98,3 @@ class StorageDatasourceImpl implements StorageDatasource {
     await prefs.setStringList(_downloadsKey, raw);
   }
 }
-

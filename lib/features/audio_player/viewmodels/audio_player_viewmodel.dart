@@ -151,7 +151,10 @@ class AudioPlayerViewModel extends ChangeNotifier {
     await _startPlayback(song);
   }
 
-  Future<void> playFromQueue(List<SongModel> songs, {int initialIndex = 0}) async {
+  Future<void> playFromQueue(
+    List<SongModel> songs, {
+    int initialIndex = 0,
+  }) async {
     queueManager.setQueue(songs, initialIndex: initialIndex);
     final song = queueManager.currentSong;
     if (song != null) {
@@ -169,9 +172,15 @@ class AudioPlayerViewModel extends ChangeNotifier {
       if (resolved != null && resolved.streamUrl.isNotEmpty) {
         playableSong = playableSong.copyWith(
           streamUrl: resolved.streamUrl,
-          album: resolved.album.isNotEmpty ? resolved.album : playableSong.album,
-          thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : playableSong.thumbnailUrl,
-          duration: resolved.duration > Duration.zero ? resolved.duration : playableSong.duration,
+          album: resolved.album.isNotEmpty
+              ? resolved.album
+              : playableSong.album,
+          thumbnailUrl: resolved.thumbnailUrl.isNotEmpty
+              ? resolved.thumbnailUrl
+              : playableSong.thumbnailUrl,
+          duration: resolved.duration > Duration.zero
+              ? resolved.duration
+              : playableSong.duration,
         );
         queueManager.updateSong(playableSong);
       } else {
@@ -180,13 +189,20 @@ class AudioPlayerViewModel extends ChangeNotifier {
           '${playableSong.title} ${playableSong.artist}'.trim(),
           limit: 1,
         );
-        if (searchResults.isNotEmpty && searchResults.first.streamUrl.isNotEmpty) {
+        if (searchResults.isNotEmpty &&
+            searchResults.first.streamUrl.isNotEmpty) {
           final topMatch = searchResults.first;
           playableSong = playableSong.copyWith(
             streamUrl: topMatch.streamUrl,
-            album: topMatch.album.isNotEmpty ? topMatch.album : playableSong.album,
-            thumbnailUrl: topMatch.thumbnailUrl.isNotEmpty ? topMatch.thumbnailUrl : playableSong.thumbnailUrl,
-            duration: topMatch.duration > Duration.zero ? topMatch.duration : playableSong.duration,
+            album: topMatch.album.isNotEmpty
+                ? topMatch.album
+                : playableSong.album,
+            thumbnailUrl: topMatch.thumbnailUrl.isNotEmpty
+                ? topMatch.thumbnailUrl
+                : playableSong.thumbnailUrl,
+            duration: topMatch.duration > Duration.zero
+                ? topMatch.duration
+                : playableSong.duration,
           );
           queueManager.updateSong(playableSong);
         }
@@ -205,20 +221,26 @@ class AudioPlayerViewModel extends ChangeNotifier {
     if (nextIdx < queueManager.currentQueue.length) {
       final nextSong = queueManager.currentQueue[nextIdx];
       if (nextSong.streamUrl.isEmpty) {
-        audioRepository.resolveSingleTrack(
-          nextSong.title,
-          artist: nextSong.artist,
-        ).then((resolved) {
-          if (resolved != null && resolved.streamUrl.isNotEmpty) {
-            final updated = nextSong.copyWith(
-              streamUrl: resolved.streamUrl,
-              album: resolved.album.isNotEmpty ? resolved.album : nextSong.album,
-              thumbnailUrl: resolved.thumbnailUrl.isNotEmpty ? resolved.thumbnailUrl : nextSong.thumbnailUrl,
-              duration: resolved.duration > Duration.zero ? resolved.duration : nextSong.duration,
-            );
-            queueManager.updateSong(updated);
-          }
-        }).catchError((_) {});
+        audioRepository
+            .resolveSingleTrack(nextSong.title, artist: nextSong.artist)
+            .then((resolved) {
+              if (resolved != null && resolved.streamUrl.isNotEmpty) {
+                final updated = nextSong.copyWith(
+                  streamUrl: resolved.streamUrl,
+                  album: resolved.album.isNotEmpty
+                      ? resolved.album
+                      : nextSong.album,
+                  thumbnailUrl: resolved.thumbnailUrl.isNotEmpty
+                      ? resolved.thumbnailUrl
+                      : nextSong.thumbnailUrl,
+                  duration: resolved.duration > Duration.zero
+                      ? resolved.duration
+                      : nextSong.duration,
+                );
+                queueManager.updateSong(updated);
+              }
+            })
+            .catchError((_) {});
       }
     }
   }
@@ -373,7 +395,10 @@ class AudioPlayerViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _triggerBackgroundRadio(SongModel seedSong, int requestId) async {
+  Future<void> _triggerBackgroundRadio(
+    SongModel seedSong,
+    int requestId,
+  ) async {
     _isAutoQueueLoading = true;
     notifyListeners();
 
@@ -391,7 +416,8 @@ class AudioPlayerViewModel extends ChangeNotifier {
       // Verify that the currently active song in the player still matches this seed
       final activeSong = queueManager.currentSong;
       if (activeSong == null ||
-          (activeSong.id != seedSong.id && activeSong.title != seedSong.title)) {
+          (activeSong.id != seedSong.id &&
+              activeSong.title != seedSong.title)) {
         return;
       }
 
@@ -400,7 +426,8 @@ class AudioPlayerViewModel extends ChangeNotifier {
         queueManager.addTracks(upcoming);
         notifyListeners();
       }
-    } catch (_) {} finally {
+    } catch (_) {
+    } finally {
       if (requestId == _autoQueueRequestId) {
         _isAutoQueueLoading = false;
         notifyListeners();

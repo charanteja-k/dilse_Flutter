@@ -62,7 +62,8 @@ class PlaylistModel {
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       thumbnailUrl: json['thumbnailUrl'] as String? ?? '',
-      songs: (json['songs'] as List<dynamic>?)
+      songs:
+          (json['songs'] as List<dynamic>?)
               ?.map((e) => SongModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -82,4 +83,3 @@ class PlaylistModel {
   @override
   int get hashCode => id.hashCode;
 }
-

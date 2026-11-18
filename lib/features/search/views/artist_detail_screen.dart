@@ -23,10 +23,7 @@ import 'album_detail_screen.dart';
 class ArtistDetailScreen extends StatelessWidget {
   final ArtistModel artist;
 
-  const ArtistDetailScreen({
-    super.key,
-    required this.artist,
-  });
+  const ArtistDetailScreen({super.key, required this.artist});
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +78,8 @@ class _ArtistDetailView extends StatelessWidget {
               ),
             )
           : vm.errorMessage != null
-              ? _buildErrorView(context, vm)
-              : _buildContent(context, vm),
+          ? _buildErrorView(context, vm)
+          : _buildContent(context, vm),
     );
   }
 
@@ -160,7 +157,8 @@ class _ArtistDetailView extends StatelessWidget {
                       ? Image.network(
                           artist.thumbnailUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildPlaceholderAvatar(context),
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildPlaceholderAvatar(context),
                         )
                       : _buildPlaceholderAvatar(context),
                 ),
@@ -194,7 +192,8 @@ class _ArtistDetailView extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => _playTopSongs(context, topSongs, shuffle: false),
+                          onPressed: () =>
+                              _playTopSongs(context, topSongs, shuffle: false),
                           icon: Icon(
                             Icons.play_arrow_rounded,
                             color: context.colors.oledBackground,
@@ -211,7 +210,9 @@ class _ArtistDetailView extends StatelessWidget {
                             backgroundColor: context.colors.textPrimary,
                             foregroundColor: context.colors.oledBackground,
                             elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: context.spacing.sm),
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.spacing.sm,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: context.radius.asBorderRadiusFull,
                             ),
@@ -221,7 +222,8 @@ class _ArtistDetailView extends StatelessWidget {
                       SizedBox(width: context.spacing.sm),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => _playTopSongs(context, topSongs, shuffle: true),
+                          onPressed: () =>
+                              _playTopSongs(context, topSongs, shuffle: true),
                           icon: Icon(
                             Icons.shuffle_rounded,
                             color: context.colors.textPrimary,
@@ -240,7 +242,9 @@ class _ArtistDetailView extends StatelessWidget {
                               width: context.sizes.borderThin,
                             ),
                             elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: context.spacing.sm),
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.spacing.sm,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: context.radius.asBorderRadiusFull,
                             ),
@@ -289,7 +293,10 @@ class _ArtistDetailView extends StatelessWidget {
           if (topSongs.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.spacing.md, vertical: context.spacing.xs),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.spacing.md,
+                  vertical: context.spacing.xs,
+                ),
                 child: Text(
                   'Popular Tracks',
                   style: context.typography.titleLarge.copyWith(
@@ -301,13 +308,10 @@ class _ArtistDetailView extends StatelessWidget {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final song = topSongs[index];
-                    return _buildSongTile(context, song, index + 1, topSongs);
-                  },
-                  childCount: topSongs.length > 5 ? 5 : topSongs.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final song = topSongs[index];
+                  return _buildSongTile(context, song, index + 1, topSongs);
+                }, childCount: topSongs.length > 5 ? 5 : topSongs.length),
               ),
             ),
           ],
@@ -353,13 +357,10 @@ class _ArtistDetailView extends StatelessWidget {
                   mainAxisSpacing: context.spacing.sm,
                   childAspectRatio: 0.76,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final album = topAlbums[index];
-                    return _buildAlbumGridCard(context, album);
-                  },
-                  childCount: topAlbums.length > 4 ? 4 : topAlbums.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final album = topAlbums[index];
+                  return _buildAlbumGridCard(context, album);
+                }, childCount: topAlbums.length > 4 ? 4 : topAlbums.length),
               ),
             ),
           ],
@@ -368,13 +369,10 @@ class _ArtistDetailView extends StatelessWidget {
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final song = topSongs[index];
-                  return _buildSongTile(context, song, index + 1, topSongs);
-                },
-                childCount: topSongs.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final song = topSongs[index];
+                return _buildSongTile(context, song, index + 1, topSongs);
+              }, childCount: topSongs.length),
             ),
           ),
         ] else if (vm.currentFilter == ArtistFilter.albums) ...[
@@ -388,18 +386,20 @@ class _ArtistDetailView extends StatelessWidget {
                 mainAxisSpacing: context.spacing.sm,
                 childAspectRatio: 0.76,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final album = topAlbums[index];
-                  return _buildAlbumGridCard(context, album);
-                },
-                childCount: topAlbums.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final album = topAlbums[index];
+                return _buildAlbumGridCard(context, album);
+              }, childCount: topAlbums.length),
             ),
           ),
         ],
         SliverToBoxAdapter(
-          child: SizedBox(height: context.sizes.miniPlayerHeight + context.sizes.navDockHeight + context.spacing.xl),
+          child: SizedBox(
+            height:
+                context.sizes.miniPlayerHeight +
+                context.sizes.navDockHeight +
+                context.spacing.xl,
+          ),
         ),
       ],
     );
@@ -433,17 +433,23 @@ class _ArtistDetailView extends StatelessWidget {
           vertical: context.spacing.xs,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.textPrimary : context.colors.cardDarkSurface,
+          color: isSelected
+              ? context.colors.textPrimary
+              : context.colors.cardDarkSurface,
           borderRadius: context.radius.asBorderRadiusFull,
           border: Border.all(
-            color: isSelected ? context.colors.textPrimary : context.colors.solidMatteBorder,
+            color: isSelected
+                ? context.colors.textPrimary
+                : context.colors.solidMatteBorder,
             width: context.sizes.borderThin,
           ),
         ),
         child: Text(
           label,
           style: context.typography.captionMuted.copyWith(
-            color: isSelected ? context.colors.oledBackground : context.colors.textSecondary,
+            color: isSelected
+                ? context.colors.oledBackground
+                : context.colors.textSecondary,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -527,7 +533,9 @@ class _ArtistDetailView extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.typography.titleMedium.copyWith(
-                      color: isCurrent ? context.colors.textPrimary : context.colors.textPrimary,
+                      color: isCurrent
+                          ? context.colors.textPrimary
+                          : context.colors.textPrimary,
                       fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
@@ -577,9 +585,7 @@ class _ArtistDetailView extends StatelessWidget {
       onTap: () {
         HapticFeedback.lightImpact();
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => AlbumDetailScreen(album: album),
-          ),
+          MaterialPageRoute(builder: (_) => AlbumDetailScreen(album: album)),
         );
       },
       borderRadius: context.radius.asBorderRadiusCard,
@@ -635,7 +641,9 @@ class _ArtistDetailView extends StatelessWidget {
             ),
             SizedBox(height: context.spacing.xxs),
             Text(
-              album.year.isNotEmpty ? album.year : (album.artist.isNotEmpty ? album.artist : 'Album'),
+              album.year.isNotEmpty
+                  ? album.year
+                  : (album.artist.isNotEmpty ? album.artist : 'Album'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.typography.captionMuted.copyWith(
@@ -648,7 +656,11 @@ class _ArtistDetailView extends StatelessWidget {
     );
   }
 
-  void _playTopSongs(BuildContext context, List<SongModel> songs, {required bool shuffle}) {
+  void _playTopSongs(
+    BuildContext context,
+    List<SongModel> songs, {
+    required bool shuffle,
+  }) {
     HapticFeedback.mediumImpact();
     final playerVm = context.read<AudioPlayerViewModel>();
     final queue = List<SongModel>.from(songs);

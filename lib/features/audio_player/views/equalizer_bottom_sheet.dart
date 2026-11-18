@@ -116,7 +116,8 @@ class EqualizerBottomSheet extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: context.spacing.md),
                 itemCount: AudioPlayerViewModel.equalizerPresets.length,
-                separatorBuilder: (context, index) => SizedBox(width: context.spacing.xs),
+                separatorBuilder: (context, index) =>
+                    SizedBox(width: context.spacing.xs),
                 itemBuilder: (context, index) {
                   final preset = AudioPlayerViewModel.equalizerPresets[index];
                   final isSelected = activePreset == preset;
@@ -124,7 +125,9 @@ class EqualizerBottomSheet extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      context.read<AudioPlayerViewModel>().setEqualizerPreset(preset);
+                      context.read<AudioPlayerViewModel>().setEqualizerPreset(
+                        preset,
+                      );
                     },
                     child: Container(
                       padding: EdgeInsets.symmetric(
@@ -150,7 +153,9 @@ class EqualizerBottomSheet extends StatelessWidget {
                             color: isSelected
                                 ? context.colors.oledBackground
                                 : context.colors.textSecondary,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -191,18 +196,26 @@ class EqualizerBottomSheet extends StatelessWidget {
                               data: SliderTheme.of(context).copyWith(
                                 trackHeight: context.spacing.xxs,
                                 activeTrackColor: context.colors.brandRuby,
-                                inactiveTrackColor: context.colors.solidMatteBorder,
+                                inactiveTrackColor:
+                                    context.colors.solidMatteBorder,
                                 thumbColor: context.colors.textPrimary,
-                                overlayColor: context.colors.brandRuby.withAlpha(40),
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                                overlayColor: context.colors.brandRuby
+                                    .withAlpha(40),
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
+                                ),
+                                overlayShape: const RoundSliderOverlayShape(
+                                  overlayRadius: 14,
+                                ),
                               ),
                               child: Slider(
                                 value: gain.clamp(-10.0, 10.0),
                                 min: -10.0,
                                 max: 10.0,
                                 onChanged: (val) {
-                                  context.read<AudioPlayerViewModel>().setEqualizerBand(index, val);
+                                  context
+                                      .read<AudioPlayerViewModel>()
+                                      .setEqualizerBand(index, val);
                                 },
                               ),
                             ),
@@ -234,4 +247,3 @@ class EqualizerBottomSheet extends StatelessWidget {
     );
   }
 }
-

@@ -141,7 +141,8 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
     if (index < 0 || !_scrollController.hasClients) return;
     final key = _lineKeys[index];
     if (key == null || key.currentContext == null) {
-      final targetOffset = (index * (context.sizes.playerHeroPlaySize * 0.8)) -
+      final targetOffset =
+          (index * (context.sizes.playerHeroPlaySize * 0.8)) -
           context.sizes.miniPlayerHeight * 1.5;
       final clamped = targetOffset.clamp(
         0.0,
@@ -190,10 +191,15 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
     final timeTagRegex = RegExp(r'\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]');
     final parsedSynced = <LyricLine>[];
 
-    final bool hasNativeIndic = LyricsTransliterationService.hasIndicScript(widget.rawLyrics);
-    final bool isRomanizedTelugu = LyricsTransliterationService.isRomanizedTelugu(widget.rawLyrics);
+    final bool hasNativeIndic = LyricsTransliterationService.hasIndicScript(
+      widget.rawLyrics,
+    );
+    final bool isRomanizedTelugu =
+        LyricsTransliterationService.isRomanizedTelugu(widget.rawLyrics);
 
-    if (hasNativeIndic || isRomanizedTelugu || widget.pronunciationLyrics != null) {
+    if (hasNativeIndic ||
+        isRomanizedTelugu ||
+        widget.pronunciationLyrics != null) {
       _hasTransliteration = true;
     }
 
@@ -214,7 +220,9 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
           originalText = LyricsTransliterationService.toTeluguScript(text);
         } else if (hasNativeIndic) {
           originalText = text;
-          pronunciationText = LyricsTransliterationService.transliterateText(text);
+          pronunciationText = LyricsTransliterationService.transliterateText(
+            text,
+          );
         } else {
           originalText = text;
           pronunciationText = text;
@@ -240,7 +248,9 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
             seconds: seconds,
             milliseconds: milliseconds,
           );
-          parsedSynced.add(LyricLine(duration, originalText, pronunciationText));
+          parsedSynced.add(
+            LyricLine(duration, originalText, pronunciationText),
+          );
         }
       }
     }
@@ -252,7 +262,9 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
     } else {
       // Unsynced Plain Text fallback
       _isSynced = false;
-      final cleanRegex = RegExp(r'\[\s*(?:\d+\s*:\s*)?\d+\s*:\s*\d+(?:[.:]\d+)?\s*\]');
+      final cleanRegex = RegExp(
+        r'\[\s*(?:\d+\s*:\s*)?\d+\s*:\s*\d+(?:[.:]\d+)?\s*\]',
+      );
       final cleaned = <LyricLine>[];
       bool prevWasEmpty = false;
 
@@ -274,13 +286,17 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
             originalText = LyricsTransliterationService.toTeluguScript(line);
           } else if (hasNativeIndic) {
             originalText = line;
-            pronunciationText = LyricsTransliterationService.transliterateText(line);
+            pronunciationText = LyricsTransliterationService.transliterateText(
+              line,
+            );
           } else {
             originalText = line;
             pronunciationText = line;
           }
 
-          cleaned.add(LyricLine(Duration.zero, originalText, pronunciationText));
+          cleaned.add(
+            LyricLine(Duration.zero, originalText, pronunciationText),
+          );
           prevWasEmpty = false;
         }
       }
@@ -390,8 +406,8 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
               size: context.sizes.iconSm * 0.85,
               color: isSelected
                   ? (widget.vibrantColor.computeLuminance() > 0.5
-                      ? context.colors.oledBackground
-                      : context.colors.textPrimary)
+                        ? context.colors.oledBackground
+                        : context.colors.textPrimary)
                   : context.colors.textSecondary,
             ),
             SizedBox(width: context.spacing.xs),
@@ -402,8 +418,8 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
                     ? (widget.vibrantColor.computeLuminance() > 0.5
-                        ? context.colors.oledBackground
-                        : context.colors.textPrimary)
+                          ? context.colors.oledBackground
+                          : context.colors.textPrimary)
                     : context.colors.textSecondary,
               ),
             ),
@@ -414,7 +430,8 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
   }
 
   Widget _buildLineContent(LyricLine item, bool isCurrent) {
-    final hasRomanized = item.romanizedText.isNotEmpty && item.romanizedText != item.text;
+    final hasRomanized =
+        item.romanizedText.isNotEmpty && item.romanizedText != item.text;
 
     if (_displayMode == LyricsDisplayMode.dual && hasRomanized) {
       return Column(
@@ -457,7 +474,8 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
       );
     }
 
-    final displayText = (_displayMode == LyricsDisplayMode.pronunciation && hasRomanized)
+    final displayText =
+        (_displayMode == LyricsDisplayMode.pronunciation && hasRomanized)
         ? item.romanizedText
         : item.text;
 
@@ -555,7 +573,9 @@ class _AnimatedLyricsState extends State<AnimatedLyrics> {
                   },
                   child: Padding(
                     padding: context.spacing.insetsVertical(
-                      _displayMode == LyricsDisplayMode.dual ? context.spacing.md : context.spacing.sm,
+                      _displayMode == LyricsDisplayMode.dual
+                          ? context.spacing.md
+                          : context.spacing.sm,
                     ),
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 250),

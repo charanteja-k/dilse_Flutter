@@ -172,11 +172,8 @@ class ApiEndpoints {
     required String repo,
     int perPage = 30,
   }) {
-    return Uri.https(
-      'api.github.com',
-      '/repos/$owner/$repo/releases',
-      {'per_page': perPage.toString()},
-    );
+    return Uri.https('api.github.com', '/repos/$owner/$repo/releases', {
+      'per_page': perPage.toString(),
+    });
   }
 }
-

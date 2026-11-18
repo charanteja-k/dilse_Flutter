@@ -55,8 +55,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                       ),
                     )
                   : downloadsVm.downloadedSongs.isEmpty
-                      ? _buildEmptyState(context)
-                      : _buildDownloadedSongsList(context, songs, downloadsVm),
+                  ? _buildEmptyState(context)
+                  : _buildDownloadedSongsList(context, songs, downloadsVm),
             ),
           ],
         ),
@@ -98,9 +98,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               ),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                context
-                    .read<AudioPlayerViewModel>()
-                    .playFromQueue(vm.downloadedSongs);
+                context.read<AudioPlayerViewModel>().playFromQueue(
+                  vm.downloadedSongs,
+                );
               },
             ),
         ],
@@ -181,10 +181,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               color: context.colors.textSecondary,
             ),
             SizedBox(height: context.spacing.sm),
-            Text(
-              'No downloads yet',
-              style: context.typography.headlineMedium,
-            ),
+            Text('No downloads yet', style: context.typography.headlineMedium),
             SizedBox(height: context.spacing.xs),
             Text(
               'Download songs to enjoy guaranteed 100% offline playback.',
@@ -210,7 +207,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
         left: context.spacing.md,
         right: context.spacing.md,
         top: context.spacing.xs,
-        bottom: context.sizes.miniPlayerHeight +
+        bottom:
+            context.sizes.miniPlayerHeight +
             context.sizes.navDockHeight +
             context.spacing.xl,
       ),
@@ -241,10 +239,11 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           ? Image.network(
                               song.thumbnailUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.music_note_rounded,
-                                color: context.colors.textSecondary,
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.music_note_rounded,
+                                    color: context.colors.textSecondary,
+                                  ),
                             )
                           : Icon(
                               Icons.music_note_rounded,
@@ -274,10 +273,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                     ),
                   ),
                   if (durationStr.isNotEmpty) ...[
-                    Text(
-                      durationStr,
-                      style: context.typography.captionMuted,
-                    ),
+                    Text(durationStr, style: context.typography.captionMuted),
                     SizedBox(width: context.spacing.xs),
                   ],
                   IconButton(

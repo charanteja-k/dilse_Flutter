@@ -17,4 +17,3 @@ class MoodCategory {
     return queryTemplate.replaceAll('{lang}', primaryLanguage);
   }
 }
-

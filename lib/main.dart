@@ -32,9 +32,7 @@ void main() async {
   PaintingBinding.instance.imageCache.maximumSize = 100;
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize AudioService for lockscreen media controls and background notification
   DilSeAudioHandler? audioHandler;
@@ -102,12 +100,15 @@ class DilseApp extends StatelessWidget {
         ),
 
         // Queue Manager
-        Provider<QueueManager>(
-          create: (_) => QueueManager(),
-        ),
+        Provider<QueueManager>(create: (_) => QueueManager()),
 
         // ViewModels
-        ChangeNotifierProxyProvider3<SoLoudAudioDriver, QueueManager, AudioRepository, AudioPlayerViewModel>(
+        ChangeNotifierProxyProvider3<
+          SoLoudAudioDriver,
+          QueueManager,
+          AudioRepository,
+          AudioPlayerViewModel
+        >(
           create: (context) => AudioPlayerViewModel(
             audioDriver: context.read<SoLoudAudioDriver>(),
             queueManager: context.read<QueueManager>(),
@@ -125,25 +126,21 @@ class DilseApp extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<AudioRepository, HomeViewModel>(
-          create: (context) => HomeViewModel(
-            audioRepository: context.read<AudioRepository>(),
-          ),
+          create: (context) =>
+              HomeViewModel(audioRepository: context.read<AudioRepository>()),
           update: (_, repo, previous) =>
               previous ?? HomeViewModel(audioRepository: repo),
         ),
 
         ChangeNotifierProxyProvider<AudioRepository, SearchViewModel>(
-          create: (context) => SearchViewModel(
-            audioRepository: context.read<AudioRepository>(),
-          ),
+          create: (context) =>
+              SearchViewModel(audioRepository: context.read<AudioRepository>()),
           update: (_, repo, previous) =>
               previous ?? SearchViewModel(audioRepository: repo),
         ),
 
         // Storage Datasource (Library & Downloads)
-        Provider<StorageDatasource>(
-          create: (_) => StorageDatasourceImpl(),
-        ),
+        Provider<StorageDatasource>(create: (_) => StorageDatasourceImpl()),
 
         // Library & Downloads ViewModels
         ChangeNotifierProxyProvider<StorageDatasource, LibraryViewModel>(

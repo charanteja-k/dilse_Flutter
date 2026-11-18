@@ -72,13 +72,17 @@ class _FloatingNavDockState extends State<FloatingNavDock>
     );
     _jumpAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: -7.0)
-            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        tween: Tween<double>(
+          begin: 0.0,
+          end: -7.0,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 45,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: -7.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeInQuad)),
+        tween: Tween<double>(
+          begin: -7.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInQuad)),
         weight: 55,
       ),
     ]).animate(_jumpController);
@@ -149,9 +153,7 @@ class _FloatingNavDockState extends State<FloatingNavDock>
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.only(
-          bottom: context.spacing.xs,
-        ),
+        padding: EdgeInsets.only(bottom: context.spacing.xs),
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
@@ -223,8 +225,9 @@ class _FloatingNavDockState extends State<FloatingNavDock>
                         child: AnimatedBuilder(
                           animation: _jumpAnimation,
                           builder: (context, child) {
-                            final offsetY =
-                                isJustTapped ? _jumpAnimation.value : 0.0;
+                            final offsetY = isJustTapped
+                                ? _jumpAnimation.value
+                                : 0.0;
                             return Transform.translate(
                               offset: Offset(0, offsetY),
                               child: Icon(

@@ -19,19 +19,25 @@ void main() {
       httpClient.close();
     });
 
-    test('searchSongs returns valid SongModel list with 320kbps streams', () async {
-      final songs = await repository.searchSongs('Kesariya', limit: 5);
+    test(
+      'searchSongs returns valid SongModel list with 320kbps streams',
+      () async {
+        final songs = await repository.searchSongs('Kesariya', limit: 5);
 
-      expect(songs, isNotEmpty);
-      final firstSong = songs.first;
-      expect(firstSong.id, isNotEmpty);
-      expect(firstSong.title.toLowerCase(), contains('kesariya'));
-      expect(firstSong.streamUrl, startsWith('http'));
-      expect(firstSong.bitrate, equals('320kbps'));
-    });
+        expect(songs, isNotEmpty);
+        final firstSong = songs.first;
+        expect(firstSong.id, isNotEmpty);
+        expect(firstSong.title.toLowerCase(), contains('kesariya'));
+        expect(firstSong.streamUrl, startsWith('http'));
+        expect(firstSong.bitrate, equals('320kbps'));
+      },
+    );
 
     test('resolveSingleTrack matches and fetches stream details', () async {
-      final song = await repository.resolveSingleTrack('Kesariya', artist: 'Arijit Singh');
+      final song = await repository.resolveSingleTrack(
+        'Kesariya',
+        artist: 'Arijit Singh',
+      );
 
       expect(song, isNotNull);
       expect(song!.title, isNotEmpty);
@@ -40,7 +46,10 @@ void main() {
     });
 
     test('getRecommendations returns valid regional discovery songs', () async {
-      final recommendations = await repository.getRecommendations(query: 'telugu', limit: 5);
+      final recommendations = await repository.getRecommendations(
+        query: 'telugu',
+        limit: 5,
+      );
 
       expect(recommendations, isNotEmpty);
       expect(recommendations.length, inInclusiveRange(1, 5));
@@ -48,4 +57,3 @@ void main() {
     });
   });
 }
-

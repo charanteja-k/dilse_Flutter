@@ -11,7 +11,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color surfaceContainer;
   final Color floatingDockSurface;
   final Color solidMatteBorder;
-  final Color brandRuby; // In pure monochrome, maps to primary accent (White in dark, Black in light)
+  final Color
+  brandRuby; // In pure monochrome, maps to primary accent (White in dark, Black in light)
   final Color successEmerald;
   final Color warningAmber;
   final Color errorCrimson;
@@ -135,9 +136,21 @@ class AppColors extends ThemeExtension<AppColors> {
     return AppColors(
       oledBackground: Color.lerp(oledBackground, other.oledBackground, t)!,
       cardDarkSurface: Color.lerp(cardDarkSurface, other.cardDarkSurface, t)!,
-      surfaceContainer: Color.lerp(surfaceContainer, other.surfaceContainer, t)!,
-      floatingDockSurface: Color.lerp(floatingDockSurface, other.floatingDockSurface, t)!,
-      solidMatteBorder: Color.lerp(solidMatteBorder, other.solidMatteBorder, t)!,
+      surfaceContainer: Color.lerp(
+        surfaceContainer,
+        other.surfaceContainer,
+        t,
+      )!,
+      floatingDockSurface: Color.lerp(
+        floatingDockSurface,
+        other.floatingDockSurface,
+        t,
+      )!,
+      solidMatteBorder: Color.lerp(
+        solidMatteBorder,
+        other.solidMatteBorder,
+        t,
+      )!,
       brandRuby: Color.lerp(brandRuby, other.brandRuby, t)!,
       successEmerald: Color.lerp(successEmerald, other.successEmerald, t)!,
       warningAmber: Color.lerp(warningAmber, other.warningAmber, t)!,

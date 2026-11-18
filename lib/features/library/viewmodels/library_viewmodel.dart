@@ -3,13 +3,7 @@ import '../../../data/datasources/local/storage_datasource.dart';
 import '../../../data/models/playlist_model.dart';
 import '../../../data/models/song_model.dart';
 
-enum LibrarySection {
-  playlists,
-  liked,
-  albums,
-  artists,
-  history,
-}
+enum LibrarySection { playlists, liked, albums, artists, history }
 
 extension LibrarySectionExt on LibrarySection {
   String get label {
@@ -179,4 +173,3 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 }
-
