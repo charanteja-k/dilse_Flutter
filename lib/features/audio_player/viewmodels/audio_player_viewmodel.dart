@@ -6,8 +6,10 @@ import '../../../data/datasources/local/queue_manager.dart';
 import '../../../data/datasources/local/soloud_audio_driver.dart';
 import '../../../data/models/song_model.dart';
 import '../../../data/repositories/audio_repository.dart';
+import '../../../core/services/queue_calibrator.dart';
 
 export '../../../data/datasources/local/queue_manager.dart' show RepeatMode;
+export '../../../core/services/queue_calibrator.dart' show QueueMode, QueueTrackBadge;
 
 enum ArtworkStyle { card, vinyl }
 
@@ -30,6 +32,9 @@ class AudioPlayerViewModel extends ChangeNotifier {
   bool get isAutoQueueLoading => _isAutoQueueLoading;
 
   ArtworkStyle _artworkStyle = ArtworkStyle.card;
+  QueueMode _queueMode = QueueMode.blend;
+  final Map<String, QueueTrackBadge> _trackBadges = {};
+  List<SongModel> _lastRawCandidates = [];
   final Set<String> _likedSongIds = {};
 
   String? _currentLyricsPlain;
@@ -106,6 +111,9 @@ class AudioPlayerViewModel extends ChangeNotifier {
   bool get isBuffering => _playbackState == PlaybackState.buffering;
   bool get isShuffled => queueManager.isShuffled;
   RepeatMode get repeatMode => queueManager.repeatMode;
+  QueueMode get queueMode => _queueMode;
+  QueueTrackBadge getTrackBadge(String songId) =>
+      _trackBadges[songId] ?? QueueTrackBadge.discovery;
 
   ArtworkStyle get artworkStyle => _artworkStyle;
   Set<String> get likedSongIds => Set.unmodifiable(_likedSongIds);
@@ -297,6 +305,42 @@ class AudioPlayerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets the queue calibration mode and recalibrates upcoming tracks smoothly.
+  void setQueueMode(QueueMode mode) {
+    if (_queueMode == mode) return;
+    _queueMode = mode;
+    _recalibrateUpcomingQueue();
+    notifyListeners();
+  }
+
+  /// Clears upcoming tracks in the queue while preserving the active song.
+  void clearUpcomingQueue() {
+    queueManager.clearUpcoming();
+    _lastRawCandidates.clear();
+    _trackBadges.clear();
+    notifyListeners();
+  }
+
+  void _recalibrateUpcomingQueue() {
+    final activeSong = queueManager.currentSong;
+    if (activeSong == null || _lastRawCandidates.isEmpty) return;
+
+    final calibrator = const QueueCalibrator();
+    final calibrated = calibrator.calibrate(
+      seedSong: activeSong,
+      rawCandidates: _lastRawCandidates,
+      mode: _queueMode,
+    );
+
+    _trackBadges.clear();
+    final newUpcoming = <SongModel>[];
+    for (final item in calibrated) {
+      newUpcoming.add(item.song);
+      _trackBadges[item.song.id] = item.badge;
+    }
+    queueManager.replaceUpcoming(newUpcoming);
+  }
+
   Future<void> toggleLike(SongModel song) async {
     if (_likedSongIds.contains(song.id)) {
       _likedSongIds.remove(song.id);
@@ -396,7 +440,20 @@ class AudioPlayerViewModel extends ChangeNotifier {
       }
 
       if (radioTracks.length > 1) {
-        final upcoming = radioTracks.sublist(1);
+        _lastRawCandidates = radioTracks.sublist(1);
+        final calibrator = const QueueCalibrator();
+        final calibrated = calibrator.calibrate(
+          seedSong: seedSong,
+          rawCandidates: _lastRawCandidates,
+          mode: _queueMode,
+        );
+
+        _trackBadges.clear();
+        final upcoming = <SongModel>[];
+        for (final item in calibrated) {
+          upcoming.add(item.song);
+          _trackBadges[item.song.id] = item.badge;
+        }
         queueManager.addTracks(upcoming);
         notifyListeners();
       }

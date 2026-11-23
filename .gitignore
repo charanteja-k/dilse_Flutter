@@ -46,3 +46,7 @@ app.*.map.json
 
 # Agent Rules (Local System Only)
 AGENTS.md
+
+# Scratch / Experimentation Scripts
+scratch/
+

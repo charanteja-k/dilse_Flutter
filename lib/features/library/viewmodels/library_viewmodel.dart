@@ -4,6 +4,7 @@ import '../../../data/models/playlist_model.dart';
 import '../../../data/models/song_model.dart';
 
 enum LibrarySection {
+  all,
   playlists,
   liked,
   albums,
@@ -14,6 +15,8 @@ enum LibrarySection {
 extension LibrarySectionExt on LibrarySection {
   String get label {
     switch (this) {
+      case LibrarySection.all:
+        return 'All';
       case LibrarySection.playlists:
         return 'Playlists';
       case LibrarySection.liked:
@@ -39,16 +42,43 @@ class LibraryViewModel extends ChangeNotifier {
     loadLibrary();
   }
 
-  LibrarySection _currentSection = LibrarySection.playlists;
+  LibrarySection _currentSection = LibrarySection.all;
   List<PlaylistModel> _playlists = [];
   List<SongModel> _likedSongs = [];
   List<SongModel> _history = [];
   bool _isLoading = false;
+  String _searchFilter = '';
 
   LibrarySection get currentSection => _currentSection;
-  List<PlaylistModel> get playlists => List.unmodifiable(_playlists);
-  List<SongModel> get likedSongs => List.unmodifiable(_likedSongs);
-  List<SongModel> get history => List.unmodifiable(_history);
+  String get searchFilter => _searchFilter;
+
+  void setSearchFilter(String query) {
+    _searchFilter = query.trim();
+    notifyListeners();
+  }
+
+  List<PlaylistModel> get playlists {
+    if (_searchFilter.isEmpty) return List.unmodifiable(_playlists);
+    return _playlists
+        .where((p) => p.title.toLowerCase().contains(_searchFilter.toLowerCase()))
+        .toList();
+  }
+
+  List<SongModel> get likedSongs {
+    if (_searchFilter.isEmpty) return List.unmodifiable(_likedSongs);
+    final q = _searchFilter.toLowerCase();
+    return _likedSongs
+        .where((s) => s.title.toLowerCase().contains(q) || s.artist.toLowerCase().contains(q))
+        .toList();
+  }
+
+  List<SongModel> get history {
+    if (_searchFilter.isEmpty) return List.unmodifiable(_history);
+    final q = _searchFilter.toLowerCase();
+    return _history
+        .where((s) => s.title.toLowerCase().contains(q) || s.artist.toLowerCase().contains(q))
+        .toList();
+  }
   bool get isLoading => _isLoading;
 
   bool isLiked(String songId) => _likedSongs.any((s) => s.id == songId);
@@ -58,10 +88,14 @@ class LibraryViewModel extends ChangeNotifier {
     for (final p in _playlists) {
       all.addAll(p.songs);
     }
-    return all
+    final albums = all
         .map((s) => s.album.trim())
-        .where((a) => a.isNotEmpty)
+        .where((a) => a.isNotEmpty && !a.toLowerCase().contains('dilse'))
         .toSet()
+        .toList();
+    if (_searchFilter.isEmpty) return albums;
+    return albums
+        .where((a) => a.toLowerCase().contains(_searchFilter.toLowerCase()))
         .toList();
   }
 
@@ -70,10 +104,14 @@ class LibraryViewModel extends ChangeNotifier {
     for (final p in _playlists) {
       all.addAll(p.songs);
     }
-    return all
+    final artists = all
         .map((s) => s.artist.trim())
-        .where((a) => a.isNotEmpty)
+        .where((a) => a.isNotEmpty && !a.toLowerCase().contains('unknown'))
         .toSet()
+        .toList();
+    if (_searchFilter.isEmpty) return artists;
+    return artists
+        .where((a) => a.toLowerCase().contains(_searchFilter.toLowerCase()))
         .toList();
   }
 

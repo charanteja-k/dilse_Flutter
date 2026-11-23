@@ -3,6 +3,13 @@ import 'package:flutter/foundation.dart';
 import '../../../data/datasources/local/storage_datasource.dart';
 import '../../../data/models/song_model.dart';
 
+enum DownloadSortOption {
+  all,
+  recent,
+  largest,
+  alphabetical,
+}
+
 /// Pure business ViewModel managing downloaded offline tracks and storage telemetry.
 /// Strictly adheres to AGENTS.md Invariants 1 & 3.
 class DownloadsViewModel extends ChangeNotifier {
@@ -15,21 +22,61 @@ class DownloadsViewModel extends ChangeNotifier {
   List<SongModel> _downloadedSongs = [];
   Map<String, int> _songFileSizes = {};
   String _searchFilter = '';
+  DownloadSortOption _selectedSort = DownloadSortOption.all;
   bool _isLoading = false;
 
   List<SongModel> get downloadedSongs => List.unmodifiable(_downloadedSongs);
   String get searchFilter => _searchFilter;
+  DownloadSortOption get selectedSort => _selectedSort;
   bool get isLoading => _isLoading;
 
+  int getFileSizeForSong(String songId) => _songFileSizes[songId] ?? 0;
+
+  String formatSongSize(String songId) {
+    final bytes = getFileSizeForSong(songId);
+    return formatBytes(bytes);
+  }
+
   List<SongModel> get filteredSongs {
-    if (_searchFilter.trim().isEmpty) return _downloadedSongs;
-    final q = _searchFilter.toLowerCase();
-    return _downloadedSongs
-        .where((s) =>
-            s.title.toLowerCase().contains(q) ||
-            s.artist.toLowerCase().contains(q) ||
-            s.album.toLowerCase().contains(q))
-        .toList();
+    List<SongModel> result = List.of(_downloadedSongs);
+
+    // Apply search filter
+    if (_searchFilter.trim().isNotEmpty) {
+      final q = _searchFilter.toLowerCase();
+      result = result
+          .where((s) =>
+              s.title.toLowerCase().contains(q) ||
+              s.artist.toLowerCase().contains(q) ||
+              s.album.toLowerCase().contains(q))
+          .toList();
+    }
+
+    // Apply sorting
+    switch (_selectedSort) {
+      case DownloadSortOption.all:
+      case DownloadSortOption.recent:
+        // Already in downloaded order (latest first)
+        break;
+      case DownloadSortOption.largest:
+        result.sort((a, b) {
+          final szA = _songFileSizes[a.id] ?? 0;
+          final szB = _songFileSizes[b.id] ?? 0;
+          return szB.compareTo(szA);
+        });
+        break;
+      case DownloadSortOption.alphabetical:
+        result.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+    }
+
+    return result;
+  }
+
+  void setSortOption(DownloadSortOption option) {
+    if (_selectedSort != option) {
+      _selectedSort = option;
+      notifyListeners();
+    }
   }
 
   int get totalStorageBytes =>

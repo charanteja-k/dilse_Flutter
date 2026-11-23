@@ -202,6 +202,31 @@ class QueueManager {
     }
   }
 
+  /// Clears upcoming tracks in the queue while preserving the active song.
+  void clearUpcoming() {
+    if (_currentIndex >= 0 && _currentIndex < _currentQueue.length) {
+      final activeSong = _currentQueue[_currentIndex];
+      _currentQueue.removeRange(_currentIndex + 1, _currentQueue.length);
+      _originalQueue.clear();
+      _originalQueue.add(activeSong);
+      _currentIndex = 0;
+    } else {
+      clear();
+    }
+  }
+
+  /// Replaces upcoming tracks after current index with calibrated tracks.
+  void replaceUpcoming(List<SongModel> newUpcoming) {
+    if (_currentIndex >= 0 && _currentIndex < _currentQueue.length) {
+      _currentQueue.removeRange(_currentIndex + 1, _currentQueue.length);
+      _currentQueue.addAll(newUpcoming);
+      _originalQueue.clear();
+      _originalQueue.addAll(_currentQueue);
+    } else {
+      setQueue(newUpcoming);
+    }
+  }
+
   void clear() {
     _originalQueue.clear();
     _currentQueue.clear();
