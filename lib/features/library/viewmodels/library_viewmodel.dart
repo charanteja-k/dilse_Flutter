@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../../data/datasources/local/storage_datasource.dart';
 import '../../../data/models/playlist_model.dart';
@@ -37,8 +38,13 @@ extension LibrarySectionExt on LibrarySection {
 /// - Invariant 3: Strict MVVM (zero BuildContext, zero UI widgets).
 class LibraryViewModel extends ChangeNotifier {
   final StorageDatasource storageDatasource;
+  late final StreamSubscription<List<SongModel>> _likedSub;
 
   LibraryViewModel({required this.storageDatasource}) {
+    _likedSub = storageDatasource.likedSongsStream.listen((songs) {
+      _likedSongs = List.from(songs);
+      notifyListeners();
+    });
     loadLibrary();
   }
 
@@ -144,14 +150,7 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<void> toggleLike(SongModel song) async {
-    final exists = _likedSongs.any((s) => s.id == song.id);
-    if (exists) {
-      _likedSongs.removeWhere((s) => s.id == song.id);
-    } else {
-      _likedSongs.insert(0, song);
-    }
-    notifyListeners();
-    await storageDatasource.saveLikedSongs(_likedSongs);
+    await storageDatasource.toggleLike(song);
   }
 
   Future<void> addToHistory(SongModel song) async {
@@ -215,6 +214,12 @@ class LibraryViewModel extends ChangeNotifier {
       notifyListeners();
       await storageDatasource.savePlaylists(_playlists);
     }
+  }
+
+  @override
+  void dispose() {
+    _likedSub.cancel();
+    super.dispose();
   }
 }
 

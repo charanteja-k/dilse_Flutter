@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/datasources/local/audio_handler.dart';
 import '../../../data/datasources/local/queue_manager.dart';
 import '../../../data/datasources/local/soloud_audio_driver.dart';
+import '../../../data/datasources/local/storage_datasource.dart';
 import '../../../data/models/song_model.dart';
 import '../../../data/repositories/audio_repository.dart';
 import '../../../core/services/queue_calibrator.dart';
@@ -20,10 +21,12 @@ class AudioPlayerViewModel extends ChangeNotifier {
   final SoLoudAudioDriver audioDriver;
   final QueueManager queueManager;
   final AudioRepository audioRepository;
+  final StorageDatasource? storageDatasource;
 
   late final StreamSubscription<PlaybackState> _stateSub;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<Duration> _durationSub;
+  StreamSubscription<List<SongModel>>? _likedSub;
 
   PlaybackState _playbackState = PlaybackState.idle;
   Duration _position = Duration.zero;
@@ -73,11 +76,19 @@ class AudioPlayerViewModel extends ChangeNotifier {
     required this.audioDriver,
     required this.queueManager,
     required this.audioRepository,
+    this.storageDatasource,
     DilSeAudioHandler? audioHandler,
   }) {
     _stateSub = audioDriver.stateStream.listen(_onStateChanged);
     _positionSub = audioDriver.positionStream.listen(_onPositionChanged);
     _durationSub = audioDriver.durationStream.listen(_onDurationChanged);
+    if (storageDatasource != null) {
+      _likedSub = storageDatasource!.likedSongsStream.listen((songs) {
+        _likedSongIds.clear();
+        _likedSongIds.addAll(songs.map((s) => s.id));
+        notifyListeners();
+      });
+    }
     _loadLikedSongs();
     if (audioHandler != null) {
       audioHandler.onSkipToNext = skipNext;
@@ -313,6 +324,19 @@ class AudioPlayerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cycles to the next queue calibration mode:
+  /// blend -> discover -> familiar -> singleLanguage -> blend
+  QueueMode cycleQueueMode() {
+    final next = switch (_queueMode) {
+      QueueMode.blend => QueueMode.discover,
+      QueueMode.discover => QueueMode.familiar,
+      QueueMode.familiar => QueueMode.singleLanguage,
+      QueueMode.singleLanguage => QueueMode.blend,
+    };
+    setQueueMode(next);
+    return next;
+  }
+
   /// Clears upcoming tracks in the queue while preserving the active song.
   void clearUpcomingQueue() {
     queueManager.clearUpcoming();
@@ -321,15 +345,24 @@ class AudioPlayerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _recalibrateUpcomingQueue() {
+  Future<void> _recalibrateUpcomingQueue() async {
     final activeSong = queueManager.currentSong;
     if (activeSong == null || _lastRawCandidates.isEmpty) return;
 
     final calibrator = const QueueCalibrator();
+    final likedSongs = storageDatasource != null
+        ? await storageDatasource!.getLikedSongs()
+        : <SongModel>[];
+    final historySongs = storageDatasource != null
+        ? await storageDatasource!.getListeningHistory()
+        : <SongModel>[];
+
     final calibrated = calibrator.calibrate(
       seedSong: activeSong,
       rawCandidates: _lastRawCandidates,
       mode: _queueMode,
+      userLikedSongs: likedSongs,
+      userHistory: historySongs,
     );
 
     _trackBadges.clear();
@@ -342,10 +375,19 @@ class AudioPlayerViewModel extends ChangeNotifier {
   }
 
   Future<void> toggleLike(SongModel song) async {
-    if (_likedSongIds.contains(song.id)) {
-      _likedSongIds.remove(song.id);
+    if (storageDatasource != null) {
+      final isNowLiked = await storageDatasource!.toggleLike(song);
+      if (isNowLiked) {
+        _likedSongIds.add(song.id);
+      } else {
+        _likedSongIds.remove(song.id);
+      }
     } else {
-      _likedSongIds.add(song.id);
+      if (_likedSongIds.contains(song.id)) {
+        _likedSongIds.remove(song.id);
+      } else {
+        _likedSongIds.add(song.id);
+      }
     }
     notifyListeners();
     try {
@@ -356,12 +398,17 @@ class AudioPlayerViewModel extends ChangeNotifier {
 
   Future<void> _loadLikedSongs() async {
     try {
+      if (storageDatasource != null) {
+        final songs = await storageDatasource!.getLikedSongs();
+        _likedSongIds.clear();
+        _likedSongIds.addAll(songs.map((s) => s.id));
+      }
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList('dilse_liked_song_ids');
       if (list != null) {
         _likedSongIds.addAll(list);
-        notifyListeners();
       }
+      notifyListeners();
     } catch (_) {}
   }
 
@@ -442,10 +489,19 @@ class AudioPlayerViewModel extends ChangeNotifier {
       if (radioTracks.length > 1) {
         _lastRawCandidates = radioTracks.sublist(1);
         final calibrator = const QueueCalibrator();
+        final likedSongs = storageDatasource != null
+            ? await storageDatasource!.getLikedSongs()
+            : <SongModel>[];
+        final historySongs = storageDatasource != null
+            ? await storageDatasource!.getListeningHistory()
+            : <SongModel>[];
+
         final calibrated = calibrator.calibrate(
           seedSong: seedSong,
           rawCandidates: _lastRawCandidates,
           mode: _queueMode,
+          userLikedSongs: likedSongs,
+          userHistory: historySongs,
         );
 
         _trackBadges.clear();
@@ -480,6 +536,7 @@ class AudioPlayerViewModel extends ChangeNotifier {
     _stateSub.cancel();
     _positionSub.cancel();
     _durationSub.cancel();
+    _likedSub?.cancel();
     audioDriver.dispose();
     super.dispose();
   }

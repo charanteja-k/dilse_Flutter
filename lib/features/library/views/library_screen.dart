@@ -1281,17 +1281,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         ),
                       ),
                       if (pl.songs.isNotEmpty)
-                        IconButton(
-                          icon: Icon(
-                            Icons.play_circle_fill_rounded,
-                            color: context.colors.textPrimary,
-                            size: context.sizes.iconLg,
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(ctx);
-                            context.read<AudioPlayerViewModel>().playFromQueue(pl.songs);
-                          },
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Start Auto Queue from Seed',
+                              icon: Icon(
+                                Icons.sensors_rounded,
+                                color: context.colors.textSecondary,
+                                size: context.sizes.iconMd,
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pop(ctx);
+                                context.read<AudioPlayerViewModel>().playSong(pl.songs.first);
+                              },
+                            ),
+                            IconButton(
+                              tooltip: 'Play Playlist',
+                              icon: Icon(
+                                Icons.play_circle_fill_rounded,
+                                color: context.colors.textPrimary,
+                                size: context.sizes.iconLg,
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pop(ctx);
+                                context.read<AudioPlayerViewModel>().playFromQueue(pl.songs);
+                              },
+                            ),
+                          ],
                         ),
                     ],
                   ),
@@ -1342,16 +1361,35 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   style: context.typography.captionMuted,
                                 ),
-                                trailing: IconButton(
-                                  icon: Icon(
-                                    Icons.remove_circle_outline_rounded,
-                                    color: context.colors.textSecondary,
-                                    size: context.sizes.iconSm,
-                                  ),
-                                  onPressed: () {
-                                    vm.removeSongFromPlaylist(pl.id, song.id);
-                                    Navigator.pop(ctx);
-                                  },
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: 'Start Auto Queue from this Seed',
+                                      icon: Icon(
+                                        Icons.sensors_rounded,
+                                        color: context.colors.textSecondary,
+                                        size: context.sizes.iconSm,
+                                      ),
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        Navigator.pop(ctx);
+                                        context.read<AudioPlayerViewModel>().playSong(song);
+                                      },
+                                    ),
+                                    if (!pl.id.startsWith('inbuilt_'))
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.remove_circle_outline_rounded,
+                                          color: context.colors.textSecondary,
+                                          size: context.sizes.iconSm,
+                                        ),
+                                        onPressed: () {
+                                          vm.removeSongFromPlaylist(pl.id, song.id);
+                                          Navigator.pop(ctx);
+                                        },
+                                      ),
+                                  ],
                                 ),
                                 onTap: () {
                                   HapticFeedback.lightImpact();

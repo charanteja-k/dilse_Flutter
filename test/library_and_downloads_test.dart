@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dilse/data/datasources/local/storage_datasource.dart';
 import 'package:dilse/data/models/playlist_model.dart';
@@ -11,12 +12,31 @@ class FakeStorageDatasource implements StorageDatasource {
   List<SongModel> history = [];
   List<SongModel> downloads = [];
 
+  final _likedController = StreamController<List<SongModel>>.broadcast();
+
+  @override
+  Stream<List<SongModel>> get likedSongsStream => _likedController.stream;
+
   @override
   Future<List<SongModel>> getLikedSongs() async => List.from(liked);
 
   @override
   Future<void> saveLikedSongs(List<SongModel> songs) async {
     liked = List.from(songs);
+    _likedController.add(List.unmodifiable(liked));
+  }
+
+  @override
+  Future<bool> toggleLike(SongModel song) async {
+    final idx = liked.indexWhere((s) => s.id == song.id);
+    final exists = idx != -1;
+    if (exists) {
+      liked.removeAt(idx);
+    } else {
+      liked.insert(0, song);
+    }
+    await saveLikedSongs(liked);
+    return !exists;
   }
 
   @override

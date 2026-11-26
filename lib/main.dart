@@ -101,25 +101,32 @@ class DilseApp extends StatelessWidget {
           dispose: (context, driver) => driver.dispose(),
         ),
 
+        // Storage Datasource (Library, Downloads, and Player Liked State)
+        Provider<StorageDatasource>(
+          create: (_) => StorageDatasourceImpl(),
+        ),
+
         // Queue Manager
         Provider<QueueManager>(
           create: (_) => QueueManager(),
         ),
 
         // ViewModels
-        ChangeNotifierProxyProvider3<SoLoudAudioDriver, QueueManager, AudioRepository, AudioPlayerViewModel>(
+        ChangeNotifierProxyProvider4<SoLoudAudioDriver, QueueManager, AudioRepository, StorageDatasource, AudioPlayerViewModel>(
           create: (context) => AudioPlayerViewModel(
             audioDriver: context.read<SoLoudAudioDriver>(),
             queueManager: context.read<QueueManager>(),
             audioRepository: context.read<AudioRepository>(),
+            storageDatasource: context.read<StorageDatasource>(),
             audioHandler: audioHandler,
           ),
-          update: (_, driver, queue, repo, previous) =>
+          update: (_, driver, queue, repo, storage, previous) =>
               previous ??
               AudioPlayerViewModel(
                 audioDriver: driver,
                 queueManager: queue,
                 audioRepository: repo,
+                storageDatasource: storage,
                 audioHandler: audioHandler,
               ),
         ),
@@ -138,11 +145,6 @@ class DilseApp extends StatelessWidget {
           ),
           update: (_, repo, previous) =>
               previous ?? SearchViewModel(audioRepository: repo),
-        ),
-
-        // Storage Datasource (Library & Downloads)
-        Provider<StorageDatasource>(
-          create: (_) => StorageDatasourceImpl(),
         ),
 
         // Library & Downloads ViewModels

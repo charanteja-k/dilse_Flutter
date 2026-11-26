@@ -13,6 +13,7 @@ import '../../audio_player/views/floating_vinyl_disc.dart';
 import '../../audio_player/views/mini_player.dart';
 import '../../downloads/views/downloads_screen.dart';
 import '../../library/views/library_screen.dart';
+import '../../library/viewmodels/library_viewmodel.dart';
 import '../../search/views/search_screen.dart';
 import '../viewmodels/home_viewmodel.dart';
 import 'floating_nav_dock.dart';
@@ -550,6 +551,19 @@ class _HomeScreenState extends State<HomeScreen> {
           return GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
+              if (item.iconKey == 'liked_songs' || item.id == 'liked_songs') {
+                final liked = context.read<LibraryViewModel>().likedSongs;
+                if (liked.isNotEmpty) {
+                  context.read<AudioPlayerViewModel>().playFromQueue(liked);
+                } else {
+                  DilSeNotification.info(
+                    context,
+                    item.title,
+                    subtitle: 'No liked songs yet. Heart songs while listening to save them here.',
+                  );
+                }
+                return;
+              }
               if (item.songs.isNotEmpty) {
                 context.read<AudioPlayerViewModel>().playFromQueue(item.songs);
               } else {
