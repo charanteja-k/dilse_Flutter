@@ -61,18 +61,18 @@ void main() {
     final rawCandidates = [
       SongModel(
         id: 'c_1',
-        title: 'Aasa Kooda',
-        artist: 'Sai Abhyankkar',
-        album: 'Think Indie',
+        title: 'Saranga Dariya',
+        artist: 'Mangli',
+        album: 'Love Story - Telugu',
         thumbnailUrl: '',
         streamUrl: '',
         duration: const Duration(seconds: 210),
       ),
       SongModel(
         id: 'c_2',
-        title: 'KALYANI (Remix)',
-        artist: 'ARJN',
-        album: 'Club',
+        title: 'Aasa Kooda',
+        artist: 'Sai Abhyankkar',
+        album: 'Think Indie - Tamil',
         thumbnailUrl: '',
         streamUrl: '',
         duration: const Duration(seconds: 180),
@@ -129,11 +129,14 @@ void main() {
       final sidSriramTrack = calibrated.firstWhere((t) => t.song.title == 'Maate Vinadhuga');
       expect(sidSriramTrack.badge, equals(QueueTrackBadge.topArtist));
 
+      final sarangaDariya = calibrated.firstWhere((t) => t.song.title == 'Saranga Dariya');
+      expect(sarangaDariya.badge, equals(QueueTrackBadge.discovery));
+
       final aasaKooda = calibrated.firstWhere((t) => t.song.title == 'Aasa Kooda');
-      expect(aasaKooda.badge, equals(QueueTrackBadge.discovery));
+      expect(aasaKooda.badge, equals(QueueTrackBadge.similarVibe));
     });
 
-    test('Single language mode quarantines off-language tracks', () {
+    test('Single language mode strictly quarantines off-language tracks', () {
       final calibrated = calibrator.calibrate(
         seedSong: seedSong,
         rawCandidates: rawCandidates,
@@ -142,9 +145,73 @@ void main() {
         userHistory: historySongs,
       );
 
-      // Chaleya (Hindi) should be filtered out in single language mode for Telugu seed
+      // Chaleya (Hindi) and Aasa Kooda (Tamil) must be quarantined for Telugu seed
       final hasChaleya = calibrated.any((t) => t.song.title == 'Chaleya');
-      expect(hasChaleya, isFalse);
+      expect(hasChaleya, isFalse, reason: 'Hindi track must be filtered out for Telugu seed');
+
+      final hasAasaKooda = calibrated.any((t) => t.song.title == 'Aasa Kooda');
+      expect(hasAasaKooda, isFalse, reason: 'Tamil track must be filtered out for Telugu seed');
+
+      // Only Telugu tracks should remain
+      expect(calibrated.every((t) => t.song.title != 'Chaleya' && t.song.title != 'Aasa Kooda'), isTrue);
+    });
+
+    test('Single language mode with Hindi seed strictly quarantines Telugu/English', () {
+      final hindiSeed = SongModel(
+        id: 'seed_hindi',
+        title: 'Tum Hi Ho',
+        artist: 'Arijit Singh',
+        album: 'Aashiqui 2 - Hindi',
+        thumbnailUrl: '',
+        streamUrl: '',
+        duration: const Duration(seconds: 262),
+      );
+
+      final mixedCandidates = [
+        SongModel(id: 'h_1', title: 'Kesariya', artist: 'Arijit Singh, Pritam', album: 'Brahmastra', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 240)),
+        SongModel(id: 'h_2', title: 'Channa Mereya', artist: 'Arijit Singh', album: 'Ae Dil Hai Mushkil', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 280)),
+        SongModel(id: 't_1', title: 'Saranga Dariya', artist: 'Mangli', album: 'Love Story', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 210)),
+        SongModel(id: 'e_1', title: 'Shape of You', artist: 'Ed Sheeran', album: 'Divide', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 230)),
+      ];
+
+      final calibrated = calibrator.calibrate(
+        seedSong: hindiSeed,
+        rawCandidates: mixedCandidates,
+        mode: QueueMode.singleLanguage,
+      );
+
+      expect(calibrated.any((t) => t.song.title == 'Saranga Dariya'), isFalse);
+      expect(calibrated.any((t) => t.song.title == 'Shape of You'), isFalse);
+      expect(calibrated.every((t) => t.song.title == 'Kesariya' || t.song.title == 'Channa Mereya'), isTrue);
+    });
+
+    test('Single language mode with English seed strictly quarantines regional Indian tracks', () {
+      final englishSeed = SongModel(
+        id: 'seed_en',
+        title: 'Blinding Lights',
+        artist: 'The Weeknd',
+        album: 'After Hours',
+        thumbnailUrl: '',
+        streamUrl: '',
+        duration: const Duration(seconds: 200),
+      );
+
+      final mixedCandidates = [
+        SongModel(id: 'e_1', title: 'Shape of You', artist: 'Ed Sheeran', album: 'Divide', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 230)),
+        SongModel(id: 'e_2', title: 'Save Your Tears', artist: 'The Weeknd', album: 'After Hours', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 215)),
+        SongModel(id: 'h_1', title: 'Kesariya', artist: 'Arijit Singh', album: 'Brahmastra', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 240)),
+        SongModel(id: 't_1', title: 'Saranga Dariya', artist: 'Mangli', album: 'Love Story', thumbnailUrl: '', streamUrl: '', duration: const Duration(seconds: 210)),
+      ];
+
+      final calibrated = calibrator.calibrate(
+        seedSong: englishSeed,
+        rawCandidates: mixedCandidates,
+        mode: QueueMode.singleLanguage,
+      );
+
+      expect(calibrated.any((t) => t.song.title == 'Kesariya'), isFalse);
+      expect(calibrated.any((t) => t.song.title == 'Saranga Dariya'), isFalse);
+      expect(calibrated.every((t) => t.song.title == 'Shape of You' || t.song.title == 'Save Your Tears'), isTrue);
     });
 
     test('Discover mode prioritizes fresh discoveries', () {

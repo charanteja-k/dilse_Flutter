@@ -16,6 +16,7 @@ import 'data/repositories/audio_repository_impl.dart';
 import 'data/repositories/update_repository.dart';
 import 'data/repositories/update_repository_impl.dart';
 import 'data/datasources/local/storage_datasource.dart';
+import 'core/theme/theme_viewmodel.dart';
 import 'features/app_update/viewmodels/update_viewmodel.dart';
 import 'features/audio_player/viewmodels/audio_player_viewmodel.dart';
 import 'features/downloads/viewmodels/downloads_viewmodel.dart';
@@ -182,14 +183,23 @@ class DilseApp extends StatelessWidget {
           update: (_, repo, previous) =>
               previous ?? UpdateViewModel(updateRepository: repo),
         ),
+
+        // Application Theme ViewModel (OLED Dark <-> Clean Light mode)
+        ChangeNotifierProvider<ThemeViewModel>(
+          create: (_) => ThemeViewModel()..loadThemePreference(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'DilSe',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.dark,
-        home: const HomeScreen(),
+      child: Consumer<ThemeViewModel>(
+        builder: (context, themeVm, _) {
+          return MaterialApp(
+            title: 'DilSe',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeVm.themeMode,
+            home: const HomeScreen(),
+          );
+        },
       ),
     );
   }

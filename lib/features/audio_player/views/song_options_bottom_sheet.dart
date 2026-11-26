@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/theme/theme_viewmodel.dart';
 import '../../../data/models/song_model.dart';
 import '../viewmodels/audio_player_viewmodel.dart';
 import 'equalizer_bottom_sheet.dart';
@@ -178,6 +179,74 @@ class SongOptionsBottomSheet extends StatelessWidget {
               onTap: () {
                 HapticFeedback.lightImpact();
                 context.read<AudioPlayerViewModel>().toggleLike(song);
+              },
+            ),
+
+            // Action: Toggle UI Theme (Dark Mode <-> Light Mode)
+            Consumer<ThemeViewModel>(
+              builder: (context, themeVm, _) {
+                final isDark = themeVm.isDarkMode;
+                return ListTile(
+                  leading: Icon(
+                    isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                    color: context.colors.textPrimary,
+                    size: context.sizes.iconMd,
+                  ),
+                  title: Text(
+                    isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme',
+                    style: context.typography.titleMedium,
+                  ),
+                  subtitle: Text(
+                    isDark ? 'Current: OLED Dark Mode' : 'Current: Clean Light Mode',
+                    style: context.typography.captionMuted,
+                  ),
+                  trailing: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        themeVm.toggleTheme();
+                      },
+                      borderRadius: context.radius.asBorderRadiusFull,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.spacing.sm,
+                          vertical: context.spacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.colors.cardDarkSurface,
+                          borderRadius: context.radius.asBorderRadiusFull,
+                          border: Border.all(
+                            color: context.colors.solidMatteBorder,
+                            width: context.sizes.borderThin,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isDark ? 'Light' : 'Dark',
+                              style: context.typography.captionMuted.copyWith(
+                                color: context.colors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: context.spacing.xxs),
+                            Icon(
+                              isDark ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                              color: context.colors.textPrimary,
+                              size: context.sizes.iconSm,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    themeVm.toggleTheme();
+                  },
+                );
               },
             ),
 

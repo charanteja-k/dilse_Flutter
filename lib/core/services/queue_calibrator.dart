@@ -198,32 +198,155 @@ class QueueCalibrator {
     return false;
   }
 
+  static const _teluguKeywords = [
+    'telugu', 'tollywood', 'aditya music', 'mango music', 'lahari', 'chuttamalle', 'devara',
+    'rrr', 'saranga dariya', 'samajavaragamana', 'buttabomma', 'inkem inkem', 'kurchi madathapetti',
+    'srivalli', 'pushpa', 'geetha govindam', 'ala vaikunthapurramuloo', 'guntur kaaram', 'hanuman',
+    'salaar', 'kalki', 'nuvvu', 'nenu', 'neetho', 'naatho', 'prema', 'kanulu', 'choodu', 'raave',
+    'pilla', 'gundello', 'chesina', 'manushulu', 'chesave', 'unnodu', 'evaru', 'andala', 'oka',
+    'rendu', 'tandri', 'venkata', 'ramana', 'shiva', 'yettaagayya', 'varsham', 'munduga', 'priya',
+    'urime', 'manase', 'neneppudaina', 'dhinaku', 'dhin', 'jiya', 'dookudu', 'murari', 'ragava',
+    'rama', 'dethadi', 'kannullo', 'choosi', 'choodangane', 'mellaga', 'adiga', 'adigaa',
+    'sega', 'geetanjali', 'aatagadhara siva',
+  ];
+
+  static const _hindiKeywords = [
+    'hindi', 'bollywood', 't-series', 'zee music', 'yrf', 'kesariya', 'tum hi ho', 'channa mereya',
+    'apna bana le', 'aashiqui', 'sunn raha hai', 'tera', 'meri', 'hum', 'hamara', 'dil', 'pyaar',
+    'ishq', 'mohabbat', 'zindagi', 'saathiya', 'kahani', 'khuda', 'dua', 'raat', 'aankhon',
+    'deewana', 'dhadkan', 'sanam', 'o rangrez', 'bhaag milkha', 'azeem-o-shaan', 'jodhaa akbar',
+    'ganpati aarti', 'sarkar 3', 'kalank', 'kabira', 'agar tum', 'tujh mein rab', 'chaleya',
+    'chammak challo', 'dhurandhar', 'raataan lambiyan', 'shayad', 'pal', 'jeena jeena',
+  ];
+
+  static const _tamilKeywords = [
+    'tamil', 'kollywood', 'rowdy baby', 'vaathi coming', 'arabic kuthu', 'enjoy enjaami',
+    'kutty pattas', 'master the blaster', 'chellamma', 'two two two', 'naan pizhai', 'bae',
+    'maari', 'master', 'beast', 'doctor', 'kaathuvaakula', 'jailer', 'leo', 'vikram', 'ponniyin',
+    'selvan', 'kaadhal', 'kadhal', 'anbe', 'kannazhaga',
+  ];
+
+  static const _punjabiKeywords = [
+    'punjabi', 'brown munde', 'insane', 'excuses', 'spaceship', 'majhaail', 'desires', 'tere te',
+    'g.o.a.t', 'born to shine', 'clash', 'lehanga', 'naah', 'prada', 'lahore', 'high rated gabru',
+  ];
+
+  static const _teluguComposers = {
+    'devi sri prasad', 'dsp', 'thaman', 'thaman s', 's. thaman', 'm.m. keeravaani', 'm. m. keeravani',
+    'keeravani', 'keeravaani', 'mani sharma', 'mickey j meyer', 'mickey j. meyer', 'vivek sagar',
+    'bheems ceciroleo', 'bheems', 'chaitan bharadwaj', 'anup rubens', 'koti', 'chakri',
+    'r.p. patnaik', 'rp patnaik', 'mahati swara sagar', 'radhan',
+  };
+
+  static const _hindiComposers = {
+    'pritam', 'vishal-shekhar', 'sachin-jigar', 'shankar-ehsaan-loy', 'mithoon',
+    'amit trivedi', 'tanishk bagchi', 'rochak kohli', 'salim-sulaiman', 'himesh reshammiya',
+    'jatin-lalit', 'nadeem-shravan', 'anu malik', 'laxmikant-pyarelal', 'r.d. burman', 'rd burman',
+    'b praak', 'jaani', 'badshah', 'yo yo honey singh', 'honey singh', 'raftaar',
+  };
+
+  static const _tamilComposers = {
+    'ilaiyaraaja', 'ilayaraja', 'harris jayaraj', 'yuvan shankar raja', 'd. imman', 'd imman',
+    'g.v. prakash kumar', 'g. v. prakash', 'sean roldan', 'sam c.s.', 'hiphop tamizha', 'vidyasagar',
+  };
+
+  static const _teluguSingers = {
+    's. p. balasubrahmanyam', 's.p. balasubrahmanyam', 'spb', 's.p. balu', 'balasubrahmanyam',
+    'anurag kulkarni', 'ram miriyala', 'mangli', 'geetha madhuri', 'sunitha', 'rahul sipligunj',
+    'penchal das', 'lipsika', 'srikrishna', 'sri krishna', 'dhanunjay', 'hemachandra',
+    'kaala bhairava', 'kala bhairava', 'mohana bhogaraju', 'deepu', 'revanth', 'malavika',
+    'karunya', 'bhaskarabhatla', 'chandrabose', 'sirivennela', 'srimani', 'veturi',
+    'ramajogayya sastry', 'ananta sriram', 'kasarla shyam', 'jonnavithula',
+  };
+
+  static const _hindiSingers = {
+    'arijit singh', 'sonu nigam', 'atif aslam', 'mohit chauhan', 'jubin nautiyal',
+    'kumar sanu', 'udit narayan', 'alka yagnik', 'sunidhi chauhan', 'javed ali', 'kk',
+    'rahat fateh ali khan', 'lucky ali', 'darshan raval', 'vishal mishra',
+    'neha kakkar', 'tony kakkar', 'tulsi kumar', 'monali thakur', 'mika singh',
+    'sachet tandon', 'parampara tandon', 'stebin ben',
+  };
+
+  static const _tamilSingers = {
+    'dhanush', 'dhee', 'andrea jeremiah', 'shakthisree gopalan', 'naresh iyer',
+  };
+
+  static const _punjabiSingers = {
+    'ap dhillon', 'gurinder gill', 'shubh', 'sidhu moose wala', 'diljit dosanjh', 'karan aujla',
+    'amrit maan', 'harrdy sandhu', 'jassi gill', 'guru randhawa', 'sukhe', 'mankirt aulakh',
+  };
+
+  static const _englishArtists = {
+    'the weeknd', 'taylor swift', 'ed sheeran', 'drake', 'post malone', 'bruno mars',
+    'billie eilish', 'coldplay', 'imagine dragons', 'dua lipa', 'justin bieber', 'ariana grande',
+    'eminem', 'rihanna', 'katy perry', 'maroon 5', 'adele', 'sam smith', 'shawn mendes',
+    'the chainsmokers', 'chainsmokers', 'hans zimmer', 'alan walker', 'sia', 'charlie puth',
+    'selena gomez', 'kendrick lamar', 'akon', 'enya', 'the wellermen', 'sickick', 'duncan laurence',
+    'bebe rexha', 'david guetta', 'marshmello', 'avicii', 'calvin harris', 'travis scott',
+    'kanye west', 'twenty one pilots', 'one direction', 'harry styles', 'zayn', 'lady gaga',
+  };
+
   String _inferLanguage(SongModel song) {
-    final combined = '${song.title} ${song.artist} ${song.album}'.toLowerCase();
-    if (combined.contains('telugu') || combined.contains('devara') || combined.contains('rrr')) {
-      return 'telugu';
+    final text = '${song.title} ${song.artist} ${song.album}'.toLowerCase();
+
+    // 1. Unicode script match
+    if (RegExp(r'[\u0C00-\u0C7F]').hasMatch(text)) return 'telugu';
+    if (RegExp(r'[\u0900-\u097F]').hasMatch(text)) return 'hindi';
+    if (RegExp(r'[\u0B80-\u0BFF]').hasMatch(text)) return 'tamil';
+    if (RegExp(r'[\u0A00-\u0A7F]').hasMatch(text)) return 'punjabi';
+    if (RegExp(r'[\u0D00-\u0D7F]').hasMatch(text)) return 'malayalam';
+    if (RegExp(r'[\u0C80-\u0CFF]').hasMatch(text)) return 'kannada';
+
+    // 2. Strong Title / Album Keywords
+    for (final kw in _teluguKeywords) {
+      if (text.contains(kw)) return 'telugu';
     }
-    if (combined.contains('hindi') || combined.contains('bollywood') || combined.contains('aashiqui')) {
-      return 'hindi';
+    for (final kw in _hindiKeywords) {
+      if (text.contains(kw)) return 'hindi';
     }
-    if (combined.contains('tamil') || combined.contains('kollywood')) {
-      return 'tamil';
+    for (final kw in _tamilKeywords) {
+      if (text.contains(kw)) return 'tamil';
     }
-    return 'unknown';
+    for (final kw in _punjabiKeywords) {
+      if (text.contains(kw)) return 'punjabi';
+    }
+
+    // 3. Core Composers
+    for (final c in _teluguComposers) {
+      if (text.contains(c)) return 'telugu';
+    }
+    for (final c in _hindiComposers) {
+      if (text.contains(c)) return 'hindi';
+    }
+    for (final c in _tamilComposers) {
+      if (text.contains(c)) return 'tamil';
+    }
+
+    // 4. Regional Singers
+    for (final s in _teluguSingers) {
+      if (text.contains(s)) return 'telugu';
+    }
+    for (final s in _hindiSingers) {
+      if (text.contains(s)) return 'hindi';
+    }
+    for (final s in _tamilSingers) {
+      if (text.contains(s)) return 'tamil';
+    }
+    for (final s in _punjabiSingers) {
+      if (text.contains(s)) return 'punjabi';
+    }
+
+    // 5. English / Western artists
+    for (final a in _englishArtists) {
+      if (text.contains(a)) return 'english';
+    }
+
+    return 'english';
   }
 
   bool _isLanguageMatch(SongModel candidate, String seedLang) {
     if (seedLang == 'unknown') return true;
-    final combined = '${candidate.title} ${candidate.artist} ${candidate.album}'.toLowerCase();
-    if (seedLang == 'telugu') {
-      // Discard distinct Hindi/Punjabi keywords if in single language mode
-      if (combined.contains('chaleya') ||
-          combined.contains('chammak challo') ||
-          combined.contains('dhurandhar') ||
-          combined.contains('punjabi')) {
-        return false;
-      }
-    }
-    return true;
+    final candidateLang = _inferLanguage(candidate);
+    return candidateLang == seedLang;
   }
 }
